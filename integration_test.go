@@ -1,4 +1,4 @@
-package capnp_test
+package shark_test
 
 import (
 	"bytes"
@@ -11,9 +11,9 @@ import (
 	"time"
 	"unsafe"
 
-	"capnproto.org/go/capnp/v3"
-	air "capnproto.org/go/capnp/v3/internal/aircraftlib"
-	"capnproto.org/go/capnp/v3/internal/capnptool"
+	"github.com/kumo-rpc/sharkgo"
+	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
+	"github.com/kumo-rpc/sharkgo/internal/capnptool"
 )
 
 // A marshalTest tests whether a message can be encoded then read by the
@@ -21,7 +21,7 @@ import (
 type marshalTest struct {
 	name string
 
-	msg *capnp.Message
+	msg *shark.Message
 	typ string
 
 	text string
@@ -63,7 +63,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		if _, err := air.NewRootZjob(seg); err != nil {
 			t.Fatal(err)
 		}
@@ -82,7 +82,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		zjob, err := air.NewRootZjob(seg)
 		if err != nil {
 			t.Fatal(err)
@@ -106,7 +106,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		zjob, err := air.NewRootZjob(seg)
 		if err != nil {
 			t.Fatal(err)
@@ -135,7 +135,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		zjob, err := air.NewRootZjob(seg)
 		if err != nil {
 			t.Fatal(err)
@@ -168,7 +168,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		server, err := air.NewRootZserver(seg)
 		if err != nil {
 			t.Fatal(err)
@@ -194,7 +194,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		server, err := air.NewRootZserver(seg)
 		if err != nil {
 			t.Fatal(err)
@@ -234,7 +234,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		server, err := air.NewRootZserver(seg)
 		if err != nil {
 			t.Fatal(err)
@@ -271,8 +271,8 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
-		_, scratch := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
+		_, scratch := shark.NewSingleSegmentMessage(nil)
 
 		// in seg
 		segbag, err := air.NewRootBag(seg)
@@ -310,8 +310,8 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
-		_, scratch := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
+		_, scratch := shark.NewSingleSegmentMessage(nil)
 
 		// in seg
 		segbag, err := air.NewRootBag(seg)
@@ -353,8 +353,8 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
-		_, scratch := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
+		_, scratch := shark.NewSingleSegmentMessage(nil)
 
 		// in seg
 		segbag, err := air.NewRootBag(seg)
@@ -406,8 +406,8 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
-		_, scratch := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
+		_, scratch := shark.NewSingleSegmentMessage(nil)
 
 		// in seg
 		segbag, err := air.NewRootBag(seg)
@@ -463,8 +463,8 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
-		_, scratch := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
+		_, scratch := shark.NewSingleSegmentMessage(nil)
 
 		// in seg
 		segbag, err := air.NewRootBag(seg)
@@ -509,7 +509,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		holder, err := air.NewRootHoldsVerEmptyList(seg)
 		if err != nil {
 			t.Fatal(err)
@@ -537,7 +537,7 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		holder, err := air.NewRootNester1Capn(seg)
 		if err != nil {
 			t.Fatal(err)
@@ -562,12 +562,12 @@ func makeMarshalTests(t *testing.T) []marshalTest {
 	}
 
 	{
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		holder, err := air.NewRootRWTestCapn(seg)
 		if err != nil {
 			t.Fatal(err)
 		}
-		mat, err := capnp.NewPointerList(seg, 2)
+		mat, err := shark.NewPointerList(seg, 2)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -754,13 +754,13 @@ var bitListTests = []bitListTest{
 	},
 }
 
-func (blt bitListTest) makeMessage() (*capnp.Message, error) {
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
+func (blt bitListTest) makeMessage() (*shark.Message, error) {
+	msg, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		return nil, err
 	}
-	list, err := capnp.NewBitList(seg, int32(len(blt.list)))
+	list, err := shark.NewBitList(seg, int32(len(blt.list)))
 	if err != nil {
 		return nil, err
 	}
@@ -851,7 +851,7 @@ func TestZDataAccessors(t *testing.T) {
 		16, 17, 18, 19, 0, 0, 0, 0,
 	})
 
-	msg, err := capnp.Unmarshal(data)
+	msg, err := shark.Unmarshal(data)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -892,7 +892,7 @@ func TestReadListInStruct(t *testing.T) {
 		102, 117, 114, 105, 111, 115, 97, 0,
 		109, 97, 120, 0, 0, 0, 0, 0,
 	})
-	msg, err := capnp.Unmarshal(in)
+	msg, err := shark.Unmarshal(in)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -956,7 +956,7 @@ func TestReadNestedListOfStructWithList(t *testing.T) {
 			113, 117, 98, 101, 114, 116, 0, 0,
 			114, 111, 99, 107, 115, 0, 0, 0,
 		})
-	msg, err := capnp.Unmarshal(in)
+	msg, err := shark.Unmarshal(in)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -978,7 +978,7 @@ func TestReadNestedListOfStructWithList(t *testing.T) {
 			t.Errorf("RWTestCapn.nestMatrix[%d]: %v", i, err)
 			return
 		}
-		rowList := capnp.StructList[air.Nester1Capn](row.List())
+		rowList := shark.StructList[air.Nester1Capn](row.List())
 		if j >= rowList.Len() {
 			t.Errorf("len(RWTestCapn.nestMatrix[%d]) = %d; tried to index %d", i, rowList.Len(), j)
 			return
@@ -1033,7 +1033,7 @@ func TestDataVersioningAvoidsUnnecessaryTruncation(t *testing.T) {
 		55, 0, 0, 0, 0, 0, 0, 0,
 	})
 
-	msg, err := capnp.Unmarshal(in)
+	msg, err := shark.Unmarshal(in)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -1045,7 +1045,7 @@ func TestDataVersioningAvoidsUnnecessaryTruncation(t *testing.T) {
 	}
 
 	// Store the larger message into another segment.
-	freshMsg, freshSeg := capnp.NewSingleSegmentMessage(nil)
+	freshMsg, freshSeg := shark.NewSingleSegmentMessage(nil)
 	wrapEmpty, err := air.NewRootWrapEmpty(freshSeg)
 	if err != nil {
 		t.Fatal("NewRootWrapEmpty:", err)
@@ -1079,7 +1079,7 @@ func TestZserverAccessors(t *testing.T) {
 		120, 121, 122, 0, 0, 0, 0, 0,
 	})
 
-	msg, err := capnp.Unmarshal(in)
+	msg, err := shark.Unmarshal(in)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -1127,7 +1127,7 @@ func TestEnumFromString(t *testing.T) {
 
 func TestDefaultStructField(t *testing.T) {
 	t.Parallel()
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	root, err := air.NewRootStackingRoot(seg)
 	if err != nil {
 		t.Fatal(err)
@@ -1145,13 +1145,13 @@ func TestDefaultStructField(t *testing.T) {
 
 func TestDataTextCopyOptimization(t *testing.T) {
 	t.Parallel()
-	_, seg1 := capnp.NewSingleSegmentMessage(nil)
+	_, seg1 := shark.NewSingleSegmentMessage(nil)
 	root, err := air.NewRootNester1Capn(seg1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, seg2 := capnp.NewSingleSegmentMessage(nil)
-	strsl, err := capnp.NewTextList(seg2, 256)
+	_, seg2 := shark.NewSingleSegmentMessage(nil)
+	strsl, err := shark.NewTextList(seg2, 256)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1186,7 +1186,7 @@ func TestDataTextCopyOptimization(t *testing.T) {
 // highlight how much faster text movement between segments
 // is when special casing Text and Data
 //
-// run this test with capnp.go:1334-1341 commented in/out to compare.
+// run this test with shark.go:1334-1341 commented in/out to compare.
 func BenchmarkTextMovementBetweenSegments(b *testing.B) {
 	buf := make([]byte, 1<<21)
 	buf2 := make([]byte, 1<<21)
@@ -1203,12 +1203,12 @@ func BenchmarkTextMovementBetweenSegments(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, seg := capnp.NewSingleSegmentMessage(buf[:0])
-		_, scratch := capnp.NewSingleSegmentMessage(buf2[:0])
+		_, seg := shark.NewSingleSegmentMessage(buf[:0])
+		_, scratch := shark.NewSingleSegmentMessage(buf2[:0])
 
 		ht, _ := air.NewRootHoldsText(seg)
 		// Purposefully created in another segment.
-		tl, _ := capnp.NewTextList(scratch, 1000)
+		tl, _ := shark.NewTextList(scratch, 1000)
 		for j := 0; j < 1000; j++ {
 			tl.Set(j, astr[j])
 		}
@@ -1230,7 +1230,7 @@ func TestV1DataVersioningBiggerToEmpty(t *testing.T) {
 		41, 0, 0, 0, 0, 0, 0, 0,
 	})
 
-	remsg, err := capnp.Unmarshal(in)
+	remsg, err := shark.Unmarshal(in)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -1316,7 +1316,7 @@ func TestV1DataVersioningEmptyToBigger(t *testing.T) {
 		8, 0, 0, 0, 0, 0, 0, 0,
 	})
 
-	remsg, err := capnp.Unmarshal(in)
+	remsg, err := shark.Unmarshal(in)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -1375,7 +1375,7 @@ func TestDataVersioningZeroPointersToMore(t *testing.T) {
 		8, 0, 0, 0, 0, 0, 0, 0,
 	})
 
-	remsg, err := capnp.Unmarshal(in)
+	remsg, err := shark.Unmarshal(in)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -1438,7 +1438,7 @@ func TestDataVersioningZeroPointersToTwo(t *testing.T) {
 			38, 0, 0, 0, 0, 0, 0, 0,
 		})
 
-	remsg, err := capnp.Unmarshal(in)
+	remsg, err := shark.Unmarshal(in)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -1531,7 +1531,7 @@ func TestVoidUnionSetters(t *testing.T) {
 		1, 0, 0, 0, 0, 0, 0, 0,
 	})
 
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
+	msg, seg := shark.NewSingleSegmentMessage(nil)
 	voidUnion, err := air.NewRootVoidUnion(seg)
 	if err != nil {
 		t.Fatal(err)
@@ -1558,7 +1558,7 @@ func TestReadDefaults(t *testing.T) {
 		0, 0, 0, 0, 0, 0, 0, 0,
 	})
 
-	msg, err := capnp.Unmarshal(data)
+	msg, err := shark.Unmarshal(data)
 	if err != nil {
 		t.Fatal("Unmarshal:", err)
 	}
@@ -1660,7 +1660,7 @@ func BenchmarkMarshal(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		a := data[r.Intn(len(data))]
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		root, err := air.NewRootBenchmarkA(seg)
 		if err != nil {
 			b.Fatal(err)
@@ -1681,12 +1681,12 @@ func BenchmarkMarshal_ReuseMsg(b *testing.B) {
 	for i := range data {
 		data[i] = generateA(r)
 	}
-	msg, _ := capnp.NewSingleSegmentMessage(nil)
+	msg, _ := shark.NewSingleSegmentMessage(nil)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		a := data[r.Intn(len(data))]
-		seg, err := msg.Reset(capnp.SingleSegment(nil))
+		seg, err := msg.Reset(shark.SingleSegment(nil))
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -1714,7 +1714,7 @@ func BenchmarkUnmarshal(b *testing.B) {
 	data := make([]testCase, 1000)
 	for i := range data {
 		a := generateA(r)
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		root, _ := air.NewRootBenchmarkA(seg)
 		a.fill(root)
 		buf, err := msg.Marshal()
@@ -1728,7 +1728,7 @@ func BenchmarkUnmarshal(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		testIdx := r.Intn(len(data))
-		msg, err := capnp.Unmarshal(data[testIdx].data)
+		msg, err := shark.Unmarshal(data[testIdx].data)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -1757,7 +1757,7 @@ func BenchmarkUnmarshal_Reuse(b *testing.B) {
 	data := make([]testCase, 1000)
 	for i := range data {
 		a := generateA(r)
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		root, _ := air.NewRootBenchmarkA(seg)
 		a.fill(root)
 		buf, err := msg.Marshal()
@@ -1766,8 +1766,8 @@ func BenchmarkUnmarshal_Reuse(b *testing.B) {
 		}
 		data[i].data, data[i].a = buf, *a
 	}
-	msg := new(capnp.Message)
-	ta := capnp.NewReadOnlySingleSegment(nil)
+	msg := new(shark.Message)
+	ta := shark.NewReadOnlySingleSegment(nil)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -1790,12 +1790,12 @@ func BenchmarkDecode(b *testing.B) {
 	var buf bytes.Buffer
 
 	r := rand.New(rand.NewSource(12345))
-	enc := capnp.NewEncoder(&buf)
+	enc := shark.NewEncoder(&buf)
 	count := 10000
 
 	for i := 0; i < count; i++ {
 		a := generateA(r)
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		root, _ := air.NewRootBenchmarkA(seg)
 		a.fill(root)
 		enc.Encode(msg)
@@ -1808,7 +1808,7 @@ func BenchmarkDecode(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		dec := capnp.NewDecoder(bytes.NewReader(blob))
+		dec := shark.NewDecoder(bytes.NewReader(blob))
 
 		for {
 			msg, err := dec.Decode()
@@ -1834,7 +1834,7 @@ func BenchmarkDecode(b *testing.B) {
 func TestPointerTraverseDefense(t *testing.T) {
 	t.Parallel()
 	const limit = 128
-	msg, _ := capnp.NewSingleSegmentMessage([]byte{
+	msg, _ := shark.NewSingleSegmentMessage([]byte{
 		0, 0, 0, 0, 1, 0, 0, 0, // root 1-word struct pointer to next word
 		0, 0, 0, 0, 0, 0, 0, 0, // struct's data
 	})
@@ -1855,7 +1855,7 @@ func TestPointerTraverseDefense(t *testing.T) {
 func TestPointerDepthDefense(t *testing.T) {
 	t.Parallel()
 	const limit = 64
-	msg, _ := capnp.NewSingleSegmentMessage([]byte{
+	msg, _ := shark.NewSingleSegmentMessage([]byte{
 		0, 0, 0, 0, 0, 0, 1, 0, // root 1-pointer struct pointer to next word
 		0xfc, 0xff, 0xff, 0xff, 0, 0, 1, 0, // root struct pointer that points back to itself
 	})
@@ -1892,36 +1892,36 @@ func TestPointerDepthDefense(t *testing.T) {
 func TestPointerDepthDefenseAcrossStructsAndLists(t *testing.T) {
 	t.Parallel()
 	const limit = 63
-	msg, _ := capnp.NewSingleSegmentMessage([]byte{
+	msg, _ := shark.NewSingleSegmentMessage([]byte{
 		0, 0, 0, 0, 0, 0, 1, 0, // root 1-pointer struct pointer to next word
 		0x01, 0, 0, 0, 0x0e, 0, 0, 0, // list pointer to 1-element list of pointer (next word)
 		0xf8, 0xff, 0xff, 0xff, 0, 0, 1, 0, // struct pointer to previous word
 	})
 	msg.DepthLimit = limit
 
-	toStruct := func(p capnp.Ptr, err error) (capnp.Struct, error) {
+	toStruct := func(p shark.Ptr, err error) (shark.Struct, error) {
 		if err != nil {
-			return capnp.Struct{}, err
+			return shark.Struct{}, err
 		}
 		if !p.IsValid() {
-			return capnp.Struct{}, errors.New("invalid pointer")
+			return shark.Struct{}, errors.New("invalid pointer")
 		}
 		s := p.Struct()
 		if !s.IsValid() {
-			return capnp.Struct{}, errors.New("not a struct")
+			return shark.Struct{}, errors.New("not a struct")
 		}
 		return s, nil
 	}
-	toList := func(p capnp.Ptr, err error) (capnp.List, error) {
+	toList := func(p shark.Ptr, err error) (shark.List, error) {
 		if err != nil {
-			return capnp.List{}, err
+			return shark.List{}, err
 		}
 		if !p.IsValid() {
-			return capnp.List{}, errors.New("invalid pointer")
+			return shark.List{}, errors.New("invalid pointer")
 		}
 		l := p.List()
 		if !l.IsValid() {
-			return capnp.List{}, errors.New("not a list")
+			return shark.List{}, errors.New("not a list")
 		}
 		return l, nil
 	}
@@ -1935,7 +1935,7 @@ func TestPointerDepthDefenseAcrossStructsAndLists(t *testing.T) {
 			t.Fatalf("deref %d (for list): %v", limit-i+1, err)
 		}
 		i--
-		curr, err = toStruct(capnp.PointerList(l).At(0))
+		curr, err = toStruct(shark.PointerList(l).At(0))
 		if err != nil {
 			t.Fatalf("deref %d (for struct): %v", limit-i+1, err)
 		}
@@ -1950,7 +1950,7 @@ func TestPointerDepthDefenseAcrossStructsAndLists(t *testing.T) {
 
 func TestHasPointerInUnion(t *testing.T) {
 	t.Parallel()
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	craft, err := air.NewRootAircraft(seg)
 	if err != nil {
 		t.Fatal("NewRootAircraft:", err)
@@ -1972,7 +1972,7 @@ func TestHasPointerInUnion(t *testing.T) {
 
 func TestSetNilBlob(t *testing.T) {
 	t.Parallel()
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatal("NewRootZ:", err)
@@ -1995,7 +1995,7 @@ func TestSetNilBlob(t *testing.T) {
 
 func TestSetEmptyText(t *testing.T) {
 	t.Parallel()
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatal("NewRootZ:", err)
@@ -2025,7 +2025,7 @@ func TestSetEmptyText(t *testing.T) {
 
 func TestSetNilBlobWithDefault(t *testing.T) {
 	t.Parallel()
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	d, err := air.NewRootDefaults(seg)
 	if err != nil {
 		t.Fatal("NewRootDefaults:", err)
@@ -2049,7 +2049,7 @@ func TestSetNilBlobWithDefault(t *testing.T) {
 
 func TestSetEmptyTextWithDefault(t *testing.T) {
 	t.Parallel()
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	d, err := air.NewRootDefaults(seg)
 	if err != nil {
 		t.Fatal("NewRootDefaults:", err)
@@ -2079,7 +2079,7 @@ func TestSetEmptyTextWithDefault(t *testing.T) {
 
 func TestFuzzedListOutOfBounds(t *testing.T) {
 	t.Parallel()
-	msg, _ := capnp.NewSingleSegmentMessage([]byte(
+	msg, _ := shark.NewSingleSegmentMessage([]byte(
 		"\x00\x00\x00\x00\x03\x00\x01\x00\x0f\x000000000000" +
 			"000000000000\x01\x00\x00\x00\x13\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00"))
 
@@ -2101,7 +2101,7 @@ func TestFuzzedListOutOfBounds(t *testing.T) {
 	}
 }
 
-func benchmarkGrowth(b *testing.B, newArena func() capnp.Arena, release bool) {
+func benchmarkGrowth(b *testing.B, newArena func() shark.Arena, release bool) {
 	const (
 		fieldValue = "1234567" // carefully chosen to be word-padded
 
@@ -2113,7 +2113,7 @@ func benchmarkGrowth(b *testing.B, newArena func() capnp.Arena, release bool) {
 	b.SetBytes(totalSize)
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		msg, seg, err := capnp.NewMessage(newArena())
+		msg, seg, err := shark.NewMessage(newArena())
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -2137,13 +2137,13 @@ func benchmarkGrowth(b *testing.B, newArena func() capnp.Arena, release bool) {
 	}
 }
 
-func newSingleSegmentArena() capnp.Arena { return capnp.SingleSegment(nil) }
-func newMultiSegmentArena() capnp.Arena  { return capnp.MultiSegment(nil) }
+func newSingleSegmentArena() shark.Arena { return shark.SingleSegment(nil) }
+func newMultiSegmentArena() shark.Arena  { return shark.MultiSegment(nil) }
 
 func BenchmarkGrowth(b *testing.B) {
 	tests := []struct {
 		name     string
-		newArena func() capnp.Arena
+		newArena func() shark.Arena
 	}{{
 		name:     "SingleSegment",
 		newArena: newSingleSegmentArena,
@@ -2164,28 +2164,28 @@ func BenchmarkGrowth(b *testing.B) {
 	}
 }
 
-func benchmarkSmallMessage(b *testing.B, newArena func() capnp.Arena, release bool) {
+func benchmarkSmallMessage(b *testing.B, newArena func() shark.Arena, release bool) {
 	const fieldValue = "1234567" // carefully chosen to be word-padded
 	b.SetBytes(8 * 9)
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		msg, seg, err := capnp.NewMessage(newArena())
+		msg, seg, err := shark.NewMessage(newArena())
 		if err != nil {
 			b.Fatal(err)
 		}
-		root, err := capnp.NewRootStruct(seg, capnp.ObjectSize{PointerCount: 2})
+		root, err := shark.NewRootStruct(seg, shark.ObjectSize{PointerCount: 2})
 		if err != nil {
 			b.Fatal(err)
 		}
 
-		sub1, err := capnp.NewStruct(root.Segment(), capnp.ObjectSize{PointerCount: 1})
+		sub1, err := shark.NewStruct(root.Segment(), shark.ObjectSize{PointerCount: 1})
 		if err != nil {
 			b.Fatal(err)
 		}
 		if err := root.SetPtr(0, sub1.ToPtr()); err != nil {
 			b.Fatal(err)
 		}
-		text, err := capnp.NewText(sub1.Segment(), fieldValue)
+		text, err := shark.NewText(sub1.Segment(), fieldValue)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -2193,7 +2193,7 @@ func benchmarkSmallMessage(b *testing.B, newArena func() capnp.Arena, release bo
 			b.Fatal(err)
 		}
 
-		sub2, err := capnp.NewStruct(root.Segment(), capnp.ObjectSize{DataSize: 32})
+		sub2, err := shark.NewStruct(root.Segment(), shark.ObjectSize{DataSize: 32})
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -2210,7 +2210,7 @@ func benchmarkSmallMessage(b *testing.B, newArena func() capnp.Arena, release bo
 func BenchmarkSmallMessage(b *testing.B) {
 	tests := []struct {
 		name     string
-		newArena func() capnp.Arena
+		newArena func() shark.Arena
 	}{{
 		name:     "SingleSegment",
 		newArena: newSingleSegmentArena,

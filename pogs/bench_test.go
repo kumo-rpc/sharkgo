@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	air "capnproto.org/go/capnp/v3/internal/aircraftlib"
+	"github.com/kumo-rpc/sharkgo"
+	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
 )
 
 type A struct {
@@ -34,15 +34,15 @@ func BenchmarkExtract(b *testing.B) {
 	data := make([][]byte, 1000)
 	for i := range data {
 		a := generateA(r)
-		msg, seg := capnp.NewSingleSegmentMessage(nil)
+		msg, seg := shark.NewSingleSegmentMessage(nil)
 		root, _ := air.NewRootBenchmarkA(seg)
-		Insert(air.BenchmarkA_TypeID, capnp.Struct(root), a)
+		Insert(air.BenchmarkA_TypeID, shark.Struct(root), a)
 		data[i], _ = msg.Marshal()
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		msg, _ := capnp.Unmarshal(data[r.Intn(len(data))])
+		msg, _ := shark.Unmarshal(data[r.Intn(len(data))])
 		root, _ := msg.Root()
 		var a A
 		Extract(&a, air.BenchmarkA_TypeID, root.Struct())
@@ -60,9 +60,9 @@ func BenchmarkInsert(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		a := data[r.Intn(len(data))]
-		msg, seg := capnp.NewSingleSegmentMessage(arena[:0])
+		msg, seg := shark.NewSingleSegmentMessage(arena[:0])
 		root, _ := air.NewRootBenchmarkA(seg)
-		Insert(air.BenchmarkA_TypeID, capnp.Struct(root), a)
+		Insert(air.BenchmarkA_TypeID, shark.Struct(root), a)
 		msg.Marshal()
 	}
 }

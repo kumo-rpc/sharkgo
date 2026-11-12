@@ -10,9 +10,9 @@ import (
 	"errors"
 	"io"
 
-	capnp "capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/exc"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/exc"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 )
 
 // A Transport sends and receives Cap'n Proto RPC messages to and from
@@ -27,7 +27,7 @@ type Transport interface {
 	// has no effect.  Before releasing the message, Send() MAY be called
 	// at most once to send the mssage.
 	//
-	// When Release() is called, the underlying *capnp.Message SHOULD be
+	// When Release() is called, the underlying *shark.Message SHOULD be
 	// released.  This will also release any clients in the CapTable and
 	// release its Arena.
 	//
@@ -42,7 +42,7 @@ type Transport interface {
 	// concurrently with RecvMessage or with any other release function
 	// returned by RecvMessage.
 	//
-	// When Release() is called, the underlying *capnp.Message SHOULD be
+	// When Release() is called, the underlying *shark.Message SHOULD be
 	// released.  This will also release any clients in the CapTable and
 	// release its Arena.
 	//
@@ -61,7 +61,7 @@ type Transport interface {
 // use. Before releasing an ougoing message, Send() MAY be called at
 // most once to send the message over the transport that produced it.
 //
-// Implementations SHOULD release the underlying *capnp.Message when
+// Implementations SHOULD release the underlying *shark.Message when
 // the Release() method is called.
 //
 // Release() MUST be idempotent, and calls to Send() after a call to
@@ -76,7 +76,7 @@ type OutgoingMessage interface {
 // Release() MUST be called when the IncomingMessage is no longer
 // in use.
 //
-// Implementations SHOULD release the underlying *capnp.Message when
+// Implementations SHOULD release the underlying *shark.Message when
 // the Release() method is called.  Release() MUST be idempotent.
 type IncomingMessage interface {
 	Message() rpccp.Message
@@ -86,8 +86,8 @@ type IncomingMessage interface {
 // A Codec is responsible for encoding and decoding messages from
 // a single logical stream.
 type Codec interface {
-	Encode(*capnp.Message) error
-	Decode() (*capnp.Message, error)
+	Encode(*shark.Message) error
+	Decode() (*shark.Message, error)
 	Close() error
 }
 
@@ -124,14 +124,14 @@ func NewPackedStream(rwc io.ReadWriteCloser) Transport {
 //
 // It is safe to call NewMessage concurrently with RecvMessage.
 func (s *transport) NewMessage() (OutgoingMessage, error) {
-	_, seg := capnp.NewMultiSegmentMessage(nil)
+	_, seg := shark.NewMultiSegmentMessage(nil)
 	m, err := rpccp.NewRootMessage(seg)
 	if err != nil {
 		err = transporterr.Annotate(exc.WrapError("new message", err), "stream transport")
 		return nil, err
 	}
 
-	send := func(m *capnp.Message) (err error) {
+	send := func(m *shark.Message) (err error) {
 		if err = s.c.Encode(m); err != nil {
 			err = transporterr.Annotate(exc.WrapError("send", err), "stream transport")
 		}
@@ -178,8 +178,8 @@ func (s *transport) Close() error {
 }
 
 type streamCodec struct {
-	*capnp.Decoder
-	*capnp.Encoder
+	*shark.Decoder
+	*shark.Encoder
 	io.Closer
 }
 
@@ -192,23 +192,23 @@ func newStreamCodec(rwc io.ReadWriteCloser, f streamEncoding) *streamCodec {
 }
 
 type streamEncoding interface {
-	NewEncoder(io.Writer) *capnp.Encoder
-	NewDecoder(io.Reader) *capnp.Decoder
+	NewEncoder(io.Writer) *shark.Encoder
+	NewDecoder(io.Reader) *shark.Decoder
 }
 
 type basicEncoding struct{}
 
-func (basicEncoding) NewEncoder(w io.Writer) *capnp.Encoder { return capnp.NewEncoder(w) }
-func (basicEncoding) NewDecoder(r io.Reader) *capnp.Decoder { return capnp.NewDecoder(r) }
+func (basicEncoding) NewEncoder(w io.Writer) *shark.Encoder { return shark.NewEncoder(w) }
+func (basicEncoding) NewDecoder(r io.Reader) *shark.Decoder { return shark.NewDecoder(r) }
 
 type packedEncoding struct{}
 
-func (packedEncoding) NewEncoder(w io.Writer) *capnp.Encoder { return capnp.NewPackedEncoder(w) }
-func (packedEncoding) NewDecoder(r io.Reader) *capnp.Decoder { return capnp.NewPackedDecoder(r) }
+func (packedEncoding) NewEncoder(w io.Writer) *shark.Encoder { return shark.NewPackedEncoder(w) }
+func (packedEncoding) NewDecoder(r io.Reader) *shark.Decoder { return shark.NewPackedDecoder(r) }
 
 type outgoingMsg struct {
 	message  rpccp.Message
-	send     func(*capnp.Message) error
+	send     func(*shark.Message) error
 	released bool
 }
 

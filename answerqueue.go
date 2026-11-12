@@ -1,11 +1,11 @@
-package capnp
+package shark
 
 import (
 	"context"
 	"errors"
 	"sync"
 
-	"capnproto.org/go/capnp/v3/exc"
+	"github.com/kumo-rpc/sharkgo/exc"
 )
 
 // AnswerQueue is a queue of method calls to make after an earlier

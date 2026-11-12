@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 // ClientHook for a promise that will be resolved to some other capability
 // at some point. Buffers calls in a queue until the promsie is fulfilled,

@@ -4,7 +4,7 @@
 //go:generate msgp -tests=false -o msgp_bench_gen_test.go
 //msgp:Tuple Event
 
-package capnp_test
+package shark_test
 
 import (
 	"bytes"

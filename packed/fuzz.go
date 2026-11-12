@@ -2,7 +2,7 @@
 // +build gofuzz
 
 // Fuzz test harness.  To run:
-// go-fuzz-build capnproto.org/go/capnp/v3/internal/packed
+// go-fuzz-build github.com/kumo-rpc/sharkgo/internal/packed
 // go-fuzz -bin=packed-fuzz.zip -workdir=internal/packed/testdata
 
 package packed

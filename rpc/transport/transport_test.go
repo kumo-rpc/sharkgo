@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	capnp "capnproto.org/go/capnp/v3"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
+	"github.com/kumo-rpc/sharkgo"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -79,9 +79,9 @@ func testTransport(t *testing.T, makePipe func() (t1, t2 Transport, err error)) 
 			t.Fatal("NewParams:", err)
 		}
 		// simulate mutating CapTable
-		callMsg.Message().Message().CapTable().Add(capnp.ErrorClient(errors.New("foo")))
+		callMsg.Message().Message().CapTable().Add(shark.ErrorClient(errors.New("foo")))
 		callMsg.Message().Message().CapTable().Reset()
-		capPtr := capnp.NewInterface(params.Segment(), 0).ToPtr()
+		capPtr := shark.NewInterface(params.Segment(), 0).ToPtr()
 		if err := params.SetContent(capPtr); err != nil {
 			t.Fatal("SetContent:", err)
 		}

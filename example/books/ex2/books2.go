@@ -5,12 +5,12 @@ import (
 	"os"
 
 	"books"
-	"capnproto.org/go/capnp/v3"
+	"github.com/kumo-rpc/sharkgo"
 )
 
 func main() {
 	// Read the message from stdin.
-	msg, err := capnp.NewDecoder(os.Stdin).Decode()
+	msg, err := shark.NewDecoder(os.Stdin).Decode()
 	if err != nil {
 		panic(err)
 	}

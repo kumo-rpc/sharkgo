@@ -1,0 +1,9 @@
+@0xaca73f831c7ebfdd;
+
+using Go = import "/go.shk";
+$Go.package("main");
+$Go.import("github.com/kumo-rpc/sharkgo/flowcontrol/internal/test-tool");
+
+interface Writer {
+  write @0 (data :Data);
+}

@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"testing"
 	"testing/quick"
 
-	"capnproto.org/go/capnp/v3/exp/bufferpool"
+	"github.com/kumo-rpc/sharkgo/exp/bufferpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

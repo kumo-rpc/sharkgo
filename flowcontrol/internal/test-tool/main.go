@@ -11,13 +11,13 @@ import (
 	"sync"
 	"time"
 
-	capnp "capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/flowcontrol"
-	"capnproto.org/go/capnp/v3/flowcontrol/bbr"
-	"capnproto.org/go/capnp/v3/flowcontrol/tracing"
-	"capnproto.org/go/capnp/v3/internal/syncutil"
-	"capnproto.org/go/capnp/v3/rpc"
-	"capnproto.org/go/capnp/v3/util"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/flowcontrol"
+	"github.com/kumo-rpc/sharkgo/flowcontrol/bbr"
+	"github.com/kumo-rpc/sharkgo/flowcontrol/tracing"
+	"github.com/kumo-rpc/sharkgo/internal/syncutil"
+	"github.com/kumo-rpc/sharkgo/rpc"
+	"github.com/kumo-rpc/sharkgo/util"
 )
 
 var (
@@ -57,7 +57,7 @@ func doClient(ctx context.Context) {
 	rpcConn := rpc.NewConn(rpc.NewStreamTransport(netConn), nil)
 	defer rpcConn.Close()
 	w := Writer(rpcConn.Bootstrap(ctx))
-	l := capnp.Client(w).GetFlowLimiter()
+	l := shark.Client(w).GetFlowLimiter()
 	var (
 		snapshots  []bbr.Snapshot
 		snapshotMu sync.Mutex
@@ -90,9 +90,9 @@ func doClient(ctx context.Context) {
 		})
 	})
 	if *noTrace {
-		capnp.Client(w).SetFlowLimiter(l)
+		shark.Client(w).SetFlowLimiter(l)
 	} else {
-		capnp.Client(w).SetFlowLimiter(tl)
+		shark.Client(w).SetFlowLimiter(tl)
 	}
 	startTime := time.Now()
 	sent := 0
@@ -133,7 +133,7 @@ func doClient(ctx context.Context) {
 	util.Chkfatal(enc.Encode(report))
 }
 
-func waitAsync(wg *sync.WaitGroup, fut Writer_write_Results_Future, rel capnp.ReleaseFunc) {
+func waitAsync(wg *sync.WaitGroup, fut Writer_write_Results_Future, rel shark.ReleaseFunc) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -154,7 +154,7 @@ func doServer() {
 		go func() {
 			rpcConn := rpc.NewConn(rpc.NewStreamTransport(netConn),
 				&rpc.Options{
-					BootstrapClient: capnp.Client(Writer_ServerToClient(writerImpl{})),
+					BootstrapClient: shark.Client(Writer_ServerToClient(writerImpl{})),
 				})
 			<-rpcConn.Done()
 		}()

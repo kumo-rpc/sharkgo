@@ -1,0 +1,34 @@
+{{ template "_typeid" .Node }}
+
+func New{{.Node.Name}}(s *shark.Segment) ({{.Node.Name}}, error) {
+	st, err := shark.NewStruct(s, {{.G.ObjectSize .Node}})
+	return {{.Node.Name}}(st), err
+}
+
+func NewRoot{{.Node.Name}}(s *shark.Segment) ({{.Node.Name}}, error) {
+	st, err := shark.NewRootStruct(s, {{.G.ObjectSize .Node}})
+	return {{.Node.Name}}(st), err
+}
+
+func ReadRoot{{.Node.Name}}(msg *shark.Message) ({{.Node.Name}}, error) {
+	root, err := msg.Root()
+	return {{.Node.Name}}(root.Struct()), err
+}
+{{if .StringMethod}}
+func (s {{.Node.Name}}) String() string {
+	str, _ := {{.G.Imports.Text}}.Marshal({{.Node.Id|printf "%#x"}}, shark.Struct(s))
+	return str
+}
+{{end}}
+
+func (s {{.Node.Name}}) EncodeAsPtr(seg *shark.Segment) shark.Ptr {
+	return shark.Struct(s).EncodeAsPtr(seg)
+}
+
+func ({{.Node.Name}}) DecodeFromPtr(p shark.Ptr) {{.Node.Name}} {
+	return {{.Node.Name}}(shark.Struct{}.DecodeFromPtr(p))
+}
+
+func (s {{.Node.Name}}) ToPtr() shark.Ptr {
+	return shark.Struct(s).ToPtr()
+}

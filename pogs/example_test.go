@@ -3,10 +3,10 @@ package pogs_test
 import (
 	"fmt"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/demo/books"
-	"capnproto.org/go/capnp/v3/pogs"
-	"capnproto.org/go/capnp/v3/schemas"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/demo/books"
+	"github.com/kumo-rpc/sharkgo/pogs"
+	"github.com/kumo-rpc/sharkgo/schemas"
 )
 
 func init() {
@@ -35,7 +35,7 @@ func ExampleExtract() {
 	}
 
 	// Read the message from bytes.
-	msg, err := capnp.Unmarshal(bookData)
+	msg, err := shark.Unmarshal(bookData)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +68,7 @@ func ExampleInsert() {
 	}
 
 	// Allocate a new Cap'n Proto Book struct.
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	root, err := books.NewRootBook(seg)
 	if err != nil {
 		panic(err)
@@ -79,7 +79,7 @@ func ExampleInsert() {
 		Title:     "War and Peace",
 		PageCount: 1440,
 	}
-	if err := pogs.Insert(books.Book_TypeID, capnp.Struct(root), b); err != nil {
+	if err := pogs.Insert(books.Book_TypeID, shark.Struct(root), b); err != nil {
 		panic(err)
 	}
 	fmt.Println(root)

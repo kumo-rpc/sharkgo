@@ -1,0 +1,17 @@
+{{if gt .Node.StructNode.DiscriminantCount 0}}
+func (s {{.Node.Name}}) Which() {{.Node.Name}}_Which {
+	return {{.Node.Name}}_Which(shark.Struct(s).Uint16({{.Node.DiscriminantOffset}}))
+}
+{{end -}}
+
+func (s {{.Node.Name}}) IsValid() bool {
+	return shark.Struct(s).IsValid()
+}
+
+func (s {{.Node.Name}}) Message() *shark.Message {
+	return shark.Struct(s).Message()
+}
+
+func (s {{.Node.Name}}) Segment() *shark.Segment {
+	return shark.Struct(s).Segment()
+}

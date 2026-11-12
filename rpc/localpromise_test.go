@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +16,7 @@ type echoNumOrderChecker struct {
 	skipAssertNum bool
 }
 
-func (e *echoNumOrderChecker) EchoNum(ctx context.Context, p testcapnp.PingPong_echoNum) error {
+func (e *echoNumOrderChecker) EchoNum(ctx context.Context, p testshark.PingPong_echoNum) error {
 	if !e.skipAssertNum {
 		assert.Equal(e.t, e.nextNum, p.Args().N())
 	}
@@ -33,29 +33,29 @@ func TestLocalPromiseFulfill(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	p, r := capnp.NewLocalPromise[testcapnp.PingPong]()
+	p, r := shark.NewLocalPromise[testshark.PingPong]()
 	defer p.Release()
 
-	fut1, rel1 := p.EchoNum(ctx, func(p testcapnp.PingPong_echoNum_Params) error {
+	fut1, rel1 := p.EchoNum(ctx, func(p testshark.PingPong_echoNum_Params) error {
 		p.SetN(1)
 		return nil
 	})
 	defer rel1()
 
-	fut2, rel2 := p.EchoNum(ctx, func(p testcapnp.PingPong_echoNum_Params) error {
+	fut2, rel2 := p.EchoNum(ctx, func(p testshark.PingPong_echoNum_Params) error {
 		p.SetN(2)
 		return nil
 	})
 	defer rel2()
 
-	pp := testcapnp.PingPong_ServerToClient(&echoNumOrderChecker{
+	pp := testshark.PingPong_ServerToClient(&echoNumOrderChecker{
 		t:       t,
 		nextNum: 1,
 	})
 	defer pp.Release()
 	r.Fulfill(pp)
 
-	fut3, rel3 := p.EchoNum(ctx, func(p testcapnp.PingPong_echoNum_Params) error {
+	fut3, rel3 := p.EchoNum(ctx, func(p testshark.PingPong_echoNum_Params) error {
 		p.SetN(3)
 		return nil
 	})
@@ -73,8 +73,8 @@ func TestLocalPromiseFulfill(t *testing.T) {
 	assert.Equal(t, int64(3), res3.N())
 }
 
-func echoNum(ctx context.Context, pp testcapnp.PingPong, n int64) (testcapnp.PingPong_echoNum_Results_Future, capnp.ReleaseFunc) {
-	return pp.EchoNum(ctx, func(p testcapnp.PingPong_echoNum_Params) error {
+func echoNum(ctx context.Context, pp testshark.PingPong, n int64) (testshark.PingPong_echoNum_Results_Future, shark.ReleaseFunc) {
+	return pp.EchoNum(ctx, func(p testshark.PingPong_echoNum_Params) error {
 		p.SetN(n)
 		return nil
 	})
@@ -84,7 +84,7 @@ func TestLocalPromiseReject(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	p, r := capnp.NewLocalPromise[testcapnp.PingPong]()
+	p, r := shark.NewLocalPromise[testshark.PingPong]()
 	defer p.Release()
 
 	fut1, rel1 := echoNum(ctx, p, 1)

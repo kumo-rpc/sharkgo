@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/schema"
-	"capnproto.org/go/capnp/v3/schemas"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/schema"
+	"github.com/kumo-rpc/sharkgo/schemas"
 )
 
 func readTestFile(name string) ([]byte, error) {
@@ -42,7 +42,7 @@ func TestEncode(t *testing.T) {
 		{0xaf440d469839118e, `(data = "\x00\n\"\\\xff")`},
 	}
 
-	data, err := readTestFile("txt.capnp.out")
+	data, err := readTestFile("txt.shk.out")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,13 +57,13 @@ func TestEncode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Adding to registry: %v", err)
 	}
-	msg, err := capnp.Unmarshal(data)
+	msg, err := shark.Unmarshal(data)
 	if err != nil {
-		t.Fatal("Unmarshaling txt.capnp.out:", err)
+		t.Fatal("Unmarshaling txt.shk.out:", err)
 	}
 	req, err := schema.ReadRootCodeGeneratorRequest(msg)
 	if err != nil {
-		t.Fatal("Reading code generator request txt.capnp.out:", err)
+		t.Fatal("Reading code generator request txt.shk.out:", err)
 	}
 	nodes, err := req.Nodes()
 	if err != nil {
@@ -135,7 +135,7 @@ func TestEncodeList(t *testing.T) {
 		{0x90c9e81e6418df8e, `[(key = "foo", value = (void = void)), (key = "bar", value = (void = void))]`},
 	}
 
-	data, err := readTestFile("txt.capnp.out")
+	data, err := readTestFile("txt.shk.out")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -150,13 +150,13 @@ func TestEncodeList(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Adding to registry: %v", err)
 	}
-	msg, err := capnp.Unmarshal(data)
+	msg, err := shark.Unmarshal(data)
 	if err != nil {
-		t.Fatal("Unmarshaling txt.capnp.out:", err)
+		t.Fatal("Unmarshaling txt.shk.out:", err)
 	}
 	req, err := schema.ReadRootCodeGeneratorRequest(msg)
 	if err != nil {
-		t.Fatal("Reading code generator request txt.capnp.out:", err)
+		t.Fatal("Reading code generator request txt.shk.out:", err)
 	}
 	nodes, err := req.Nodes()
 	if err != nil {

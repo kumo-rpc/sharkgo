@@ -12,8 +12,7 @@ import (
 
 	"context"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/rpc"
+	"github.com/kumo-rpc/sharkgo/rpc"
 )
 
 const SOCK_ADDR = "/tmp/example.sock"
@@ -65,7 +64,7 @@ func serveHash(ctx context.Context, rwc io.ReadWriteCloser) error {
 
 	// Listen for calls, using the HashFactory as the bootstrap interface.
 	conn := rpc.NewConn(rpc.NewStreamTransport(rwc), &rpc.Options{
-		BootstrapClient: capnp.Client(client),
+		BootstrapClient: shark.Client(client),
 	})
 	defer conn.Close()
 

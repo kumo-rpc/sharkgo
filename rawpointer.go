@@ -1,7 +1,7 @@
-package capnp
+package shark
 
 import (
-	"capnproto.org/go/capnp/v3/internal/str"
+	"github.com/kumo-rpc/sharkgo/internal/str"
 )
 
 // pointerOffset is an address offset in multiples of word size.

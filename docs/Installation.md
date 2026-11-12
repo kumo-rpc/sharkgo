@@ -6,10 +6,10 @@ Then, run the following command to install the compiler plugin for the
 Go language:
 
 ```bash
-go install capnproto.org/go/capnp/v3/capnpc-go@latest
+go install github.com/kumo-rpc/sharkgo/shark-go@latest
 ```
 
-This will install a `capnpc-go` executable under `$(go env GOPATH)/bin`,
+This will install a `shark-go` executable under `$(go env GOPATH)/bin`,
 which you should make sure has been added to your shell's `$PATH` variable.
 
 You will also need a checkout of of the `go-capnp` repository, for the

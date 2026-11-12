@@ -7,9 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/rpc"
-	testcp "capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/rpc"
+	testcp "github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
 )
 
 // Test connect/disconnect to a pingpong capability
@@ -21,7 +21,7 @@ func TestServe(t *testing.T) {
 	lis, err := net.Listen("tcp", ":0")
 	assert.NoError(t, err)
 	srv := testcp.PingPong_ServerToClient(pingPongServer{})
-	bootstrapClient := capnp.Client(srv)
+	bootstrapClient := shark.Client(srv)
 
 	go func() {
 		err2 := rpc.Serve(lis, bootstrapClient)
@@ -68,7 +68,7 @@ func TestServeCapability(t *testing.T) {
 	lis, err := net.Listen("tcp", ":0")
 	assert.NoError(t, err)
 	srv := testcp.PingPong_ServerToClient(pingPongServer{})
-	bootstrapClient := capnp.Client(srv)
+	bootstrapClient := shark.Client(srv)
 
 	errChannel := make(chan error)
 	go func() {
@@ -137,7 +137,7 @@ func TestListenAndServe(t *testing.T) {
 
 			// Provide a server that listens
 			srv := testcp.PingPong_ServerToClient(pingPongServer{})
-			bootstrapClient := capnp.Client(srv)
+			bootstrapClient := shark.Client(srv)
 			go func() {
 				t.Log("Starting ListenAndServe")
 				err2 := rpc.ListenAndServe(ctx, "tcp", ":0", bootstrapClient, tcase.opts...)

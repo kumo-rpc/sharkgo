@@ -6,13 +6,13 @@ import (
 	"math"
 	"reflect"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/nodemap"
-	"capnproto.org/go/capnp/v3/internal/schema"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/nodemap"
+	"github.com/kumo-rpc/sharkgo/internal/schema"
 )
 
 // Extract copies s into val, a pointer to a Go struct.
-func Extract(val any, typeID uint64, s capnp.Struct) error {
+func Extract(val any, typeID uint64, s shark.Struct) error {
 	e := new(extracter)
 	err := e.extractStruct(reflect.ValueOf(val), typeID, s)
 	if err != nil {
@@ -26,13 +26,13 @@ type extracter struct {
 }
 
 var (
-	clientType = reflect.TypeOf(capnp.Client{})
-	ptrType    = reflect.TypeOf(capnp.Ptr{})
-	structType = reflect.TypeOf(capnp.Struct{})
-	listType   = reflect.TypeOf(capnp.List{})
+	clientType = reflect.TypeOf(shark.Client{})
+	ptrType    = reflect.TypeOf(shark.Ptr{})
+	structType = reflect.TypeOf(shark.Struct{})
+	listType   = reflect.TypeOf(shark.List{})
 )
 
-func (e *extracter) extractStruct(val reflect.Value, typeID uint64, s capnp.Struct) error {
+func (e *extracter) extractStruct(val reflect.Value, typeID uint64, s shark.Struct) error {
 	if val.Kind() == reflect.Ptr {
 		if val.Type().Elem().Kind() != reflect.Struct {
 			return fmt.Errorf("can't extract struct into %v", val.Type())
@@ -69,7 +69,7 @@ func (e *extracter) extractStruct(val reflect.Value, typeID uint64, s capnp.Stru
 	var discriminant uint16
 	hasWhich := false
 	if hasDiscriminant(n) {
-		discriminant = s.Uint16(capnp.DataOffset(n.StructNode().DiscriminantOffset() * 2))
+		discriminant = s.Uint16(shark.DataOffset(n.StructNode().DiscriminantOffset() * 2))
 		if err := props.setWhich(val, discriminant); err == nil {
 			hasWhich = true
 		} else if !isNoWhichError(err) {
@@ -109,7 +109,7 @@ func (e *extracter) extractStruct(val reflect.Value, typeID uint64, s capnp.Stru
 	return nil
 }
 
-func (e *extracter) extractField(val reflect.Value, s capnp.Struct, f schema.Field) error {
+func (e *extracter) extractField(val reflect.Value, s shark.Struct, f schema.Field) error {
 	typ, err := f.Slot().Type()
 	if err != nil {
 		return err
@@ -128,51 +128,51 @@ func (e *extracter) extractField(val reflect.Value, s capnp.Struct, f schema.Fie
 	}
 	switch typ.Which() {
 	case schema.Type_Which_bool:
-		v := s.Bit(capnp.BitOffset(f.Slot().Offset()))
+		v := s.Bit(shark.BitOffset(f.Slot().Offset()))
 		d := dv.Bool()
 		val.SetBool(v != d) // != acts as XOR
 	case schema.Type_Which_int8:
-		v := int8(s.Uint8(capnp.DataOffset(f.Slot().Offset())))
+		v := int8(s.Uint8(shark.DataOffset(f.Slot().Offset())))
 		d := dv.Int8()
 		val.SetInt(int64(v ^ d))
 	case schema.Type_Which_int16:
-		v := int16(s.Uint16(capnp.DataOffset(f.Slot().Offset() * 2)))
+		v := int16(s.Uint16(shark.DataOffset(f.Slot().Offset() * 2)))
 		d := dv.Int16()
 		val.SetInt(int64(v ^ d))
 	case schema.Type_Which_int32:
-		v := int32(s.Uint32(capnp.DataOffset(f.Slot().Offset() * 4)))
+		v := int32(s.Uint32(shark.DataOffset(f.Slot().Offset() * 4)))
 		d := dv.Int32()
 		val.SetInt(int64(v ^ d))
 	case schema.Type_Which_int64:
-		v := int64(s.Uint64(capnp.DataOffset(f.Slot().Offset() * 8)))
+		v := int64(s.Uint64(shark.DataOffset(f.Slot().Offset() * 8)))
 		d := dv.Int64()
 		val.SetInt(v ^ d)
 	case schema.Type_Which_uint8:
-		v := s.Uint8(capnp.DataOffset(f.Slot().Offset()))
+		v := s.Uint8(shark.DataOffset(f.Slot().Offset()))
 		d := dv.Uint8()
 		val.SetUint(uint64(v ^ d))
 	case schema.Type_Which_uint16:
-		v := s.Uint16(capnp.DataOffset(f.Slot().Offset() * 2))
+		v := s.Uint16(shark.DataOffset(f.Slot().Offset() * 2))
 		d := dv.Uint16()
 		val.SetUint(uint64(v ^ d))
 	case schema.Type_Which_enum:
-		v := s.Uint16(capnp.DataOffset(f.Slot().Offset() * 2))
+		v := s.Uint16(shark.DataOffset(f.Slot().Offset() * 2))
 		d := dv.Enum()
 		val.SetUint(uint64(v ^ d))
 	case schema.Type_Which_uint32:
-		v := s.Uint32(capnp.DataOffset(f.Slot().Offset() * 4))
+		v := s.Uint32(shark.DataOffset(f.Slot().Offset() * 4))
 		d := dv.Uint32()
 		val.SetUint(uint64(v ^ d))
 	case schema.Type_Which_uint64:
-		v := s.Uint64(capnp.DataOffset(f.Slot().Offset() * 8))
+		v := s.Uint64(shark.DataOffset(f.Slot().Offset() * 8))
 		d := dv.Uint64()
 		val.SetUint(v ^ d)
 	case schema.Type_Which_float32:
-		v := s.Uint32(capnp.DataOffset(f.Slot().Offset() * 4))
+		v := s.Uint32(shark.DataOffset(f.Slot().Offset() * 4))
 		d := math.Float32bits(dv.Float32())
 		val.SetFloat(float64(math.Float32frombits(v ^ d)))
 	case schema.Type_Which_float64:
-		v := s.Uint64(capnp.DataOffset(f.Slot().Offset() * 8))
+		v := s.Uint64(shark.DataOffset(f.Slot().Offset() * 8))
 		d := math.Float64bits(dv.Float64())
 		val.SetFloat(math.Float64frombits(v ^ d))
 	case schema.Type_Which_text:
@@ -262,7 +262,7 @@ func (e *extracter) extractField(val reflect.Value, s capnp.Struct, f schema.Fie
 	return nil
 }
 
-func (e *extracter) extractList(val reflect.Value, typ schema.Type, l capnp.List) error {
+func (e *extracter) extractList(val reflect.Value, typ schema.Type, l shark.List) error {
 	vt := val.Type()
 	elem, err := typ.List().ElementType()
 	if err != nil {
@@ -281,52 +281,52 @@ func (e *extracter) extractList(val reflect.Value, typ schema.Type, l capnp.List
 	switch elem.Which() {
 	case schema.Type_Which_bool:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetBool(capnp.BitList(l).At(i))
+			val.Index(i).SetBool(shark.BitList(l).At(i))
 		}
 	case schema.Type_Which_int8:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetInt(int64(capnp.Int8List(l).At(i)))
+			val.Index(i).SetInt(int64(shark.Int8List(l).At(i)))
 		}
 	case schema.Type_Which_int16:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetInt(int64(capnp.Int16List(l).At(i)))
+			val.Index(i).SetInt(int64(shark.Int16List(l).At(i)))
 		}
 	case schema.Type_Which_int32:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetInt(int64(capnp.Int32List(l).At(i)))
+			val.Index(i).SetInt(int64(shark.Int32List(l).At(i)))
 		}
 	case schema.Type_Which_int64:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetInt(capnp.Int64List(l).At(i))
+			val.Index(i).SetInt(shark.Int64List(l).At(i))
 		}
 	case schema.Type_Which_uint8:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetUint(uint64(capnp.UInt8List(l).At(i)))
+			val.Index(i).SetUint(uint64(shark.UInt8List(l).At(i)))
 		}
 	case schema.Type_Which_uint16, schema.Type_Which_enum:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetUint(uint64(capnp.UInt16List(l).At(i)))
+			val.Index(i).SetUint(uint64(shark.UInt16List(l).At(i)))
 		}
 	case schema.Type_Which_uint32:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetUint(uint64(capnp.UInt32List(l).At(i)))
+			val.Index(i).SetUint(uint64(shark.UInt32List(l).At(i)))
 		}
 	case schema.Type_Which_uint64:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetUint(capnp.UInt64List(l).At(i))
+			val.Index(i).SetUint(shark.UInt64List(l).At(i))
 		}
 	case schema.Type_Which_float32:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetFloat(float64(capnp.Float32List(l).At(i)))
+			val.Index(i).SetFloat(float64(shark.Float32List(l).At(i)))
 		}
 	case schema.Type_Which_float64:
 		for i := 0; i < n; i++ {
-			val.Index(i).SetFloat(capnp.Float64List(l).At(i))
+			val.Index(i).SetFloat(shark.Float64List(l).At(i))
 		}
 	case schema.Type_Which_text:
 		if val.Type().Elem().Kind() == reflect.String {
 			for i := 0; i < n; i++ {
-				s, err := capnp.TextList(l).At(i)
+				s, err := shark.TextList(l).At(i)
 				if err != nil {
 					// TODO(light): collect errors and finish
 					return err
@@ -335,7 +335,7 @@ func (e *extracter) extractList(val reflect.Value, typ schema.Type, l capnp.List
 			}
 		} else {
 			for i := 0; i < n; i++ {
-				b, err := capnp.TextList(l).BytesAt(i)
+				b, err := shark.TextList(l).BytesAt(i)
 				if err != nil {
 					// TODO(light): collect errors and finish
 					return err
@@ -345,7 +345,7 @@ func (e *extracter) extractList(val reflect.Value, typ schema.Type, l capnp.List
 		}
 	case schema.Type_Which_data:
 		for i := 0; i < n; i++ {
-			b, err := capnp.DataList(l).At(i)
+			b, err := shark.DataList(l).At(i)
 			if err != nil {
 				// TODO(light): collect errors and finish
 				return err
@@ -354,7 +354,7 @@ func (e *extracter) extractList(val reflect.Value, typ schema.Type, l capnp.List
 		}
 	case schema.Type_Which_list:
 		for i := 0; i < n; i++ {
-			p, err := capnp.PointerList(l).At(i)
+			p, err := shark.PointerList(l).At(i)
 			// TODO(light): collect errors and finish
 			if err != nil {
 				return err
@@ -384,7 +384,7 @@ func (e *extracter) extractList(val reflect.Value, typ schema.Type, l capnp.List
 	case schema.Type_Which_interface:
 		elemType := val.Type().Elem()
 		for i := 0; i < n; i++ {
-			p, err := capnp.PointerList(l).At(i)
+			p, err := shark.PointerList(l).At(i)
 			// TODO(light): collect errors and finish
 			if err != nil {
 				return err

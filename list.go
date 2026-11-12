@@ -1,13 +1,13 @@
-package capnp
+package shark
 
 import (
 	"errors"
 	"math"
 	"strconv"
 
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/internal/strquote"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/internal/strquote"
 )
 
 // A List is a reference to an array of values.

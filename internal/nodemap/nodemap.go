@@ -2,9 +2,9 @@
 package nodemap
 
 import (
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/schema"
-	"capnproto.org/go/capnp/v3/schemas"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/schema"
+	"github.com/kumo-rpc/sharkgo/schemas"
 )
 
 // Map is a lazy index of a registry.
@@ -36,7 +36,7 @@ func (m *Map) Find(id uint64) (schema.Node, error) {
 	if err != nil {
 		return schema.Node{}, err
 	}
-	msg, err := capnp.Unmarshal(data)
+	msg, err := shark.Unmarshal(data)
 	if err != nil {
 		return schema.Node{}, err
 	}

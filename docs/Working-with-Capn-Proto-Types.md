@@ -12,8 +12,8 @@ In this section, we will learn how to:
 
 Instantiating a type that was generated from your a schema is a three-step process:
 
-1. Instantiate a `capnp.Arena`, which exposes a low-level API to a `[]byte` buffer.
-2. Instantiate a new `*capnp.Message`, which allocates capnp structs in the above arena.
+1. Instantiate a `shark.Arena`, which exposes a low-level API to a `[]byte` buffer.
+2. Instantiate a new `*shark.Message`, which allocates capnp structs in the above arena.
 3. Instantiate the schema-generated type, which wraps the above `Message` and provides a high-level getter/setter API.
 
 The code below creates a new `books.Book` from the schema you generated in the [previous section](Writing-Schemas-and-Generating-Code.md), and populates its fields.  Steps 1 through 3 are repeated in the comments, for clarity.
@@ -23,7 +23,7 @@ package main
 
 import (
     "foo/books"
-    "capnproto.org/go/capnp/v3"
+    "github.com/kumo-rpc/sharkgo"
 )
 
 func main() {
@@ -31,14 +31,14 @@ func main() {
     // buffer, providing a low-level access API.  You probably won't ever need to
     // interact with it directly.  We will ignore the meaning of "single segment"
     // for now.
-    arena := capnp.SingleSegment(nil)
+    arena := shark.SingleSegment(nil)
 
     // Make a brand new empty message.  A Message allocates Cap'n Proto structs within
     // its arena.  For convenience, NewMessage also returns the root "segment" of the
     // message, which is needed to instantiate the Book struct.  You don't need to
     // understand segments and roots yet (or maybe ever), but if you're curious, messages
     // and segments are documented here:  https://capnproto.org/encoding.html
-    msg, seg, err := capnp.NewMessage(arena)
+    msg, seg, err := shark.NewMessage(arena)
     if err != nil {
         panic(err)
     }
@@ -74,20 +74,20 @@ func main() {
 }
 ```
 
-So far, this looks a lot like Protocol Buffers.  In the next few sections, we'll show you where Cap'n Proto really comes into its own:  data serialization.  This will also show you where the `*capnp.Message` type is used.
+So far, this looks a lot like Protocol Buffers.  In the next few sections, we'll show you where Cap'n Proto really comes into its own:  data serialization.  This will also show you where the `*shark.Message` type is used.
 
 ## Marshalling and Unmarshalling
 
 In a narrow technical sense, there is no "marshalling" or "unmarshalling" in Cap'n Proto.  This is because the get and set operations you saw above act **directly on the object's underlying `[]byte` buffer**.  This is what makes reading and writing Cap'n Proto data blisteringly fast!
 
-Despite this slight inaccuracy, we still refer to the process of converting objects to and from `[]byte`s as *marshalling* and *unmarshalling*, and provide the corresponding methods [`Message.Marshal`](https://pkg.go.dev/capnproto.org/go/capnp/v3#Message.Marshal) and [`Message.Unmarshal`](https://pkg.go.dev/capnproto.org/go/capnp/v3#Message.Unmarshal).   We use this terminology for two reasons:
+Despite this slight inaccuracy, we still refer to the process of converting objects to and from `[]byte`s as *marshalling* and *unmarshalling*, and provide the corresponding methods [`Message.Marshal`](https://pkg.go.dev/github.com/kumo-rpc/sharkgo#Message.Marshal) and [`Message.Unmarshal`](https://pkg.go.dev/github.com/kumo-rpc/sharkgo#Message.Unmarshal).   We use this terminology for two reasons:
 
 1. the terms are familiar to most Go developers, and
 2. they correctly convey the essence of the operations:  `type -> []byte` and `[]byte -> type`, respectively for marshal and unmarshal.
 
 ### Marshalling
 
-To marshal the `books.Book` instance from the previous example, we need only call the `Marshal` method on the corresponding `*capnp.Message`:
+To marshal the `books.Book` instance from the previous example, we need only call the `Marshal` method on the corresponding `*shark.Message`:
 
 ```go
 b, err := msg.Marshal()
@@ -102,13 +102,13 @@ if err != nil {
 
 In the above example, `Marshal` returns the book's underlying buffer unmodified.  To unmarshal it into a new `books.Book` object, you need to:
 
-1. call `capnp.Unmarshal` to obtain a new `*capnp.Message`; then,
+1. call `shark.Unmarshal` to obtain a new `*shark.Message`; then,
 2. call `books.ReadRootBook`, passing in the newly-obtained message.
 
 Here is the code to do so:
 
 ```go
-msg, err := capnp.Unmarshal(b)
+msg, err := shark.Unmarshal(b)
 if err != nil {
     panic(err)
 }
@@ -126,7 +126,7 @@ fmt.Printf("%s (%d pages)", title, book.Pages())
 
 ### Using the Packed Encoding
 
-Cap'n Proto supports a [packed encoding](https://capnproto.org/encoding.html#packing), that provides ultra-fast compression.  To use the packed encoding, substitute `Message.Marshal` with `Message.MarshalPacked` and `capnp.Unmarshal` with `capnp.UnmarshalPacked`.
+Cap'n Proto supports a [packed encoding](https://capnproto.org/encoding.html#packing), that provides ultra-fast compression.  To use the packed encoding, substitute `Message.Marshal` with `Message.MarshalPacked` and `shark.Unmarshal` with `shark.UnmarshalPacked`.
 
 ## Streaming
 
@@ -140,11 +140,11 @@ The `Encoder` and `Decoder` types allow you to stream generated types to and fro
 // Create a new encoder that streams messages to stdout.
 // You can also use NewPackedEncoder if you want to compress
 // the data.
-encoder := capnp.NewEncoder(os.Stdout)
+encoder := shark.NewEncoder(os.Stdout)
 
-// Send the book's underlying *capnp.Message.  Note that we
+// Send the book's underlying *shark.Message.  Note that we
 // could have also passed the 'msg' variable we obtained from
-// our previous call to capnp.Unmarshal or capnp.NewMessage.
+// our previous call to shark.Unmarshal or shark.NewMessage.
 // In most cases, however, it is more convenient to use the
 // generated type's Message() method.
 err = encoder.Encode(book.Message())
@@ -157,9 +157,9 @@ if err != nil {
 
 ```go
 // Create a new decoder that reads from stdin.
-// Use capnp.NewPackedDecoder if you are expecting a
+// Use shark.NewPackedDecoder if you are expecting a
 // packed byte-stream.
-decoder := capnp.NewDecoder(os.Stdin)
+decoder := shark.NewDecoder(os.Stdin)
 
 // Read the message from stdin.
 msg, err := decoder.Decode()

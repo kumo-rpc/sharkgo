@@ -6,9 +6,9 @@ import (
 	"net"
 	"sync"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/exp/spsc"
-	"capnproto.org/go/capnp/v3/rpc"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/exp/spsc"
+	"github.com/kumo-rpc/sharkgo/rpc"
 )
 
 // PeerID is the implementation of peer ids used by a test network
@@ -148,7 +148,7 @@ func (n network) Introduce(provider, recipient *rpc.Conn) (rpc.IntroductionInfo,
 	defer n.global.mu.Unlock()
 	nonce := n.global.nextNonce
 	n.global.nextNonce++
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	ret := rpc.IntroductionInfo{}
 	sendToRecipient, err := NewPeerAndNonce(seg)
 	if err != nil {

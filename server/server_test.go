@@ -11,9 +11,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"capnproto.org/go/capnp/v3"
-	air "capnproto.org/go/capnp/v3/internal/aircraftlib"
-	"capnproto.org/go/capnp/v3/server"
+	"github.com/kumo-rpc/sharkgo"
+	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
+	"github.com/kumo-rpc/sharkgo/server"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -75,7 +75,7 @@ func TestServerCall(t *testing.T) {
 		}
 	})
 	t.Run("Unimplemented", func(t *testing.T) {
-		echo := air.Echo(capnp.NewClient(server.New(nil, nil, nil)))
+		echo := air.Echo(shark.NewClient(server.New(nil, nil, nil)))
 		defer echo.Release()
 
 		ans, finish := echo.Echo(context.Background(), func(p air.Echo_echo_Params) error {
@@ -87,7 +87,7 @@ func TestServerCall(t *testing.T) {
 		if err == nil {
 			t.Error("echo.Echo() error = <nil>; want unimplemented")
 		} else {
-			if !capnp.IsUnimplemented(err) {
+			if !shark.IsUnimplemented(err) {
 				t.Errorf("echo.Echo() error = %v; want unimplemented", err)
 			}
 			if !strings.Contains(err.Error(), "echo") {
@@ -102,7 +102,7 @@ func TestServerCall(t *testing.T) {
 
 		// start a proxy server with hook
 		srv := server.New(nil, nil, nil)
-		srv.HandleUnknownMethod = func(method capnp.Method) *server.Method {
+		srv.HandleUnknownMethod = func(method shark.Method) *server.Method {
 			sm := server.Method{
 				Method: method,
 				Impl:   nil,
@@ -120,7 +120,7 @@ func TestServerCall(t *testing.T) {
 			}
 			return &sm
 		}
-		blankBoot := capnp.NewClient(srv)
+		blankBoot := shark.NewClient(srv)
 		echoClient := air.Echo(blankBoot)
 		defer echoClient.Release()
 
@@ -161,7 +161,7 @@ func TestServerCallOrder(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			ctx := context.Background()
-			send := func() (air.CallSequence_getNumber_Results_Future, capnp.ReleaseFunc) {
+			send := func() (air.CallSequence_getNumber_Results_Future, shark.ReleaseFunc) {
 				return test.seq.GetNumber(ctx, nil)
 			}
 			check := func(p air.CallSequence_getNumber_Results_Future, n uint32) {

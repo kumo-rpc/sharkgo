@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"capnproto.org/go/capnp/v3/exp/bufferpool"
+	"github.com/kumo-rpc/sharkgo/exp/bufferpool"
 	"github.com/stretchr/testify/require"
 )
 

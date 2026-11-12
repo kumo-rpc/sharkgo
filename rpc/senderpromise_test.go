@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/rpc"
-	"capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
-	"capnproto.org/go/capnp/v3/rpc/transport"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/rpc"
+	"github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
+	"github.com/kumo-rpc/sharkgo/rpc/transport"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,14 +19,14 @@ func TestSenderPromiseFulfill(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	p, r := capnp.NewLocalPromise[testcapnp.PingPong]()
+	p, r := shark.NewLocalPromise[testshark.PingPong]()
 
 	left, right := transport.NewPipe(1)
 	p1, p2 := rpc.NewTransport(left), rpc.NewTransport(right)
 
 	conn := rpc.NewConn(p1, &rpc.Options{
 		Logger:          testErrorReporter{tb: t},
-		BootstrapClient: capnp.Client(p),
+		BootstrapClient: shark.Client(p),
 	})
 	defer finishTest(t, conn, p2)
 
@@ -54,7 +54,7 @@ func TestSenderPromiseFulfill(t *testing.T) {
 	}
 	// 3. Fulfill promise
 	{
-		pp := testcapnp.PingPong_ServerToClient(&pingPonger{})
+		pp := testshark.PingPong_ServerToClient(&pingPonger{})
 		defer pp.Release()
 		r.Fulfill(pp)
 	}
@@ -78,9 +78,9 @@ func TestResolveUnimplementedDrop(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	p, r := capnp.NewLocalPromise[testcapnp.Empty]()
+	p, r := shark.NewLocalPromise[testshark.Empty]()
 
-	provider := testcapnp.EmptyProvider_ServerToClient(emptyShutdownerProvider{
+	provider := testshark.EmptyProvider_ServerToClient(emptyShutdownerProvider{
 		result: p,
 	})
 
@@ -89,7 +89,7 @@ func TestResolveUnimplementedDrop(t *testing.T) {
 
 	conn := rpc.NewConn(p1, &rpc.Options{
 		Logger:          testErrorReporter{tb: t},
-		BootstrapClient: capnp.Client(provider),
+		BootstrapClient: shark.Client(provider),
 	})
 	defer finishTest(t, conn, p2)
 
@@ -136,7 +136,7 @@ func TestResolveUnimplementedDrop(t *testing.T) {
 					Which:       rpccp.MessageTarget_Which_importedCap,
 					ImportedCap: bootExportID,
 				},
-				InterfaceID: testcapnp.EmptyProvider_TypeID,
+				InterfaceID: testshark.EmptyProvider_TypeID,
 				MethodID:    0,
 				Params:      rpcPayload{},
 			},
@@ -158,7 +158,7 @@ func TestResolveUnimplementedDrop(t *testing.T) {
 	}
 	// 6. Fulfill promise
 	{
-		pp := testcapnp.Empty_ServerToClient(emptyShutdowner{
+		pp := testshark.Empty_ServerToClient(emptyShutdowner{
 			onShutdown: onShutdown,
 		})
 		r.Fulfill(pp)
@@ -198,10 +198,10 @@ func TestResolveUnimplementedDrop(t *testing.T) {
 }
 
 type emptyShutdownerProvider struct {
-	result testcapnp.Empty
+	result testshark.Empty
 }
 
-func (e emptyShutdownerProvider) GetEmpty(ctx context.Context, p testcapnp.EmptyProvider_getEmpty) error {
+func (e emptyShutdownerProvider) GetEmpty(ctx context.Context, p testshark.EmptyProvider_getEmpty) error {
 	results, err := p.AllocResults()
 	if err != nil {
 		return err
@@ -223,14 +223,14 @@ func TestDisembargoSenderPromise(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	p, r := capnp.NewLocalPromise[capnp.Client]()
+	p, r := shark.NewLocalPromise[shark.Client]()
 
 	left, right := transport.NewPipe(1)
 	p1, p2 := rpc.NewTransport(left), rpc.NewTransport(right)
 
 	conn := rpc.NewConn(p1, &rpc.Options{
 		Logger:          testErrorReporter{tb: t},
-		BootstrapClient: capnp.Client(p),
+		BootstrapClient: shark.Client(p),
 	})
 	defer finishTest(t, conn, p2)
 
@@ -274,7 +274,7 @@ func TestDisembargoSenderPromise(t *testing.T) {
 
 		outMsg, err := p2.NewMessage()
 		assert.NoError(t, err)
-		iface := capnp.NewInterface(outMsg.Message().Segment(), 0)
+		iface := shark.NewInterface(outMsg.Message().Segment(), 0)
 
 		assert.NoError(t, sendMessage(ctx, p2, &rpcMessage{
 			Which: rpccp.Message_Which_return,
@@ -361,14 +361,14 @@ func TestDisembargoSenderPromiseWithPipeline(t *testing.T) {
 	const methodIdOrd uint16 = 0x0f30
 
 	ctx := context.Background()
-	p, r := capnp.NewLocalPromise[capnp.Client]()
+	p, r := shark.NewLocalPromise[shark.Client]()
 
 	left, right := transport.NewPipe(1)
 	p1, p2 := rpc.NewTransport(left), rpc.NewTransport(right)
 
 	conn := rpc.NewConn(p1, &rpc.Options{
 		Logger:          testErrorReporter{tb: t},
-		BootstrapClient: capnp.Client(p), // The bootstrap intf of conn/p1 is promise `p`
+		BootstrapClient: shark.Client(p), // The bootstrap intf of conn/p1 is promise `p`
 		RemotePeerID:    rpc.PeerID{Value: "p1"},
 	})
 	defer finishTest(t, conn, p2)
@@ -462,7 +462,7 @@ func TestDisembargoSenderPromiseWithPipeline(t *testing.T) {
 
 		outMsg, err := p2.NewMessage()
 		assert.NoError(t, err)
-		iface := capnp.NewInterface(outMsg.Message().Segment(), 0)
+		iface := shark.NewInterface(outMsg.Message().Segment(), 0)
 
 		// Reply with the return, pointing out that P2's bootstrap
 		// interface is located at the `myBootstrapID` entry in P2's
@@ -560,7 +560,7 @@ func TestDisembargoSenderPromiseWithPipeline(t *testing.T) {
 				AnswerID: p1ToP2CallQuestionId,
 				Which:    rpccp.Return_Which_results,
 				Results: &rpcPayload{
-					Content: capnp.Ptr{}, // Returning void.
+					Content: shark.Ptr{}, // Returning void.
 				},
 			},
 		}))
@@ -649,7 +649,7 @@ func TestShortensPathAfterResolve(t *testing.T) {
 
 	// Promise that will be the bootstrap capability in C1 and will be
 	// eventually resolved as the bootstrap capability in C2.
-	p, r := capnp.NewLocalPromise[testcapnp.PingPong]()
+	p, r := shark.NewLocalPromise[testshark.PingPong]()
 	defer p.Release()
 
 	left, right := transport.NewPipe(1)
@@ -659,7 +659,7 @@ func TestShortensPathAfterResolve(t *testing.T) {
 	// promise).
 	c1 := rpc.NewConn(p1, &rpc.Options{
 		Logger:          testErrorReporter{tb: t},
-		BootstrapClient: capnp.Client(p),
+		BootstrapClient: shark.Client(p),
 		RemotePeerID:    rpc.PeerID{Value: "c1"}, // (really, c2)
 		AbortTimeout:    15 * time.Second,
 	})
@@ -668,7 +668,7 @@ func TestShortensPathAfterResolve(t *testing.T) {
 	ord := &echoNumOrderChecker{t: t, skipAssertNum: true}
 	c2 := rpc.NewConn(p2, &rpc.Options{
 		Logger:          testErrorReporter{tb: t},
-		BootstrapClient: capnp.Client(testcapnp.PingPong_ServerToClient(ord)),
+		BootstrapClient: shark.Client(testshark.PingPong_ServerToClient(ord)),
 		RemotePeerID:    rpc.PeerID{Value: "c2"}, // (really, c1)
 		AbortTimeout:    15 * time.Second,
 	})
@@ -677,11 +677,11 @@ func TestShortensPathAfterResolve(t *testing.T) {
 	// take a while to resolve, because in C1 this is _also_ a promise back
 	// to C2 (in C1 this is `p`, which will be resolved by `r.Fulfill`).
 	// time.Sleep(time.Second)
-	c2PromiseToC1 := testcapnp.PingPong(c2.Bootstrap(ctx))
+	c2PromiseToC1 := testshark.PingPong(c2.Bootstrap(ctx))
 	defer c2PromiseToC1.Release()
 
 	// Fetch C2's bootstrap interface (the concrete echo server).
-	c1PromiseToC2 := testcapnp.PingPong(c1.Bootstrap(ctx))
+	c1PromiseToC2 := testshark.PingPong(c1.Bootstrap(ctx))
 	defer c1PromiseToC2.Release()
 	require.NoError(t, c1PromiseToC2.Resolve(ctx))
 
@@ -736,7 +736,7 @@ func testPromiseOrderingCase(t *testing.T, numCalls int, callToFulfill int,
 
 	// Setup a promise that will take the role of C1's bootstrap interface.
 	// This will eventually be resolved as C2's bootstrap interface.
-	p, r := capnp.NewLocalPromise[testcapnp.PingPong]()
+	p, r := shark.NewLocalPromise[testshark.PingPong]()
 	defer p.Release()
 
 	// Create the simulated connection.
@@ -746,18 +746,18 @@ func testPromiseOrderingCase(t *testing.T, numCalls int, callToFulfill int,
 	// Create the vats.
 	c1 := rpc.NewConn(p1, &rpc.Options{
 		Logger:          testErrorReporter{tb: t},
-		BootstrapClient: capnp.Client(p),
+		BootstrapClient: shark.Client(p),
 	})
 	ord := &echoNumOrderChecker{
 		t: t,
 	}
 	c2 := rpc.NewConn(p2, &rpc.Options{
 		Logger:          testErrorReporter{tb: t},
-		BootstrapClient: capnp.Client(testcapnp.PingPong_ServerToClient(ord)),
+		BootstrapClient: shark.Client(testshark.PingPong_ServerToClient(ord)),
 	})
 
 	// C2 requests C1's bootstrap capability.
-	c1BootstrapCap := testcapnp.PingPong(c2.Bootstrap(ctx))
+	c1BootstrapCap := testshark.PingPong(c2.Bootstrap(ctx))
 	defer c1BootstrapCap.Release()
 
 	fulfillC1BootstrapPromise := func() {
@@ -780,7 +780,7 @@ func testPromiseOrderingCase(t *testing.T, numCalls int, callToFulfill int,
 
 		// Fulfill the promise that was set as C1's
 		// bootstrap cap with C2's bootstrap cap.
-		r.Fulfill(testcapnp.PingPong(c2BootstrapCap))
+		r.Fulfill(testshark.PingPong(c2BootstrapCap))
 	}
 
 	// When testing fulfilling before any calls are made, do it
@@ -794,8 +794,8 @@ func testPromiseOrderingCase(t *testing.T, numCalls int, callToFulfill int,
 
 	// Send a whole bunch of calls to the promise:
 	var (
-		futures []testcapnp.PingPong_echoNum_Results_Future
-		rels    []capnp.ReleaseFunc
+		futures []testshark.PingPong_echoNum_Results_Future
+		rels    []shark.ReleaseFunc
 	)
 	for i := 0; i < numCalls; i++ {
 		fut, rel := echoNum(ctx, c1BootstrapCap, int64(i))

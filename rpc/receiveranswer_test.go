@@ -7,28 +7,28 @@ import (
 	"testing"
 
 	//"github.com/stretchr/testify/assert"
-	//rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
+	//rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
-	"capnproto.org/go/capnp/v3/server"
-	"capnproto.org/go/capnp/v3/util"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
+	"github.com/kumo-rpc/sharkgo/server"
+	"github.com/kumo-rpc/sharkgo/util"
 )
 
 type capArgsTest struct {
 	Errs chan<- error
 }
 
-func (me *capArgsTest) Self(ctx context.Context, p testcapnp.CapArgsTest_self) error {
+func (me *capArgsTest) Self(ctx context.Context, p testshark.CapArgsTest_self) error {
 	res, err := p.AllocResults()
 	if err != nil {
 		return err
 	}
-	res.SetSelf(testcapnp.CapArgsTest_ServerToClient(me))
+	res.SetSelf(testshark.CapArgsTest_ServerToClient(me))
 	return nil
 }
 
-func (me *capArgsTest) Call(ctx context.Context, p testcapnp.CapArgsTest_call) error {
+func (me *capArgsTest) Call(ctx context.Context, p testshark.CapArgsTest_call) error {
 	defer close(me.Errs)
 	client := p.Args().Cap()
 	util.Chkfatal(client.Resolve(ctx))
@@ -63,7 +63,7 @@ func TestBootstrapReceiverAnswerRpc(t *testing.T) {
 	serverConn := NewConn(
 		NewStreamTransport(cServer),
 		&Options{
-			BootstrapClient: capnp.Client(testcapnp.CapArgsTest_ServerToClient(srv)),
+			BootstrapClient: shark.Client(testshark.CapArgsTest_ServerToClient(srv)),
 		},
 	)
 	defer serverConn.Close()
@@ -72,10 +72,10 @@ func TestBootstrapReceiverAnswerRpc(t *testing.T) {
 	defer clientConn.Close()
 
 	ctx := context.Background()
-	c := testcapnp.CapArgsTest(clientConn.Bootstrap(ctx))
+	c := testshark.CapArgsTest(clientConn.Bootstrap(ctx))
 
-	res, rel := c.Call(ctx, func(p testcapnp.CapArgsTest_call_Params) error {
-		return p.SetCap(capnp.Client(c.AddRef()))
+	res, rel := c.Call(ctx, func(p testshark.CapArgsTest_call_Params) error {
+		return p.SetCap(shark.Client(c.AddRef()))
 	})
 	defer rel()
 	c.Release()
@@ -102,7 +102,7 @@ func TestCallReceiverAnswerRpc(t *testing.T) {
 	serverConn := NewConn(
 		NewStreamTransport(cServer),
 		&Options{
-			BootstrapClient: capnp.Client(testcapnp.CapArgsTest_ServerToClient(srv)),
+			BootstrapClient: shark.Client(testshark.CapArgsTest_ServerToClient(srv)),
 		},
 	)
 	defer serverConn.Close()
@@ -111,14 +111,14 @@ func TestCallReceiverAnswerRpc(t *testing.T) {
 	defer clientConn.Close()
 
 	ctx := context.Background()
-	bs := testcapnp.CapArgsTest(clientConn.Bootstrap(ctx))
+	bs := testshark.CapArgsTest(clientConn.Bootstrap(ctx))
 	defer bs.Release()
 
 	selfRes, rel := bs.Self(ctx, nil)
 	defer rel()
 	self := selfRes.Self()
-	callRes, rel := self.Call(ctx, func(p testcapnp.CapArgsTest_call_Params) error {
-		return p.SetCap(capnp.Client(self.AddRef()))
+	callRes, rel := self.Call(ctx, func(p testshark.CapArgsTest_call_Params) error {
+		return p.SetCap(shark.Client(self.AddRef()))
 	})
 	defer rel()
 
@@ -145,7 +145,7 @@ func TestBootstrapReceiverAnswer(t *testing.T) {
 	conn := NewConn(
 		NewStreamTransport(cServer),
 		&Options{
-			BootstrapClient: capnp.Client(testcapnp.CapArgsTest_ServerToClient(srv)),
+			BootstrapClient: shark.Client(testshark.CapArgsTest_ServerToClient(srv)),
 		},
 	)
 	defer conn.Close()
@@ -174,7 +174,7 @@ func TestBootstrapReceiverAnswer(t *testing.T) {
 	pa.SetQuestionId(0)
 	// Can leave off transform, since the root of the response is the
 	// bootstrap capability.
-	call.SetInterfaceId(testcapnp.CapArgsTest_TypeID)
+	call.SetInterfaceId(testshark.CapArgsTest_TypeID)
 	call.SetMethodId(0)
 	params, err := call.NewParams()
 	util.Chkfatal(err)
@@ -185,9 +185,9 @@ func TestBootstrapReceiverAnswer(t *testing.T) {
 	util.Chkfatal(err)
 	ra.SetQuestionId(0)
 	seg := params.Segment()
-	argStruct, err := capnp.NewStruct(seg, capnp.ObjectSize{PointerCount: 1})
+	argStruct, err := shark.NewStruct(seg, shark.ObjectSize{PointerCount: 1})
 	util.Chkfatal(err)
-	argStruct.SetPtr(0, capnp.NewInterface(seg, 0).ToPtr())
+	argStruct.SetPtr(0, shark.NewInterface(seg, 0).ToPtr())
 	params.SetContent(argStruct.ToPtr())
 	outMsg.Send()
 	outMsg.Release()
@@ -210,7 +210,7 @@ func TestCallReceiverAnswer(t *testing.T) {
 	conn := NewConn(
 		NewStreamTransport(cServer),
 		&Options{
-			BootstrapClient: capnp.Client(testcapnp.CapArgsTest_ServerToClient(srv)),
+			BootstrapClient: shark.Client(testshark.CapArgsTest_ServerToClient(srv)),
 		},
 	)
 	defer conn.Close()
@@ -237,7 +237,7 @@ func TestCallReceiverAnswer(t *testing.T) {
 	pa, err := tgt.NewPromisedAnswer()
 	util.Chkfatal(err)
 	pa.SetQuestionId(0)
-	call.SetInterfaceId(testcapnp.CapArgsTest_TypeID)
+	call.SetInterfaceId(testshark.CapArgsTest_TypeID)
 	call.SetMethodId(1)
 	outMsg.Send()
 	outMsg.Release()
@@ -257,7 +257,7 @@ func TestCallReceiverAnswer(t *testing.T) {
 	transform, err := pa.NewTransform(1)
 	util.Chkfatal(err)
 	transform.At(0).SetGetPointerField(0)
-	call.SetInterfaceId(testcapnp.CapArgsTest_TypeID)
+	call.SetInterfaceId(testshark.CapArgsTest_TypeID)
 	call.SetMethodId(0)
 	params, err := call.NewParams()
 	util.Chkfatal(err)
@@ -272,9 +272,9 @@ func TestCallReceiverAnswer(t *testing.T) {
 	util.Chkfatal(err)
 	transform.At(0).SetGetPointerField(0)
 	seg := params.Segment()
-	argStruct, err := capnp.NewStruct(seg, capnp.ObjectSize{PointerCount: 1})
+	argStruct, err := shark.NewStruct(seg, shark.ObjectSize{PointerCount: 1})
 	util.Chkfatal(err)
-	argStruct.SetPtr(0, capnp.NewInterface(seg, 0).ToPtr())
+	argStruct.SetPtr(0, shark.NewInterface(seg, 0).ToPtr())
 	params.SetContent(argStruct.ToPtr())
 	outMsg.Send()
 	outMsg.Release()

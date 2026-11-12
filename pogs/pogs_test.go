@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	air "capnproto.org/go/capnp/v3/internal/aircraftlib"
+	"github.com/kumo-rpc/sharkgo"
+	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
 	"github.com/kylelemons/godebug/pretty"
 )
 
@@ -56,10 +56,10 @@ type Z struct {
 	Echo   air.Echo
 	Echoes []air.Echo
 
-	AnyPtr        capnp.Ptr
-	AnyStruct     capnp.Struct
-	AnyList       capnp.List
-	AnyCapability capnp.Client
+	AnyPtr        shark.Ptr
+	AnyStruct     shark.Struct
+	AnyList       shark.List
+	AnyCapability shark.Client
 }
 
 type PlaneBase struct {
@@ -161,51 +161,51 @@ var goodTests = []Z{
 	{Which: air.Z_Which_airport, Airport: air.Airport_lax},
 	{Which: air.Z_Which_grp, Grp: &ZGroup{First: 123, Second: 456}},
 	{Which: air.Z_Which_echo, Echo: air.Echo{}},
-	{Which: air.Z_Which_echo, Echo: air.Echo(capnp.ErrorClient(errors.New("boo")))},
+	{Which: air.Z_Which_echo, Echo: air.Echo(shark.ErrorClient(errors.New("boo")))},
 	{Which: air.Z_Which_echoes, Echoes: []air.Echo{
 		{},
-		air.Echo(capnp.ErrorClient(errors.New("boo"))),
+		air.Echo(shark.ErrorClient(errors.New("boo"))),
 		{},
-		air.Echo(capnp.ErrorClient(errors.New("boo"))),
+		air.Echo(shark.ErrorClient(errors.New("boo"))),
 		{},
 	}},
-	{Which: air.Z_Which_anyPtr, AnyPtr: capnp.Ptr{}},
+	{Which: air.Z_Which_anyPtr, AnyPtr: shark.Ptr{}},
 	{Which: air.Z_Which_anyPtr, AnyPtr: newTestStruct().ToPtr()},
 	{Which: air.Z_Which_anyPtr, AnyPtr: newTestList().ToPtr()},
 	{Which: air.Z_Which_anyPtr, AnyPtr: newTestInterface().ToPtr()},
-	{Which: air.Z_Which_anyStruct, AnyStruct: capnp.Struct{}},
+	{Which: air.Z_Which_anyStruct, AnyStruct: shark.Struct{}},
 	{Which: air.Z_Which_anyStruct, AnyStruct: newTestStruct()},
-	{Which: air.Z_Which_anyList, AnyList: capnp.List{}},
+	{Which: air.Z_Which_anyList, AnyList: shark.List{}},
 	{Which: air.Z_Which_anyList, AnyList: newTestList()},
-	{Which: air.Z_Which_anyCapability, AnyCapability: capnp.Client{}},
-	{Which: air.Z_Which_anyCapability, AnyCapability: capnp.ErrorClient(errors.New("boo"))},
+	{Which: air.Z_Which_anyCapability, AnyCapability: shark.Client{}},
+	{Which: air.Z_Which_anyCapability, AnyCapability: shark.ErrorClient(errors.New("boo"))},
 }
 
-func newTestStruct() capnp.Struct {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
-	s, _ := capnp.NewRootStruct(seg, capnp.ObjectSize{DataSize: 8})
+func newTestStruct() shark.Struct {
+	_, seg := shark.NewSingleSegmentMessage(nil)
+	s, _ := shark.NewRootStruct(seg, shark.ObjectSize{DataSize: 8})
 	s.SetUint32(0, 0xdeadbeef)
 	return s
 }
 
-func newTestList() capnp.List {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
-	l, _ := capnp.NewInt32List(seg, 3)
+func newTestList() shark.List {
+	_, seg := shark.NewSingleSegmentMessage(nil)
+	l, _ := shark.NewInt32List(seg, 3)
 	l.Set(0, 123)
 	l.Set(1, 456)
 	l.Set(2, 789)
-	return capnp.List(l)
+	return shark.List(l)
 }
 
-func newTestInterface() capnp.Interface {
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
-	id := msg.CapTable().Add(capnp.ErrorClient(errors.New("boo")))
-	return capnp.NewInterface(seg, id)
+func newTestInterface() shark.Interface {
+	msg, seg := shark.NewSingleSegmentMessage(nil)
+	id := msg.CapTable().Add(shark.ErrorClient(errors.New("boo")))
+	return shark.NewInterface(seg, id)
 }
 
 func TestExtract(t *testing.T) {
 	for _, test := range goodTests {
-		_, seg := capnp.NewSingleSegmentMessage(nil)
+		_, seg := shark.NewSingleSegmentMessage(nil)
 		z, err := air.NewRootZ(seg)
 		if err != nil {
 			t.Errorf("NewRootZ for %s: %v", zpretty.Sprint(test), err)
@@ -216,7 +216,7 @@ func TestExtract(t *testing.T) {
 			continue
 		}
 		out := new(Z)
-		if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err != nil {
+		if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err != nil {
 			t.Errorf("Extract(%v) error: %v", z, err)
 		}
 		if !test.equal(out) {
@@ -227,13 +227,13 @@ func TestExtract(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	for _, test := range goodTests {
-		_, seg := capnp.NewSingleSegmentMessage(nil)
+		_, seg := shark.NewSingleSegmentMessage(nil)
 		z, err := air.NewRootZ(seg)
 		if err != nil {
 			t.Errorf("NewRootZ for %s: %v", zpretty.Sprint(test), err)
 			continue
 		}
-		err = Insert(air.Z_TypeID, capnp.Struct(z), &test)
+		err = Insert(air.Z_TypeID, shark.Struct(z), &test)
 		if err != nil {
 			t.Errorf("Insert(%s) error: %v", zpretty.Sprint(test), err)
 		}
@@ -249,7 +249,7 @@ func TestInsert_Size(t *testing.T) {
 	const baseSize = 8
 	tests := []struct {
 		name string
-		sz   capnp.ObjectSize
+		sz   shark.ObjectSize
 		z    Z
 		ok   bool
 	}{
@@ -259,13 +259,13 @@ func TestInsert_Size(t *testing.T) {
 		},
 		{
 			name: "void into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_void},
 			ok:   true,
 		},
 		{
 			name: "void into 1-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 1},
+			sz:   shark.ObjectSize{DataSize: baseSize + 1},
 			z:    Z{Which: air.Z_Which_void},
 			ok:   true,
 		},
@@ -275,199 +275,199 @@ func TestInsert_Size(t *testing.T) {
 		},
 		{
 			name: "bool into 0 byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_bool, Bool: true},
 		},
 		{
 			name: "bool into 1 byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 1},
+			sz:   shark.ObjectSize{DataSize: baseSize + 1},
 			z:    Z{Which: air.Z_Which_bool, Bool: true},
 			ok:   true,
 		},
 		{
 			name: "bool into 0 byte, 1-pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 1},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 1},
 			z:    Z{Which: air.Z_Which_bool, Bool: true},
 		},
 		{
 			name: "int8 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_i8, I8: 123},
 		},
 		{
 			name: "int8 into 1-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 1},
+			sz:   shark.ObjectSize{DataSize: baseSize + 1},
 			z:    Z{Which: air.Z_Which_i8, I8: 123},
 			ok:   true,
 		},
 		{
 			name: "uint8 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_u8, U8: 123},
 		},
 		{
 			name: "uint8 into 1-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 1},
+			sz:   shark.ObjectSize{DataSize: baseSize + 1},
 			z:    Z{Which: air.Z_Which_u8, U8: 123},
 			ok:   true,
 		},
 		{
 			name: "int16 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_i16, I16: 123},
 		},
 		{
 			name: "int16 into 2-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 2},
+			sz:   shark.ObjectSize{DataSize: baseSize + 2},
 			z:    Z{Which: air.Z_Which_i16, I16: 123},
 			ok:   true,
 		},
 		{
 			name: "uint16 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_u16, U16: 123},
 		},
 		{
 			name: "uint16 into 2-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 2},
+			sz:   shark.ObjectSize{DataSize: baseSize + 2},
 			z:    Z{Which: air.Z_Which_u16, U16: 123},
 			ok:   true,
 		},
 		{
 			name: "enum into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_airport, Airport: air.Airport_jfk},
 		},
 		{
 			name: "enum into 2-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 2},
+			sz:   shark.ObjectSize{DataSize: baseSize + 2},
 			z:    Z{Which: air.Z_Which_airport, Airport: air.Airport_jfk},
 			ok:   true,
 		},
 		{
 			name: "int32 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_i32, I32: 123},
 		},
 		{
 			name: "int32 into 4-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 4},
+			sz:   shark.ObjectSize{DataSize: baseSize + 4},
 			z:    Z{Which: air.Z_Which_i32, I32: 123},
 			ok:   true,
 		},
 		{
 			name: "uint32 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_u32, U32: 123},
 		},
 		{
 			name: "uint32 into 4-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 4},
+			sz:   shark.ObjectSize{DataSize: baseSize + 4},
 			z:    Z{Which: air.Z_Which_u32, U32: 123},
 			ok:   true,
 		},
 		{
 			name: "float32 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_f32, F32: 123},
 		},
 		{
 			name: "float32 into 4-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 4},
+			sz:   shark.ObjectSize{DataSize: baseSize + 4},
 			z:    Z{Which: air.Z_Which_f32, F32: 123},
 			ok:   true,
 		},
 		{
 			name: "int64 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_i64, I64: 123},
 		},
 		{
 			name: "int64 into 8-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 8},
+			sz:   shark.ObjectSize{DataSize: baseSize + 8},
 			z:    Z{Which: air.Z_Which_i64, I64: 123},
 			ok:   true,
 		},
 		{
 			name: "uint64 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_u64, U64: 123},
 		},
 		{
 			name: "uint64 into 8-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 8},
+			sz:   shark.ObjectSize{DataSize: baseSize + 8},
 			z:    Z{Which: air.Z_Which_u64, U64: 123},
 			ok:   true,
 		},
 		{
 			name: "float64 into 0-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize},
+			sz:   shark.ObjectSize{DataSize: baseSize},
 			z:    Z{Which: air.Z_Which_f64, F64: 123},
 		},
 		{
 			name: "float64 into 8-byte",
-			sz:   capnp.ObjectSize{DataSize: baseSize + 8},
+			sz:   shark.ObjectSize{DataSize: baseSize + 8},
 			z:    Z{Which: air.Z_Which_f64, F64: 123},
 			ok:   true,
 		},
 		{
 			name: "text into 0 pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 0},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 0},
 			z:    Z{Which: air.Z_Which_text, Text: "hi"},
 		},
 		{
 			name: "text into 1 pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 1},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 1},
 			z:    Z{Which: air.Z_Which_text, Text: "hi"},
 			ok:   true,
 		},
 		{
 			name: "data into 0 pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 0},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 0},
 			z:    Z{Which: air.Z_Which_blob, Blob: []byte("hi")},
 		},
 		{
 			name: "data into 1 pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 1},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 1},
 			z:    Z{Which: air.Z_Which_blob, Blob: []byte("hi")},
 			ok:   true,
 		},
 		{
 			name: "list into 0 pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 0},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 0},
 			z:    Z{Which: air.Z_Which_f64vec, F64vec: []float64{123}},
 		},
 		{
 			name: "list into 1 pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 1},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 1},
 			z:    Z{Which: air.Z_Which_f64vec, F64vec: []float64{123}},
 			ok:   true,
 		},
 		{
 			name: "struct into 0 pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 0},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 0},
 			z:    Z{Which: air.Z_Which_planebase, Planebase: new(PlaneBase)},
 		},
 		{
 			name: "struct into 1 pointer",
-			sz:   capnp.ObjectSize{DataSize: baseSize, PointerCount: 1},
+			sz:   shark.ObjectSize{DataSize: baseSize, PointerCount: 1},
 			z:    Z{Which: air.Z_Which_planebase, Planebase: new(PlaneBase)},
 			ok:   true,
 		},
 	}
 	for _, test := range tests {
-		_, seg := capnp.NewSingleSegmentMessage(nil)
-		st, err := capnp.NewRootStruct(seg, test.sz)
+		_, seg := shark.NewSingleSegmentMessage(nil)
+		st, err := shark.NewRootStruct(seg, test.sz)
 		if err != nil {
 			t.Errorf("%s: NewRootStruct(seg, %v): %v", test.name, test.sz, err)
 			continue
 		}
 		err = Insert(air.Z_TypeID, st, &test.z)
 		if test.ok && err != nil {
-			t.Errorf("%s: Insert(%#x, capnp.NewStruct(seg, %v), %s) = %v; want nil", test.name, uint64(air.Z_TypeID), test.sz, zpretty.Sprint(test.z), err)
+			t.Errorf("%s: Insert(%#x, shark.NewStruct(seg, %v), %s) = %v; want nil", test.name, uint64(air.Z_TypeID), test.sz, zpretty.Sprint(test.z), err)
 		}
 		if !test.ok && err == nil {
-			t.Errorf("%s: Insert(%#x, capnp.NewStruct(seg, %v), %s) = nil; want error about not fitting", test.name, uint64(air.Z_TypeID), test.sz, zpretty.Sprint(test.z))
+			t.Errorf("%s: Insert(%#x, shark.NewStruct(seg, %v), %s) = nil; want error about not fitting", test.name, uint64(air.Z_TypeID), test.sz, zpretty.Sprint(test.z))
 		}
 	}
 }
@@ -479,7 +479,7 @@ type BytesZ struct {
 }
 
 func TestExtract_StringBytes(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
@@ -489,7 +489,7 @@ func TestExtract_StringBytes(t *testing.T) {
 		t.Fatalf("zfill: %v", err)
 	}
 	out := new(BytesZ)
-	if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err != nil {
+	if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err != nil {
 		t.Errorf("Extract(%v) error: %v", z, err)
 	}
 	want := &BytesZ{Which: air.Z_Which_text, Text: []byte("Hello, World!")}
@@ -499,7 +499,7 @@ func TestExtract_StringBytes(t *testing.T) {
 }
 
 func TestExtract_StringListBytes(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
@@ -509,7 +509,7 @@ func TestExtract_StringListBytes(t *testing.T) {
 		t.Fatalf("zfill: %v", err)
 	}
 	out := new(BytesZ)
-	if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err != nil {
+	if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err != nil {
 		t.Errorf("Extract(%v) error: %v", z, err)
 	}
 	want := &BytesZ{Which: air.Z_Which_textvec, Textvec: [][]byte{[]byte("Holmes"), []byte("Watson")}}
@@ -522,13 +522,13 @@ func TestExtract_StringListBytes(t *testing.T) {
 }
 
 func TestInsert_StringBytes(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
 	}
 	bz := &BytesZ{Which: air.Z_Which_text, Text: []byte("Hello, World!")}
-	err = Insert(air.Z_TypeID, capnp.Struct(z), bz)
+	err = Insert(air.Z_TypeID, shark.Struct(z), bz)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(bz), err)
 	}
@@ -541,13 +541,13 @@ func TestInsert_StringBytes(t *testing.T) {
 }
 
 func TestInsert_StringListBytes(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
 	}
 	bz := &BytesZ{Which: air.Z_Which_textvec, Textvec: [][]byte{[]byte("Holmes"), []byte("Watson")}}
-	err = Insert(air.Z_TypeID, capnp.Struct(z), bz)
+	err = Insert(air.Z_TypeID, shark.Struct(z), bz)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(bz), err)
 	}
@@ -586,7 +586,7 @@ func (z *StructZ) equal(y *StructZ) bool {
 }
 
 func TestExtract_StructNoPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
@@ -596,7 +596,7 @@ func TestExtract_StructNoPtr(t *testing.T) {
 		t.Fatalf("zfill: %v", err)
 	}
 	out := new(StructZ)
-	if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err != nil {
+	if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err != nil {
 		t.Errorf("Extract(%v) error: %v", z, err)
 	}
 	want := &StructZ{Which: air.Z_Which_planebase, Planebase: PlaneBase{Name: "foo"}}
@@ -606,7 +606,7 @@ func TestExtract_StructNoPtr(t *testing.T) {
 }
 
 func TestExtract_StructListNoPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
@@ -618,7 +618,7 @@ func TestExtract_StructListNoPtr(t *testing.T) {
 		t.Fatalf("zfill: %v", err)
 	}
 	out := new(StructZ)
-	if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err != nil {
+	if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err != nil {
 		t.Errorf("Extract(%v) error: %v", z, err)
 	}
 	want := &StructZ{Which: air.Z_Which_zvec, Zvec: []Z{
@@ -630,7 +630,7 @@ func TestExtract_StructListNoPtr(t *testing.T) {
 }
 
 func TestExtract_GroupNoPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
@@ -640,7 +640,7 @@ func TestExtract_GroupNoPtr(t *testing.T) {
 		t.Fatalf("zfill: %v", err)
 	}
 	out := new(StructZ)
-	if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err != nil {
+	if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err != nil {
 		t.Errorf("Extract(%v) error: %v", z, err)
 	}
 	want := &StructZ{Which: air.Z_Which_grp, Grp: ZGroup{First: 123, Second: 456}}
@@ -650,13 +650,13 @@ func TestExtract_GroupNoPtr(t *testing.T) {
 }
 
 func TestInsert_StructNoPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
 	}
 	bz := &StructZ{Which: air.Z_Which_planebase, Planebase: PlaneBase{Name: "foo"}}
-	err = Insert(air.Z_TypeID, capnp.Struct(z), bz)
+	err = Insert(air.Z_TypeID, shark.Struct(z), bz)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(bz), err)
 	}
@@ -669,7 +669,7 @@ func TestInsert_StructNoPtr(t *testing.T) {
 }
 
 func TestInsert_StructListNoPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
@@ -677,7 +677,7 @@ func TestInsert_StructListNoPtr(t *testing.T) {
 	bz := &StructZ{Which: air.Z_Which_zvec, Zvec: []Z{
 		{Which: air.Z_Which_i64, I64: 123},
 	}}
-	err = Insert(air.Z_TypeID, capnp.Struct(z), bz)
+	err = Insert(air.Z_TypeID, shark.Struct(z), bz)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(bz), err)
 	}
@@ -692,13 +692,13 @@ func TestInsert_StructListNoPtr(t *testing.T) {
 }
 
 func TestInsert_GroupNoPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
 	}
 	bz := &StructZ{Which: air.Z_Which_grp, Grp: ZGroup{First: 123, Second: 456}}
-	err = Insert(air.Z_TypeID, capnp.Struct(z), bz)
+	err = Insert(air.Z_TypeID, shark.Struct(z), bz)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(bz), err)
 	}
@@ -741,7 +741,7 @@ func TestExtract_Tags(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		_, seg := capnp.NewSingleSegmentMessage(nil)
+		_, seg := shark.NewSingleSegmentMessage(nil)
 		z, err := air.NewRootZ(seg)
 		if err != nil {
 			t.Errorf("%s: NewRootZ: %v", test.name, err)
@@ -752,7 +752,7 @@ func TestExtract_Tags(t *testing.T) {
 			continue
 		}
 		out := new(TagZ)
-		if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err != nil {
+		if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err != nil {
 			t.Errorf("%s: Extract error: %v", test.name, err)
 		}
 		if *out != test.tagz {
@@ -784,13 +784,13 @@ func TestInsert_Tags(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		_, seg := capnp.NewSingleSegmentMessage(nil)
+		_, seg := shark.NewSingleSegmentMessage(nil)
 		z, err := air.NewRootZ(seg)
 		if err != nil {
 			t.Errorf("%s: NewRootZ: %v", test.name, err)
 			continue
 		}
-		err = Insert(air.Z_TypeID, capnp.Struct(z), &test.tagz)
+		err = Insert(air.Z_TypeID, shark.Struct(z), &test.tagz)
 		if err != nil {
 			t.Errorf("%s: Insert(%s) error: %v", test.name, zpretty.Sprint(test.tagz), err)
 		}
@@ -807,7 +807,7 @@ type ZBool struct {
 }
 
 func TestExtract_FixedUnion(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
@@ -816,7 +816,7 @@ func TestExtract_FixedUnion(t *testing.T) {
 		t.Fatalf("zfill: %v", err)
 	}
 	out := new(ZBool)
-	if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err != nil {
+	if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err != nil {
 		t.Errorf("Extract error: %v", err)
 	}
 	if !out.Bool {
@@ -825,7 +825,7 @@ func TestExtract_FixedUnion(t *testing.T) {
 }
 
 func TestExtract_FixedUnionMismatch(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
@@ -834,19 +834,19 @@ func TestExtract_FixedUnionMismatch(t *testing.T) {
 		t.Fatalf("zfill: %v", err)
 	}
 	out := new(ZBool)
-	if err := Extract(out, air.Z_TypeID, capnp.Struct(z)); err == nil {
+	if err := Extract(out, air.Z_TypeID, shark.Struct(z)); err == nil {
 		t.Error("Extract did not return an error")
 	}
 }
 
 func TestInsert_FixedUnion(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
 	}
 	zb := &ZBool{Bool: true}
-	err = Insert(air.Z_TypeID, capnp.Struct(z), zb)
+	err = Insert(air.Z_TypeID, shark.Struct(z), zb)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(zb), err)
 	}
@@ -864,17 +864,17 @@ type ZBoolU8 struct {
 }
 
 func TestMissingWhich(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatalf("NewRootZ: %v", err)
 	}
 	zz := &ZBoolU8{Bool: true, U8: 42}
-	err = Insert(air.Z_TypeID, capnp.Struct(z), zz)
+	err = Insert(air.Z_TypeID, shark.Struct(z), zz)
 	if err == nil {
 		t.Errorf("Insert(%s) did not return error", zpretty.Sprint(zz))
 	}
-	err = Extract(zz, air.Z_TypeID, capnp.Struct(z))
+	err = Extract(zz, air.Z_TypeID, shark.Struct(z))
 	if err == nil {
 		t.Errorf("Extract(%v) did not return error", zz)
 	}
@@ -889,19 +889,19 @@ type ZDateWithExtra struct {
 }
 
 func TestExtraFields(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZdate(seg)
 	if err != nil {
 		t.Fatalf("NewRootZdate: %v", err)
 	}
 	zd := &ZDateWithExtra{ExtraField: 42}
-	err = Insert(air.Zdate_TypeID, capnp.Struct(z), zd)
+	err = Insert(air.Zdate_TypeID, shark.Struct(z), zd)
 	if err == nil {
 		t.Errorf("Insert(%s) did not return error", zpretty.Sprint(zd))
 	} else if s := err.Error(); !strings.Contains(s, "ExtraField") {
 		t.Errorf("Insert(%s): %v; want error about ExtraField", zpretty.Sprint(zd), err)
 	}
-	err = Extract(zd, air.Zdate_TypeID, capnp.Struct(z))
+	err = Extract(zd, air.Zdate_TypeID, shark.Struct(z))
 	if err == nil {
 		t.Errorf("Extract(%v) did not return error", z)
 	} else if s := err.Error(); !strings.Contains(s, "ExtraField") {
@@ -916,19 +916,19 @@ func zequal(g *Z, c air.Z) (bool, error) {
 	if g.Which != c.Which() {
 		return false, nil
 	}
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	d, _ := air.NewRootZ(seg)
 	if err := zfill(d, g); err != nil {
 		return false, err
 	}
-	return capnp.Equal(c.ToPtr(), d.ToPtr())
+	return shark.Equal(c.ToPtr(), d.ToPtr())
 }
 
 func (z *Z) equal(y *Z) bool {
 	if z.Which != y.Which {
 		return false
 	}
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	c, _ := air.NewZ(seg)
 	if err := zfill(c, z); err != nil {
 		return false
@@ -937,7 +937,7 @@ func (z *Z) equal(y *Z) bool {
 	if err := zfill(d, y); err != nil {
 		return false
 	}
-	eq, _ := capnp.Equal(c.ToPtr(), d.ToPtr())
+	eq, _ := shark.Equal(c.ToPtr(), d.ToPtr())
 	return eq
 }
 
@@ -971,7 +971,7 @@ func zfill(c air.Z, g *Z) error {
 		return c.SetBlob(g.Blob)
 	case air.Z_Which_f64vec:
 		if g.F64vec == nil {
-			return c.SetF64vec(capnp.Float64List{})
+			return c.SetF64vec(shark.Float64List{})
 		}
 		fv, err := c.NewF64vec(int32(len(g.F64vec)))
 		if err != nil {
@@ -982,7 +982,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_f32vec:
 		if g.F32vec == nil {
-			return c.SetF32vec(capnp.Float32List{})
+			return c.SetF32vec(shark.Float32List{})
 		}
 		fv, err := c.NewF32vec(int32(len(g.F32vec)))
 		if err != nil {
@@ -993,7 +993,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_i64vec:
 		if g.I64vec == nil {
-			return c.SetI64vec(capnp.Int64List{})
+			return c.SetI64vec(shark.Int64List{})
 		}
 		iv, err := c.NewI64vec(int32(len(g.I64vec)))
 		if err != nil {
@@ -1004,7 +1004,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_i8vec:
 		if g.I8vec == nil {
-			return c.SetI8vec(capnp.Int8List{})
+			return c.SetI8vec(shark.Int8List{})
 		}
 		iv, err := c.NewI8vec(int32(len(g.I8vec)))
 		if err != nil {
@@ -1015,7 +1015,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_u64vec:
 		if g.U64vec == nil {
-			return c.SetU64vec(capnp.UInt64List{})
+			return c.SetU64vec(shark.UInt64List{})
 		}
 		uv, err := c.NewU64vec(int32(len(g.U64vec)))
 		if err != nil {
@@ -1026,7 +1026,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_u8vec:
 		if g.U8vec == nil {
-			return c.SetU8vec(capnp.UInt8List{})
+			return c.SetU8vec(shark.UInt8List{})
 		}
 		uv, err := c.NewU8vec(int32(len(g.U8vec)))
 		if err != nil {
@@ -1037,7 +1037,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_boolvec:
 		if g.Boolvec == nil {
-			return c.SetBoolvec(capnp.BitList{})
+			return c.SetBoolvec(shark.BitList{})
 		}
 		vec, err := c.NewBoolvec(int32(len(g.Boolvec)))
 		if err != nil {
@@ -1048,7 +1048,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_datavec:
 		if g.Datavec == nil {
-			return c.SetDatavec(capnp.DataList{})
+			return c.SetDatavec(shark.DataList{})
 		}
 		vec, err := c.NewDatavec(int32(len(g.Datavec)))
 		if err != nil {
@@ -1061,7 +1061,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_textvec:
 		if g.Textvec == nil {
-			return c.SetTextvec(capnp.TextList{})
+			return c.SetTextvec(shark.TextList{})
 		}
 		vec, err := c.NewTextvec(int32(len(g.Textvec)))
 		if err != nil {
@@ -1087,7 +1087,7 @@ func zfill(c air.Z, g *Z) error {
 		}
 	case air.Z_Which_zvecvec:
 		if g.Zvecvec == nil {
-			return c.SetZvecvec(capnp.PointerList{})
+			return c.SetZvecvec(shark.PointerList{})
 		}
 		vv, err := c.NewZvecvec(int32(len(g.Zvecvec)))
 		if err != nil {

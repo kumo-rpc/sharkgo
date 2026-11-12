@@ -5,27 +5,27 @@ https://capnproto.org/
 Read the Getting Started guide for a tutorial on how to use this
 package. https://github.com/capnproto/go-capnproto2/wiki/Getting-Started
 
-Generating code
+# Generating code
 
-capnpc-go provides the compiler backend for capnp.
+shark-go provides the compiler backend for shark.
 
-	# First, install capnpc-go to $PATH.
-	go install capnproto.org/go/capnp/v3/capnpc-go
+	# First, install shark-go to $PATH.
+	go install github.com/kumo-rpc/sharkgo/shark-go
 	# Then, check out the go-capnp source code:
 	git clone https://github.com/capnproto/go-capnp /desired/path/to/go-capnp
 	# Then, generate Go files.
-	capnp compile -I /desired/path/to/go-capnp/std -ogo *.capnp
+	shark compile -I /desired/path/to/go-capnp/std -ogo *.capnp
 
-capnpc-go requires two annotations for all files: package and import.
+shark-go requires two annotations for all files: package and import.
 package is needed to know what package to place at the head of the
 generated file and what identifier to use when referring to the type
 from another package.  import should be the fully qualified import path
 and is used to generate import statement from other packages and to
 detect when two types are in the same package.  For example:
 
-	using Go = import "/go.capnp";
+	using Go = import "/go.shk";
 	$Go.package("main");
-	$Go.import("capnproto.org/go/capnp/v3/example");
+	$Go.import("github.com/kumo-rpc/sharkgo/example");
 
 For adding documentation comments to the generated code, there's the doc
 annotation. This annotation adds the comment to a struct, enum or field so
@@ -37,7 +37,7 @@ that godoc will pick it up. For example:
 	  day   @2   :UInt8 ;
 	}
 
-Messages and Segments
+# Messages and Segments
 
 In Cap'n Proto, the unit of communication is a message. A message
 consists of one or more segments -- contiguous blocks of memory.  This
@@ -53,7 +53,7 @@ and unmarshaling its segments to the wire format.  If the application
 needs to read or write from a stream, it should use the Encoder and
 Decoder types.
 
-Pointers
+# Pointers
 
 The type for a generic reference to a Cap'n Proto object is Ptr.  A Ptr
 can refer to a struct, a list, or an interface.  Ptr, Struct, List, and
@@ -74,26 +74,26 @@ the most common are bad pointers or allocation failures.  For accessors,
 an invalid object will be returned in case of an error.
 
 Since Go doesn't have generics, wrapper types provide type safety on
-lists.  This package provides lists of basic types, and capnpc-go
+lists.  This package provides lists of basic types, and shark-go
 generates list wrappers for named types.  However, if you need to use
 deeper nesting of lists (e.g. List(List(UInt8))), you will need to use a
 PointerList and wrap the elements.
 
-Structs
+# Structs
 
 For the following schema:
 
-struct Foo @0x8423424e9b01c0af {
-  num @0 :UInt32;
-  bar @1 :Foo;
-}
+	struct Foo @0x8423424e9b01c0af {
+	  num @0 :UInt32;
+	  bar @1 :Foo;
+	}
 
-capnpc-go will generate:
+shark-go will generate:
 
 	// Foo is a pointer to a Foo struct in a segment.
 	// Member functions are provided to get/set members in the
 	// struct.
-	type Foo struct{ capnp.Struct }
+	type Foo struct{ shark.Struct }
 
 	// Foo_TypeID is the unique identifier for the type Foo.
 	// It remains the same across languages and schema changes.
@@ -104,15 +104,15 @@ capnpc-go will generate:
 	// message will be used or allocated.  You can set a field of type Foo
 	// to this new message, but usually you will want to use the
 	// NewBar()-style method shown below.
-	func NewFoo(s *capnp.Segment) (Foo, error)
+	func NewFoo(s *shark.Segment) (Foo, error)
 
 	// NewRootFoo creates a new Foo struct and sets the message's root to
 	// it.
-	func NewRootFoo(s *capnp.Segment) (Foo, error)
+	func NewRootFoo(s *shark.Segment) (Foo, error)
 
 	// ReadRootFoo reads the message's root pointer and converts it to a
 	// Foo struct.
-	func ReadRootFoo(msg *capnp.Message) (Foo, error)
+	func ReadRootFoo(msg *shark.Message) (Foo, error)
 
 	// Num returns the value of the num field.
 	func (s Foo) Num() uint32
@@ -137,13 +137,13 @@ capnpc-go will generate:
 
 	// Foo_List is a value with pointer semantics. It is created for all
 	// structs, and is used for List(Foo) in the capnp file.
-	type Foo_List struct{ capnp.List }
+	type Foo_List struct{ shark.List }
 
 	// NewFoo_List creates a new orphaned List(Foo), preferring placement
 	// in s. This can then be added to a message by using a Set function
 	// which takes a Foo_List. sz specifies the number of elements in the
 	// list.  The list's size cannot be changed after creation.
-	func NewFoo_List(s *capnp.Segment, sz int32) Foo_List
+	func NewFoo_List(s *shark.Segment, sz int32) Foo_List
 
 	// Len returns the number of elements in the list.
 	func (s Foo_List) Len() int
@@ -155,7 +155,7 @@ capnpc-go will generate:
 
 	// Foo_Promise is a promise for a Foo.  Methods are provided to get
 	// promises of struct and interface fields.
-	type Foo_Promise struct{ *capnp.Pipeline }
+	type Foo_Promise struct{ *shark.Pipeline }
 
 	// Get waits until the promise is resolved and returns the result.
 	func (p Foo_Promise) Get() (Foo, error)
@@ -163,8 +163,7 @@ capnpc-go will generate:
 	// Bar returns a promise for that bar field.
 	func (p Foo_Promise) Bar() Foo_Promise
 
-
-Groups
+# Groups
 
 For each group a typedef is created with a different method set for just the
 groups fields:
@@ -177,7 +176,7 @@ groups fields:
 
 generates the following:
 
-	type Foo struct{ capnp.Struct }
+	type Foo struct{ shark.Struct }
 	type Foo_group Foo
 
 	func (s Foo) Group() Foo_group
@@ -190,7 +189,7 @@ That way the following may be used to access a field in a group:
 
 Note that group accessors just convert the type and so have no overhead.
 
-Unions
+# Unions
 
 Named unions are treated as a group with an inner unnamed union. Unnamed
 unions generate an enum Type_Which and a corresponding Which() function:
@@ -258,9 +257,9 @@ and in usage:
 	f.SetA()         // Set that we are using group A
 	f.A().SetV(true) // then we can use the group A getter to set the inner values
 
-Enums
+# Enums
 
-capnpc-go generates enum values as constants. For example in the capnp file:
+shark-go generates enum values as constants. For example in the capnp file:
 
 	enum ElementSize {
 	  empty @0;
@@ -273,7 +272,7 @@ capnpc-go generates enum values as constants. For example in the capnp file:
 	  inlineComposite @7;
 	}
 
-In the generated capnp.go file:
+In the generated shark.go file:
 
 	type ElementSize uint16
 
@@ -316,9 +315,9 @@ In the generated go file:
 		}
 	}
 
-Interfaces
+# Interfaces
 
-capnpc-go generates type-safe Client wrappers for interfaces. For parameter
+shark-go generates type-safe Client wrappers for interfaces. For parameter
 lists and result lists, structs are generated as described above with the names
 Interface_method_Params and Interface_method_Results, unless a single struct
 type is used. For example, for this interface:
@@ -327,20 +326,20 @@ type is used. For example, for this interface:
 		evaluate @0 (expression :Expression) -> (value :Value);
 	}
 
-capnpc-go generates the following Go code (along with the structs
+shark-go generates the following Go code (along with the structs
 Calculator_evaluate_Params and Calculator_evaluate_Results):
 
 	// Calculator is a client to a Calculator interface.
-	type Calculator struct{ Client capnp.Client }
+	type Calculator struct{ Client shark.Client }
 
 	// Evaluate calls `evaluate` on the client.  params is called on a newly
 	// allocated Calculator_evaluate_Params struct to fill in the parameters.
 	func (c Calculator) Evaluate(
 		ctx context.Context,
 		params func(Calculator_evaluate_Params) error,
-		opts ...capnp.CallOption) *Calculator_evaluate_Results_Promise
+		opts ...shark.CallOption) *Calculator_evaluate_Results_Promise
 
-capnpc-go also generates code to implement the interface:
+shark-go also generates code to implement the interface:
 
 	// A Calculator_Server implements the Calculator interface.
 	type Calculator_Server interface {
@@ -351,11 +350,11 @@ capnpc-go also generates code to implement the interface:
 	type Calculator_evaluate_Call struct {
 		Params  Calculator_evaluate_Params
 		Results Calculator_evaluate_Results
-		Options capnp.CallOptions
+		Options shark.CallOptions
 	}
 
 	// Calculator_ServerToClient is equivalent to calling:
-	// NewCalculator(capnp.NewServer(Calculator_Methods(nil, s), s))
+	// NewCalculator(shark.NewServer(Calculator_Methods(nil, s), s))
 	// If s does not implement the Close method, then nil is used.
 	func Calculator_ServerToClient(s Calculator_Server) Calculator
 
@@ -382,4 +381,4 @@ A note about message ordering: by default, only one method per server will
 be invoked at a time; when implementing a server method which blocks or takes
 a long time, you calling the server.Go function to unblock future calls.
 */
-package capnp // import "capnproto.org/go/capnp/v3"
+package shark // import "github.com/kumo-rpc/sharkgo"

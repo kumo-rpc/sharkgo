@@ -1,0 +1,2 @@
+shark.MustUnmarshalRoot({{.Value}})
+{{- /* no EOL */ -}}

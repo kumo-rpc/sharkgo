@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/internal/syncutil"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
-	"capnproto.org/go/capnp/v3/util/deferred"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/internal/syncutil"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
+	"github.com/kumo-rpc/sharkgo/util/deferred"
 )
 
 // An exportID is an index into the exports table.
@@ -17,7 +17,7 @@ type exportID uint32
 
 // expent is an entry in a Conn's export table.
 type expent struct {
-	snapshot capnp.ClientSnapshot
+	snapshot shark.ClientSnapshot
 	wireRefs uint32
 
 	// Should be called when removing this entry from the exports table:
@@ -31,7 +31,7 @@ type exportIDKey struct {
 	Conn *Conn
 }
 
-func (c *lockedConn) findExportID(m *capnp.Metadata) (_ exportID, ok bool) {
+func (c *lockedConn) findExportID(m *shark.Metadata) (_ exportID, ok bool) {
 	maybeID, ok := m.Get(exportIDKey{(*Conn)(c)})
 	if ok {
 		return maybeID.(exportID), true
@@ -39,11 +39,11 @@ func (c *lockedConn) findExportID(m *capnp.Metadata) (_ exportID, ok bool) {
 	return 0, false
 }
 
-func (c *lockedConn) setExportID(m *capnp.Metadata, id exportID) {
+func (c *lockedConn) setExportID(m *shark.Metadata, id exportID) {
 	m.Put(exportIDKey{(*Conn)(c)}, id)
 }
 
-func (c *lockedConn) clearExportID(m *capnp.Metadata) {
+func (c *lockedConn) clearExportID(m *shark.Metadata) {
 	m.Delete(exportIDKey{(*Conn)(c)})
 }
 
@@ -100,7 +100,7 @@ func (c *lockedConn) releaseExportRefs(dq *deferred.Queue, refs map[exportID]uin
 
 // sendCap writes a capability descriptor, returning an export ID if
 // this vat is hosting the capability. Steals the snapshot.
-func (c *lockedConn) sendCap(d rpccp.CapDescriptor, snapshot capnp.ClientSnapshot) (_ exportID, isExport bool, _ error) {
+func (c *lockedConn) sendCap(d rpccp.CapDescriptor, snapshot shark.ClientSnapshot) (_ exportID, isExport bool, _ error) {
 	if !snapshot.IsValid() {
 		d.SetNone()
 		return 0, false, nil
@@ -120,7 +120,7 @@ func (c *lockedConn) sendCap(d rpccp.CapDescriptor, snapshot capnp.ClientSnapsho
 		}
 	}
 
-	if pc, ok := bv.(capnp.PipelineClient); ok {
+	if pc, ok := bv.(shark.PipelineClient); ok {
 		if q, ok := c.getAnswerQuestion(pc.Answer()); ok {
 			if q.c == (*Conn)(c) {
 				pcTrans := pc.Transform()
@@ -283,8 +283,8 @@ func (c *lockedConn) fillPayloadCapTable(payload rpccp.Payload) (map[exportID]ui
 type embargoID uint32
 
 type embargo struct {
-	result capnp.Ptr
-	q      *capnp.AnswerQueue
+	result shark.Ptr
+	q      *shark.AnswerQueue
 }
 
 func (e embargo) String() string {
@@ -297,7 +297,7 @@ func (e embargo) String() string {
 // embargo creates a new embargoed client, stealing the reference.
 //
 // The caller must be holding onto c.mu.
-func (c *lockedConn) embargo(client capnp.Client) (embargoID, capnp.Client) {
+func (c *lockedConn) embargo(client shark.Client) (embargoID, shark.Client) {
 	id := c.lk.embargoID.next()
 	e := newEmbargo(client)
 	if int64(id) == int64(len(c.lk.embargoes)) {
@@ -305,7 +305,7 @@ func (c *lockedConn) embargo(client capnp.Client) (embargoID, capnp.Client) {
 	} else {
 		c.lk.embargoes[id] = e
 	}
-	return id, capnp.NewClient(e)
+	return id, shark.NewClient(e)
 }
 
 // findEmbargo returns the embargo entry with the given ID or nil if
@@ -317,13 +317,13 @@ func (c *lockedConn) findEmbargo(id embargoID) *embargo {
 	return c.lk.embargoes[id] // might be nil
 }
 
-func newEmbargo(client capnp.Client) *embargo {
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
+func newEmbargo(client shark.Client) *embargo {
+	msg, seg := shark.NewSingleSegmentMessage(nil)
 	capID := msg.CapTable().Add(client)
-	iface := capnp.NewInterface(seg, capID)
+	iface := shark.NewInterface(seg, capID)
 	return &embargo{
 		result: iface.ToPtr(),
-		q:      capnp.NewAnswerQueue(capnp.Method{}),
+		q:      shark.NewAnswerQueue(shark.Method{}),
 	}
 }
 
@@ -332,20 +332,20 @@ func (e *embargo) lift() {
 	e.q.Fulfill(e.result)
 }
 
-func (e *embargo) Send(ctx context.Context, s capnp.Send) (*capnp.Answer, capnp.ReleaseFunc) {
+func (e *embargo) Send(ctx context.Context, s shark.Send) (*shark.Answer, shark.ReleaseFunc) {
 	return e.q.PipelineSend(ctx, nil, s)
 }
 
-func (e *embargo) Recv(ctx context.Context, r capnp.Recv) capnp.PipelineCaller {
+func (e *embargo) Recv(ctx context.Context, r shark.Recv) shark.PipelineCaller {
 
 	return e.q.PipelineRecv(ctx, nil, r)
 }
 
-func (e *embargo) Brand() capnp.Brand {
-	return capnp.Brand{}
+func (e *embargo) Brand() shark.Brand {
+	return shark.Brand{}
 }
 
-func (e *embargo) client() capnp.Client {
+func (e *embargo) client() shark.Client {
 	return e.result.Interface().Client()
 }
 

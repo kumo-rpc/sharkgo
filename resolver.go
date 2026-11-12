@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 // A Resolver supplies a value for a pending promise.
 type Resolver[T any] interface {

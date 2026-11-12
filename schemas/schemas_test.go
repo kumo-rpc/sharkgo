@@ -3,10 +3,10 @@ package schemas_test
 import (
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/schema"
-	"capnproto.org/go/capnp/v3/schemas"
-	gocp "capnproto.org/go/capnp/v3/std/go"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/schema"
+	"github.com/kumo-rpc/sharkgo/schemas"
+	gocp "github.com/kumo-rpc/sharkgo/std/go"
 )
 
 func TestDefaultFind(t *testing.T) {
@@ -14,13 +14,13 @@ func TestDefaultFind(t *testing.T) {
 	if s := schemas.Find(0xdeadbeef); s != nil {
 		t.Errorf("schemas.Find(0xdeadbeef) = %d-byte slice; want nil", len(s))
 	}
-	s := schemas.Find(gocp.Package)
+	s := schemas.Find(gocp.Package_)
 	if s == nil {
-		t.Fatalf("schemas.Find(%#x) = nil", gocp.Package)
+		t.Fatalf("schemas.Find(%#x) = nil", gocp.Package_)
 	}
-	msg, err := capnp.Unmarshal(s)
+	msg, err := shark.Unmarshal(s)
 	if err != nil {
-		t.Fatalf("capnp.Unmarshal(schemas.Find(%#x)) error: %v", gocp.Package, err)
+		t.Fatalf("shark.Unmarshal(schemas.Find(%#x)) error: %v", gocp.Package_, err)
 	}
 	req, err := schema.ReadRootCodeGeneratorRequest(msg)
 	if err != nil {
@@ -32,15 +32,15 @@ func TestDefaultFind(t *testing.T) {
 	}
 	for i := 0; i < nodes.Len(); i++ {
 		n := nodes.At(i)
-		if n.Id() == gocp.Package {
+		if n.Id() == gocp.Package_ {
 			// Found
 			if n.Which() != schema.Node_Which_annotation {
-				t.Errorf("found node %#x which = %v; want annotation", gocp.Package, n.Which())
+				t.Errorf("found node %#x which = %v; want annotation", gocp.Package_, n.Which())
 			}
 			return
 		}
 	}
-	t.Fatalf("could not find node %#x in registry", gocp.Package)
+	t.Fatalf("could not find node %#x in registry", gocp.Package_)
 }
 
 func TestNotFound(t *testing.T) {

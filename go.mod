@@ -1,4 +1,4 @@
-module capnproto.org/go/capnp/v3
+module github.com/kumo-rpc/sharkgo
 
 go 1.19
 

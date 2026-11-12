@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"capnproto.org/go/capnp/v3/internal/schema"
+	"github.com/kumo-rpc/sharkgo/internal/schema"
 )
 
 type fieldProps struct {

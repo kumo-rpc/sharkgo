@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 import (
 	"context"
@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"sync"
 
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/exp/bufferpool"
-	"capnproto.org/go/capnp/v3/flowcontrol"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/util/deferred"
-	"capnproto.org/go/capnp/v3/util/maybe"
-	"capnproto.org/go/capnp/v3/util/rc"
-	"capnproto.org/go/capnp/v3/util/sync/mutex"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/exp/bufferpool"
+	"github.com/kumo-rpc/sharkgo/flowcontrol"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/util/deferred"
+	"github.com/kumo-rpc/sharkgo/util/maybe"
+	"github.com/kumo-rpc/sharkgo/util/rc"
+	"github.com/kumo-rpc/sharkgo/util/sync/mutex"
 )
 
 func init() {
@@ -100,7 +100,7 @@ func (id CapabilityID) String() string {
 
 // GoString returns the ID as a Go expression.
 func (id CapabilityID) GoString() string {
-	return "capnp.CapabilityID(" + str.Utod(id) + ")"
+	return "shark.CapabilityID(" + str.Utod(id) + ")"
 }
 
 // A Client is a reference to a Cap'n Proto capability.

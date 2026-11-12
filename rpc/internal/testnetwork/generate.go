@@ -1,3 +1,3 @@
 package testnetwork
 
-//go:generate capnp compile -I ../../../std -ogo testnetwork.capnp
+//go:generate shark compile -I ../../../std -ogo testnetwork.shk

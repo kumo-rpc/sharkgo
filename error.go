@@ -1,7 +1,7 @@
-package capnp
+package shark
 
 import (
-	"capnproto.org/go/capnp/v3/exc"
+	"github.com/kumo-rpc/sharkgo/exc"
 )
 
 // TODO(someday):  progressively remove exported functions and instead

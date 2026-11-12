@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 
-	capnp "capnproto.org/go/capnp/v3"
+	"github.com/kumo-rpc/sharkgo"
 )
 
 // A PeerID identifies a peer on a Cap'n Proto network. The exact
@@ -45,7 +45,7 @@ type PeerID struct {
 // instruct Alice that whoever presents the token should receive the capability.
 // A VatNetwork may choose not to allow forwarding if it doesn't want its security
 // to be dependent on secret bearer tokens nor cryptographic signatures.
-type ThirdPartyToContact capnp.Ptr
+type ThirdPartyToContact shark.Ptr
 
 // The information that must be sent in a `Provide` message to identify the
 // recipient of the capability.
@@ -59,7 +59,7 @@ type ThirdPartyToContact capnp.Ptr
 // attached to the message via SCM_RIGHTS.  This file descriptor would be one
 // end of a newly-created socketpair, with the other end having been sent to the
 // capability's recipient in ThirdPartyCapId.
-type ThirdPartyToAwait capnp.Ptr
+type ThirdPartyToAwait shark.Ptr
 
 // The information that must be sent in an `Accept` message to identify the
 // object being accepted.
@@ -68,7 +68,7 @@ type ThirdPartyToAwait capnp.Ptr
 // be the public key fingerprint of the provider vat along with a nonce matching
 // the one in the `RecipientId` used in the `Provide` message sent from that
 // provider.
-type ThirdPartyCompletion capnp.Ptr
+type ThirdPartyCompletion shark.Ptr
 
 // Data needed to perform a third-party handoff.
 type IntroductionInfo struct {

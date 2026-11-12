@@ -1,17 +1,17 @@
 package aircraftlib
 
 import (
-	"capnproto.org/go/capnp/v3"
+	"github.com/kumo-rpc/sharkgo"
 )
 
 var (
 	// Make sure interface types satisfy TypeParam:
-	_ capnp.TypeParam[Echo] = Echo{}
+	_ shark.TypeParam[Echo] = Echo{}
 
 	// ...and structs:
-	_ capnp.TypeParam[Zdate] = Zdate{}
+	_ shark.TypeParam[Zdate] = Zdate{}
 
 	// ...and lists:
-	_ capnp.TypeParam[Echo_List]  = Echo_List{}
-	_ capnp.TypeParam[Zdate_List] = Zdate_List{}
+	_ shark.TypeParam[Echo_List]  = Echo_List{}
+	_ shark.TypeParam[Zdate_List] = Zdate_List{}
 )

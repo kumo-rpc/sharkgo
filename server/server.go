@@ -1,21 +1,21 @@
 // Package server provides runtime support for implementing Cap'n Proto
 // interfaces locally.
-package server // import "capnproto.org/go/capnp/v3/server"
+package server // import "github.com/kumo-rpc/sharkgo/server"
 
 import (
 	"context"
 	"sort"
 	"sync"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/exp/mpsc"
-	"capnproto.org/go/capnp/v3/internal/str"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/exp/mpsc"
+	"github.com/kumo-rpc/sharkgo/internal/str"
 )
 
 // A Method describes a single capability method on a server object.
 type Method struct {
-	capnp.Method
+	shark.Method
 	Impl func(context.Context, *Call) error
 }
 
@@ -24,12 +24,12 @@ type Method struct {
 type Call struct {
 	ctx    context.Context
 	method *Method
-	recv   capnp.Recv
-	aq     *capnp.AnswerQueue
+	recv   shark.Recv
+	aq     *shark.AnswerQueue
 	srv    *Server
 
 	alloced bool
-	results capnp.Struct
+	results shark.Struct
 
 	acked bool
 }
@@ -37,15 +37,15 @@ type Call struct {
 // Args returns the call's arguments.  Args is not safe to
 // reference after a method implementation returns.  Args is safe to
 // call and read from multiple goroutines.
-func (c *Call) Args() capnp.Struct {
+func (c *Call) Args() shark.Struct {
 	return c.recv.Args
 }
 
 // AllocResults allocates the results struct.  It is an error to call
 // AllocResults more than once.
-func (c *Call) AllocResults(sz capnp.ObjectSize) (capnp.Struct, error) {
+func (c *Call) AllocResults(sz shark.ObjectSize) (shark.Struct, error) {
 	if c.alloced {
-		return capnp.Struct{}, newError("multiple calls to AllocResults")
+		return shark.Struct{}, newError("multiple calls to AllocResults")
 	}
 	var err error
 	c.alloced = true
@@ -78,7 +78,7 @@ type Shutdowner interface {
 }
 
 // A Server is a locally implemented interface.  It implements the
-// capnp.ClientHook interface.
+// shark.ClientHook interface.
 type Server struct {
 	methods  sortedMethods
 	brand    any
@@ -93,10 +93,10 @@ type Server struct {
 	callQueue *mpsc.Queue[*Call]
 
 	// Handler for custom behavior of unknown methods
-	HandleUnknownMethod func(m capnp.Method) *Method
+	HandleUnknownMethod func(m shark.Method) *Method
 
 	// Arena implementation
-	NewArena func() capnp.Arena
+	NewArena func() shark.Arena
 }
 
 func (s *Server) String() string {
@@ -121,26 +121,26 @@ func New(methods []Method, brand any, shutdown Shutdowner) *Server {
 }
 
 // Send starts a method call.
-func (srv *Server) Send(ctx context.Context, s capnp.Send) (*capnp.Answer, capnp.ReleaseFunc) {
+func (srv *Server) Send(ctx context.Context, s shark.Send) (*shark.Answer, shark.ReleaseFunc) {
 	mm := srv.methods.find(s.Method)
 	if mm == nil && srv.HandleUnknownMethod != nil {
 		mm = srv.HandleUnknownMethod(s.Method)
 	}
 	if mm == nil {
-		return capnp.ErrorAnswer(s.Method, capnp.Unimplemented("unimplemented")), func() {}
+		return shark.ErrorAnswer(s.Method, shark.Unimplemented("unimplemented")), func() {}
 	}
 	args, err := srv.sendArgsToStruct(s)
 	if err != nil {
-		return capnp.ErrorAnswer(mm.Method, err), func() {}
+		return shark.ErrorAnswer(mm.Method, err), func() {}
 	}
-	ret := new(capnp.StructReturner)
-	pcaller := srv.start(ctx, mm, capnp.Recv{
+	ret := new(shark.StructReturner)
+	pcaller := srv.start(ctx, mm, shark.Recv{
 		Method: mm.Method, // pick up names from server method
 		Args:   args,
 		ReleaseArgs: func() {
 			if msg := args.Message(); msg != nil {
 				msg.Release()
-				args = capnp.Struct{}
+				args = shark.Struct{}
 			}
 		},
 		Returner: ret,
@@ -149,13 +149,13 @@ func (srv *Server) Send(ctx context.Context, s capnp.Send) (*capnp.Answer, capnp
 }
 
 // Recv starts a method call.
-func (srv *Server) Recv(ctx context.Context, r capnp.Recv) capnp.PipelineCaller {
+func (srv *Server) Recv(ctx context.Context, r shark.Recv) shark.PipelineCaller {
 	mm := srv.methods.find(r.Method)
 	if mm == nil && srv.HandleUnknownMethod != nil {
 		mm = srv.HandleUnknownMethod(r.Method)
 	}
 	if mm == nil {
-		r.Reject(capnp.Unimplemented("unimplemented"))
+		r.Reject(shark.Unimplemented("unimplemented"))
 		return nil
 	}
 	return srv.start(ctx, mm, r)
@@ -199,10 +199,10 @@ func (srv *Server) handleCall(c *Call) {
 	c.recv.Returner.ReleaseResults()
 }
 
-func (srv *Server) start(ctx context.Context, m *Method, r capnp.Recv) capnp.PipelineCaller {
+func (srv *Server) start(ctx context.Context, m *Method, r shark.Recv) shark.PipelineCaller {
 	srv.wg.Add(1)
 
-	aq := capnp.NewAnswerQueue(r.Method)
+	aq := shark.NewAnswerQueue(r.Method)
 	srv.callQueue.Send(&Call{
 		ctx:    ctx,
 		method: m,
@@ -214,8 +214,8 @@ func (srv *Server) start(ctx context.Context, m *Method, r capnp.Recv) capnp.Pip
 }
 
 // Brand returns a value that will match IsServer.
-func (srv *Server) Brand() capnp.Brand {
-	return capnp.Brand{Value: serverBrand{srv.brand}}
+func (srv *Server) Brand() shark.Brand {
+	return shark.Brand{Value: serverBrand{srv.brand}}
 }
 
 // Shutdown arranges for Shutdown to be called on the Shutdowner passed
@@ -225,10 +225,10 @@ func (srv *Server) Shutdown() {
 	srv.callQueue.Close()
 }
 
-// IsServer reports whether a brand returned by capnp.Client.Brand
+// IsServer reports whether a brand returned by shark.Client.Brand
 // originated from Server.Brand, and returns the brand argument passed
 // to New.
-func IsServer(brand capnp.Brand) (_ any, ok bool) {
+func IsServer(brand shark.Brand) (_ any, ok bool) {
 	sb, ok := brand.Value.(serverBrand)
 	return sb.x, ok
 }
@@ -237,29 +237,29 @@ type serverBrand struct {
 	x any
 }
 
-func (srv *Server) sendArgsToStruct(s capnp.Send) (capnp.Struct, error) {
+func (srv *Server) sendArgsToStruct(s shark.Send) (shark.Struct, error) {
 	if s.PlaceArgs == nil {
-		return capnp.Struct{}, nil
+		return shark.Struct{}, nil
 	}
 
 	if srv.NewArena == nil {
-		srv.NewArena = func() capnp.Arena {
+		srv.NewArena = func() shark.Arena {
 			// TODO:  change to single segment?
-			return capnp.MultiSegment(nil)
+			return shark.MultiSegment(nil)
 		}
 	}
 
-	_, seg, err := capnp.NewMessage(srv.NewArena())
+	_, seg, err := shark.NewMessage(srv.NewArena())
 	if err != nil {
-		return capnp.Struct{}, err
+		return shark.Struct{}, err
 	}
-	st, err := capnp.NewRootStruct(seg, s.ArgsSize)
+	st, err := shark.NewRootStruct(seg, s.ArgsSize)
 	if err != nil {
-		return capnp.Struct{}, err
+		return shark.Struct{}, err
 	}
 	if err := s.PlaceArgs(st); err != nil {
 		st.Message().Release()
-		return capnp.Struct{}, exc.WrapError("place args", err)
+		return shark.Struct{}, exc.WrapError("place args", err)
 	}
 	return st, nil
 }
@@ -267,7 +267,7 @@ func (srv *Server) sendArgsToStruct(s capnp.Send) (capnp.Struct, error) {
 type sortedMethods []Method
 
 // find returns the method with the given ID or nil.
-func (sm sortedMethods) find(id capnp.Method) *Method {
+func (sm sortedMethods) find(id shark.Method) *Method {
 	i := sort.Search(len(sm), func(i int) bool {
 		m := &sm[i]
 		if m.InterfaceID != id.InterfaceID {

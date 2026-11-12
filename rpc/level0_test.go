@@ -13,15 +13,15 @@ import (
 	"testing"
 	"time"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/pogs"
-	"capnproto.org/go/capnp/v3/rpc"
-	testcp "capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
-	"capnproto.org/go/capnp/v3/rpc/transport"
-	"capnproto.org/go/capnp/v3/schemas"
-	"capnproto.org/go/capnp/v3/server"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/pogs"
+	"github.com/kumo-rpc/sharkgo/rpc"
+	testcp "github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
+	"github.com/kumo-rpc/sharkgo/rpc/transport"
+	"github.com/kumo-rpc/sharkgo/schemas"
+	"github.com/kumo-rpc/sharkgo/server"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 		mu     sync.Mutex
 		leaked bool
 	)
-	capnp.SetClientLeakFunc(func(msg string) {
+	shark.SetClientLeakFunc(func(msg string) {
 		mu.Lock()
 		leaked = true
 		fmt.Fprintln(os.Stderr, "LEAK:", msg)
@@ -164,13 +164,13 @@ func TestRecvAbort(t *testing.T) {
 	err = boot.Resolve(ctx)
 	require.NoError(t, err, "should resolve bootstrap capability")
 
-	ans, releaseCall := boot.SendCall(context.Background(), capnp.Send{
-		Method: capnp.Method{
+	ans, releaseCall := boot.SendCall(context.Background(), shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
-		ArgsSize: capnp.ObjectSize{DataSize: 8},
-		PlaceArgs: func(s capnp.Struct) error {
+		ArgsSize: shark.ObjectSize{DataSize: 8},
+		PlaceArgs: func(s shark.Struct) error {
 			s.SetUint64(0, 42)
 			return nil
 		},
@@ -258,13 +258,13 @@ func TestSendBootstrapError(t *testing.T) {
 	}
 
 	// 4. Make a call.
-	ans, release := client.SendCall(ctx, capnp.Send{
-		Method: capnp.Method{
+	ans, release := client.SendCall(ctx, shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
-		ArgsSize: capnp.ObjectSize{DataSize: 8},
-		PlaceArgs: func(s capnp.Struct) error {
+		ArgsSize: shark.ObjectSize{DataSize: 8},
+		PlaceArgs: func(s shark.Struct) error {
 			s.SetUint64(0, 42)
 			return nil
 		},
@@ -319,8 +319,8 @@ func TestSendBootstrapCall(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		iptr := capnp.NewInterface(outMsg.Message().Segment(), 0)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		iptr := shark.NewInterface(outMsg.Message().Segment(), 0)
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID: qid,
@@ -369,13 +369,13 @@ func TestSendBootstrapCall(t *testing.T) {
 	}
 
 	// 4. Make a call.
-	ans, release := client.SendCall(ctx, capnp.Send{
-		Method: capnp.Method{
+	ans, release := client.SendCall(ctx, shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
-		ArgsSize: capnp.ObjectSize{DataSize: 8},
-		PlaceArgs: func(s capnp.Struct) error {
+		ArgsSize: shark.ObjectSize{DataSize: 8},
+		PlaceArgs: func(s shark.Struct) error {
 			s.SetUint64(0, 42)
 			return nil
 		},
@@ -416,12 +416,12 @@ func TestSendBootstrapCall(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		resp, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{DataSize: 8})
+		resp, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{DataSize: 8})
 		if err != nil {
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
 		resp.SetUint64(0, 0xdeadbeef)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID: qid,
@@ -530,8 +530,8 @@ func TestSendBootstrapCallException(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		iptr := capnp.NewInterface(outMsg.Message().Segment(), 0)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		iptr := shark.NewInterface(outMsg.Message().Segment(), 0)
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID: qid,
@@ -580,13 +580,13 @@ func TestSendBootstrapCallException(t *testing.T) {
 	}
 
 	// 4. Make a call.
-	ans, release := client.SendCall(ctx, capnp.Send{
-		Method: capnp.Method{
+	ans, release := client.SendCall(ctx, shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
-		ArgsSize: capnp.ObjectSize{DataSize: 8},
-		PlaceArgs: func(s capnp.Struct) error {
+		ArgsSize: shark.ObjectSize{DataSize: 8},
+		PlaceArgs: func(s shark.Struct) error {
 			s.SetUint64(0, 42)
 			return nil
 		},
@@ -702,13 +702,13 @@ func TestSendBootstrapPipelineCall(t *testing.T) {
 	}
 
 	// 2. Make a call.
-	ans, release := client.SendCall(ctx, capnp.Send{
-		Method: capnp.Method{
+	ans, release := client.SendCall(ctx, shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
-		ArgsSize: capnp.ObjectSize{DataSize: 8},
-		PlaceArgs: func(s capnp.Struct) error {
+		ArgsSize: shark.ObjectSize{DataSize: 8},
+		PlaceArgs: func(s shark.Struct) error {
 			s.SetUint64(0, 42)
 			return nil
 		},
@@ -755,12 +755,12 @@ func TestSendBootstrapPipelineCall(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		resp, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{DataSize: 8})
+		resp, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{DataSize: 8})
 		if err != nil {
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
 		resp.SetUint64(0, 0xdeadbeef)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID: qid,
@@ -812,8 +812,8 @@ func TestSendBootstrapPipelineCall(t *testing.T) {
 	{
 		outMsg, err := p2.NewMessage()
 		require.NoError(t, err)
-		iface := capnp.NewInterface(outMsg.Message().Segment(), 0)
-		require.NoError(t, pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()),
+		iface := shark.NewInterface(outMsg.Message().Segment(), 0)
+		require.NoError(t, pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()),
 			&rpcMessage{
 				Which: rpccp.Message_Which_return,
 				Return: &rpcReturn{
@@ -939,7 +939,7 @@ func TestRecvBootstrapCall(t *testing.T) {
 	srvShutdown := make(chan struct{})
 	srv := newServer(
 		func(ctx context.Context, call *server.Call) error {
-			resp, err := call.AllocResults(capnp.ObjectSize{DataSize: 8})
+			resp, err := call.AllocResults(shark.ObjectSize{DataSize: 8})
 			if err != nil {
 				return err
 			}
@@ -1003,12 +1003,12 @@ func TestRecvBootstrapCall(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		params, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{DataSize: 8})
+		params, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{DataSize: 8})
 		if err != nil {
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
 		params.SetUint32(0, 0x2a2b)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_call,
 			Call: &rpcCall{
 				QuestionID: callQID,
@@ -1154,12 +1154,12 @@ func TestRecvBootstrapCallException(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		params, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{DataSize: 8})
+		params, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{DataSize: 8})
 		if err != nil {
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
 		params.SetUint32(0, 0x2a2b)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_call,
 			Call: &rpcCall{
 				QuestionID: callQID,
@@ -1250,7 +1250,7 @@ func TestRecvBootstrapPipelineCall(t *testing.T) {
 	srvShutdown := make(chan struct{})
 	srv := newServer(
 		func(ctx context.Context, call *server.Call) error {
-			resp, err := call.AllocResults(capnp.ObjectSize{DataSize: 8})
+			resp, err := call.AllocResults(shark.ObjectSize{DataSize: 8})
 			if err != nil {
 				return err
 			}
@@ -1298,12 +1298,12 @@ func TestRecvBootstrapPipelineCall(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		params, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{DataSize: 8})
+		params, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{DataSize: 8})
 		if err != nil {
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
 		params.SetUint32(0, 0x2a2b)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_call,
 			Call: &rpcCall{
 				QuestionID: callQID,
@@ -1437,12 +1437,12 @@ func TestUseConnAfterBootstrapError(t *testing.T) {
 	assert.NoError(t, srvBs.Resolve(ctx))
 
 	// ...and we should be able to make a call on it:
-	ans, rel := srvBs.SendCall(ctx, capnp.Send{
-		Method: capnp.Method{
+	ans, rel := srvBs.SendCall(ctx, shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
-		ArgsSize:  capnp.ObjectSize{},
+		ArgsSize:  shark.ObjectSize{},
 		PlaceArgs: nil,
 	})
 	defer rel()
@@ -1497,8 +1497,8 @@ func TestCallOnClosedConn(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		iptr := capnp.NewInterface(outMsg.Message().Segment(), 0)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		iptr := shark.NewInterface(outMsg.Message().Segment(), 0)
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID: qid,
@@ -1553,20 +1553,20 @@ func TestCallOnClosedConn(t *testing.T) {
 	}
 
 	// 5. Make a call.
-	ans, release := client.SendCall(ctx, capnp.Send{
-		Method: capnp.Method{
+	ans, release := client.SendCall(ctx, shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
-		ArgsSize: capnp.ObjectSize{DataSize: 8},
-		PlaceArgs: func(s capnp.Struct) error {
+		ArgsSize: shark.ObjectSize{DataSize: 8},
+		PlaceArgs: func(s shark.Struct) error {
 			s.SetUint64(0, 42)
 			return nil
 		},
 	})
 	defer release()
 	_, err := ans.Struct()
-	if !capnp.IsDisconnected(err) {
+	if !shark.IsDisconnected(err) {
 		t.Errorf("call after Close returned error: %v; want disconnected", err)
 	}
 }
@@ -1586,7 +1586,7 @@ func TestRecvCancel(t *testing.T) {
 		close(callCancel)
 
 		// Return a capability
-		resp, err := call.AllocResults(capnp.ObjectSize{PointerCount: 1})
+		resp, err := call.AllocResults(shark.ObjectSize{PointerCount: 1})
 		if err != nil {
 			t.Error("alloc results:", err)
 			close(retcapShutdown)
@@ -1594,7 +1594,7 @@ func TestRecvCancel(t *testing.T) {
 		}
 		retcap := newServer(nil, func() { close(retcapShutdown) })
 		capID := resp.Message().CapTable().Add(retcap)
-		if err := resp.SetPtr(0, capnp.NewInterface(resp.Segment(), capID).ToPtr()); err != nil {
+		if err := resp.SetPtr(0, shark.NewInterface(resp.Segment(), capID).ToPtr()); err != nil {
 			t.Error("set pointer:", err)
 			return err
 		}
@@ -1638,7 +1638,7 @@ func TestRecvCancel(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_call,
 			Call: &rpcCall{
 				QuestionID: callQID,
@@ -1777,8 +1777,8 @@ func TestSendCancel(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		iptr := capnp.NewInterface(outMsg.Message().Segment(), 0)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		iptr := shark.NewInterface(outMsg.Message().Segment(), 0)
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID: bootQID,
@@ -1822,8 +1822,8 @@ func TestSendCancel(t *testing.T) {
 
 	// 4. Make a call.
 	callCtx, cancelCall := context.WithCancel(ctx)
-	ans, releaseCall := client.SendCall(callCtx, capnp.Send{
-		Method: capnp.Method{
+	ans, releaseCall := client.SendCall(callCtx, shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
@@ -1917,7 +1917,7 @@ func TestHandleReturn_regression(t *testing.T) {
 
 		srv := testcp.PingPong_ServerToClient(pingPongServer{})
 		conn1 := rpc.NewConn(rpc.NewTransport(p2), &rpc.Options{
-			BootstrapClient: capnp.Client(srv),
+			BootstrapClient: shark.Client(srv),
 		})
 		defer conn1.Close()
 
@@ -1981,7 +1981,7 @@ func TestPromisedCapability(t *testing.T) {
 			defer release()
 
 			pp := f.PingPong()
-			return capnp.Client(pp).Resolve(context.Background())
+			return shark.Client(pp).Resolve(context.Background())
 		})
 	}
 
@@ -2049,18 +2049,18 @@ type errorfer interface {
 	Errorf(string, ...any)
 }
 
-func newServer(impl func(context.Context, *server.Call) error, shutdown shutdownFunc) capnp.Client {
+func newServer(impl func(context.Context, *server.Call) error, shutdown shutdownFunc) shark.Client {
 	var methods []server.Method
 	if impl != nil {
 		methods = []server.Method{{
-			Method: capnp.Method{
+			Method: shark.Method{
 				InterfaceID: interfaceID,
 				MethodID:    methodID,
 			},
 			Impl: impl,
 		}}
 	}
-	return capnp.NewClient(server.New(methods, nil /* brand */, shutdown))
+	return shark.NewClient(server.New(methods, nil /* brand */, shutdown))
 }
 
 type shutdownFunc func()
@@ -2091,7 +2091,7 @@ func sendMessage(ctx context.Context, t rpc.Transport, msg *rpcMessage) error {
 		return fmt.Errorf("send message: %v", err)
 	}
 	defer outMsg.Release()
-	if err := pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), msg); err != nil {
+	if err := pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), msg); err != nil {
 		return fmt.Errorf("send message: %v", err)
 	}
 	if err := outMsg.Send(); err != nil {
@@ -2100,13 +2100,13 @@ func sendMessage(ctx context.Context, t rpc.Transport, msg *rpcMessage) error {
 	return nil
 }
 
-func recvMessage(ctx context.Context, t rpc.Transport) (*rpcMessage, capnp.ReleaseFunc, error) {
+func recvMessage(ctx context.Context, t rpc.Transport) (*rpcMessage, shark.ReleaseFunc, error) {
 	inMsg, err := t.RecvMessage()
 	if err != nil {
 		return nil, nil, err
 	}
 	r := new(rpcMessage)
-	if err := pogs.Extract(r, rpccp.Message_TypeID, capnp.Struct(inMsg.Message())); err != nil {
+	if err := pogs.Extract(r, rpccp.Message_TypeID, shark.Struct(inMsg.Message())); err != nil {
 		inMsg.Release()
 		return nil, nil, fmt.Errorf("extract RPC message: %v", err)
 	}
@@ -2169,7 +2169,7 @@ type rpcMessageTarget struct {
 }
 
 type rpcPayload struct {
-	Content  capnp.Ptr
+	Content  shark.Ptr
 	CapTable []rpcCapDescriptor
 }
 

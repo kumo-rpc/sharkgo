@@ -15,7 +15,7 @@ Refer to the [previous section](Getting-Started.md) for instructions.
 Consider the following schema, stored in `foo/books.capnp`:
 
 ```capnp
-using Go = import "/go.capnp";
+using Go = import "/go.shk";
 @0x85d3acc39d94e0f8;
 $Go.package("books");
 $Go.import("foo/books");
@@ -29,7 +29,7 @@ struct Book {
 }
 ```
 
-capnpc-go requires that two [annotations](https://capnproto.org/language.html#annotations) be present in your schema:
+shark-go requires that two [annotations](https://capnproto.org/language.html#annotations) be present in your schema:
 
 1. `$Go.package("books")`:  tells the compiler to place `package books` at the top of the generated Go files.
 2. `$Go.import("foo/books")`:  declares the full import path within your project.  The compiler uses this to generate the import statement in the auto-generated code, when one of your schemas imports a type from another.
@@ -41,17 +41,17 @@ Compilation will fail unless these annotations are present.
 To compile this schema into Go code, run the following command.   Note that the source path `/foo/books.capnp` must correspond to the import path declared in your annotations.
 
 ```bash
-capnp compile -I /path/to/go-capnp/std -ogo foo/books.capnp
+shark compile -I /path/to/go-capnp/std -ogo foo/books.capnp
 ```
 
-> **Tip** 👉 For more compilation options, see `capnp compile --help`.
+> **Tip** 👉 For more compilation options, see `shark compile --help`.
 
-This will output the `foo/books.capnp.go` file, containing Go structs that can be imported into your programs.  These are ordinary Go types that represent the schema you declared in `books.capnp`.  Each has accessor methods corresponding to the fields declared in the schema.  For example, the `Book` struct will have the methods `Title() (string, error)` and `SetTitle(string) error`.
+This will output the `foo/books.shark.go` file, containing Go structs that can be imported into your programs.  These are ordinary Go types that represent the schema you declared in `books.capnp`.  Each has accessor methods corresponding to the fields declared in the schema.  For example, the `Book` struct will have the methods `Title() (string, error)` and `SetTitle(string) error`.
 
 If you have go-capnp as a dependency and you are in go module folder, you can use `go list` and backticks like so
 
 ```bash
-capnp compile -I `go list -m -f '{{.Dir}}' capnproto.org/go/capnp/v3`/std -ogo foo/books.capnp
+shark compile -I `go list -m -f '{{.Dir}}' github.com/kumo-rpc/sharkgo`/std -ogo foo/books.capnp
 ```
 
 In the next section, we will show how you can write these structs to a file or transmit them over the network.

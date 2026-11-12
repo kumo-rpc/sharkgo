@@ -1,5 +1,5 @@
 #!/bin/bash
-# regen.sh - update capnpc-go and regenerate schemas
+# regen.sh - update shark-go and regenerate schemas
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -7,16 +7,16 @@ cd "$(dirname "$0")"
 echo "** go generate"
 go generate
 
-echo "** capnpc-go"
-# Run tests so that we don't install a broken capnpc-go.
-(cd capnpc-go && go generate && go test && go install)
+echo "** shark-go"
+# Run tests so that we don't install a broken shark-go.
+(cd shark-go && go generate && go test && go install)
 
 echo "** schemas"
-(cd std/capnp; ../gen.sh compile)
-(cd std/capnp; capnp compile --no-standard-import -I.. -o- schema.capnp) | (cd internal/schema && capnpc-go -promises=0 -schemas=0 -structstrings=0)
+(cd std/shark; ../gen.sh compile)
+(cd std/shark; shark compile --no-standard-import -I.. -o- schema.shk) | (cd internal/schema && shark-go -promises=0 -schemas=0 -structstrings=0)
 (
 	top="$PWD"
 	cd flowcontrol/internal/test-tool
-	capnp compile --no-standard-import -I "$top/std" -ogo *.capnp
+	shark compile --no-standard-import -I "$top/std" -ogo *.shk
 )
 go generate ./...

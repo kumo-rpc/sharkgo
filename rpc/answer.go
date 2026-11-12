@@ -5,11 +5,11 @@ import (
 	"errors"
 	"sync"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/internal/rc"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
-	"capnproto.org/go/capnp/v3/util/deferred"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/internal/rc"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
+	"github.com/kumo-rpc/sharkgo/util/deferred"
 )
 
 // An answerID is an index into the answers table.
@@ -27,10 +27,10 @@ type ansent struct {
 
 	// pcall is the PipelineCaller returned by RecvCall.  It will be set
 	// to nil once results are ready.
-	pcall capnp.PipelineCaller
+	pcall shark.PipelineCaller
 	// promise is a promise wrapping pcall. It will be resolved, and
 	// subsequently set to nil, once the results are ready.
-	promise *capnp.Promise
+	promise *shark.Promise
 
 	// pcalls is added to for every pending RecvCall and subtracted from
 	// for every RecvCall return (delivery acknowledgement).  This is used
@@ -61,7 +61,7 @@ func (ans *ansent) lockedConn() *lockedConn {
 	return (*lockedConn)(ans.returner.c)
 }
 
-// ansReturner is the implementation of capnp.Returner that is used when
+// ansReturner is the implementation of shark.Returner that is used when
 // handling an incoming call on a local capability.
 type ansReturner struct {
 	// c and id must be set before any answer methods are called.
@@ -86,7 +86,7 @@ type ansReturner struct {
 	// Pipelined calls are invoked on the snapshots, rather than the clients,
 	// to respect the invariant regarding the 4-way race condition that table
 	// entries must not path-shorten.
-	resultsCapTable []capnp.ClientSnapshot
+	resultsCapTable []shark.ClientSnapshot
 }
 
 type answerFlags uint8
@@ -153,26 +153,26 @@ func (c *Conn) newReturn() (_ rpccp.Return, sendMsg func(), _ *rc.Releaser, _ er
 // already returned.  The caller MUST hold ans.c.lk.
 //
 // This also sets ans.promise to a new promise, wrapping pcall.
-func (ans *ansent) setPipelineCaller(m capnp.Method, pcall capnp.PipelineCaller) {
+func (ans *ansent) setPipelineCaller(m shark.Method, pcall shark.PipelineCaller) {
 	if !ans.flags.Contains(resultsReady) {
 		ans.pcall = pcall
-		ans.promise = capnp.NewPromise(m, pcall, nil)
+		ans.promise = shark.NewPromise(m, pcall, nil)
 	}
 }
 
 // AllocResults allocates the results struct.
-func (ans *ansReturner) AllocResults(sz capnp.ObjectSize) (capnp.Struct, error) {
+func (ans *ansReturner) AllocResults(sz shark.ObjectSize) (shark.Struct, error) {
 	var err error
 	ans.results, err = ans.ret.NewResults()
 	if err != nil {
-		return capnp.Struct{}, rpcerr.WrapFailed("alloc results", err)
+		return shark.Struct{}, rpcerr.WrapFailed("alloc results", err)
 	}
-	s, err := capnp.NewStruct(ans.results.Segment(), sz)
+	s, err := shark.NewStruct(ans.results.Segment(), sz)
 	if err != nil {
-		return capnp.Struct{}, rpcerr.WrapFailed("alloc results", err)
+		return shark.Struct{}, rpcerr.WrapFailed("alloc results", err)
 	}
 	if err := ans.results.SetContent(s.ToPtr()); err != nil {
-		return capnp.Struct{}, rpcerr.WrapFailed("alloc results", err)
+		return shark.Struct{}, rpcerr.WrapFailed("alloc results", err)
 	}
 	ans.msgReleaser.Incr()
 	return s, nil
@@ -180,7 +180,7 @@ func (ans *ansReturner) AllocResults(sz capnp.ObjectSize) (capnp.Struct, error) 
 
 // setBootstrap sets the results to an interface pointer, stealing the
 // reference.
-func (ans *ansReturner) setBootstrap(c capnp.Client) error {
+func (ans *ansReturner) setBootstrap(c shark.Client) error {
 	if ans.ret.HasResults() || ans.ret.Message().CapTable().Len() > 0 {
 		panic("setBootstrap called after creating results")
 	}
@@ -192,14 +192,14 @@ func (ans *ansReturner) setBootstrap(c capnp.Client) error {
 	if err != nil {
 		return rpcerr.WrapFailed("alloc bootstrap results", err)
 	}
-	iface := capnp.NewInterface(ans.results.Segment(), 0)
+	iface := shark.NewInterface(ans.results.Segment(), 0)
 	if err := ans.results.SetContent(iface.ToPtr()); err != nil {
 		return rpcerr.WrapFailed("alloc bootstrap results", err)
 	}
 	return nil
 }
 
-// PrepareReturn implements capnp.Returner.PrepareReturn
+// PrepareReturn implements shark.Returner.PrepareReturn
 func (ans *ansReturner) PrepareReturn(e error) {
 	dq := &deferred.Queue{}
 	defer dq.Run()
@@ -214,7 +214,7 @@ func (ans *ansReturner) PrepareReturn(e error) {
 	})
 }
 
-// Return implements capnp.Returner.Return
+// Return implements shark.Returner.Return
 func (ans *ansReturner) Return() {
 	dq := &deferred.Queue{}
 	defer dq.Run()
@@ -275,7 +275,7 @@ func (ans *ansent) prepareSendReturn(dq *deferred.Queue) {
 	results := ans.returner.results
 	if results.IsValid() {
 		capTable := results.Message().CapTable()
-		snapshots := make([]capnp.ClientSnapshot, capTable.Len())
+		snapshots := make([]shark.ClientSnapshot, capTable.Len())
 		for i := range snapshots {
 			snapshots[i] = capTable.At(i).Snapshot()
 		}

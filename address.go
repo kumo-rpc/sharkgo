@@ -1,9 +1,9 @@
-package capnp
+package shark
 
 import (
 	"strconv"
 
-	"capnproto.org/go/capnp/v3/internal/str"
+	"github.com/kumo-rpc/sharkgo/internal/str"
 )
 
 // An address is an index inside a segment's data (in bytes).
@@ -17,7 +17,7 @@ func (a address) String() string {
 
 // GoString returns the address in hex format.
 func (a address) GoString() string {
-	return "capnp.address(%" + a.String() + ")"
+	return "shark.address(%" + a.String() + ")"
 }
 
 // addSize returns the address a+sz.  ok is false if the result would
@@ -69,7 +69,7 @@ func (sz Size) String() string {
 
 // GoString returns the size as a Go expression.
 func (sz Size) GoString() string {
-	return "capnp.Size(" + str.Utod(sz) + ")"
+	return "shark.Size(" + str.Utod(sz) + ")"
 }
 
 // times returns the size sz*n.  ok is false if the result would be
@@ -131,7 +131,7 @@ func (off DataOffset) String() string {
 
 // GoString returns the offset as a Go expression.
 func (off DataOffset) GoString() string {
-	return "capnp.DataOffset(" + str.Utod(off) + ")"
+	return "shark.DataOffset(" + str.Utod(off) + ")"
 }
 
 // ObjectSize records section sizes for a struct or list.
@@ -188,7 +188,7 @@ func (sz ObjectSize) String() string {
 
 // GoString formats the ObjectSize as a keyed struct literal.
 func (sz ObjectSize) GoString() string {
-	return "capnp.ObjectSize{DataSize: " + str.Utod(sz.DataSize) +
+	return "shark.ObjectSize{DataSize: " + str.Utod(sz.DataSize) +
 		", PointerCount: " + str.Utod(sz.PointerCount) + "}"
 }
 
@@ -213,5 +213,5 @@ func (bit BitOffset) String() string {
 
 // GoString returns the offset as a Go expression.
 func (bit BitOffset) GoString() string {
-	return "capnp.BitOffset(" + str.Utod(bit) + ")"
+	return "shark.BitOffset(" + str.Utod(bit) + ")"
 }

@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/internal/syncutil"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/internal/syncutil"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 )
 
 // An importID is an index into the imports table.
@@ -16,7 +16,7 @@ type importID uint32
 // impent is an entry in the import table.  All fields are protected by
 // Conn.mu.
 type impent struct {
-	wc capnp.WeakClient
+	wc shark.WeakClient
 
 	// wireRefs is the number of times that the importID has appeared in
 	// messages received from the remote vat.  Used to populate the
@@ -49,21 +49,21 @@ type impent struct {
 	// If resolver is non-nil, then this is a promise (received as
 	// CapDescriptor_Which_senderPromise), and when a resolve message
 	// arrives we should use this to fulfill the promise locally.
-	resolver capnp.Resolver[capnp.Client]
+	resolver shark.Resolver[shark.Client]
 }
 
 // addImport returns a client that represents the given import,
 // incrementing the number of references to this import from this vat.
-// This is separate from the reference counting that capnp.Client does.
+// This is separate from the reference counting that shark.Client does.
 //
 // The caller must be holding onto c.mu.
-func (c *lockedConn) addImport(id importID, isPromise bool) capnp.Client {
+func (c *lockedConn) addImport(id importID, isPromise bool) shark.Client {
 	if ent := c.lk.imports[id]; ent != nil {
 		ent.wireRefs++
 		client, ok := ent.wc.AddRef()
 		if !ok {
 			ent.generation++
-			client = capnp.NewClient(&importClient{
+			client = shark.NewClient(&importClient{
 				c:          (*Conn)(c),
 				id:         id,
 				generation: ent.generation,
@@ -77,13 +77,13 @@ func (c *lockedConn) addImport(id importID, isPromise bool) capnp.Client {
 		id: id,
 	}
 	var (
-		client   capnp.Client
-		resolver capnp.Resolver[capnp.Client]
+		client   shark.Client
+		resolver shark.Resolver[shark.Client]
 	)
 	if isPromise {
-		client, resolver = capnp.NewPromisedClient(hook)
+		client, resolver = shark.NewPromisedClient(hook)
 	} else {
-		client = capnp.NewClient(hook)
+		client = shark.NewClient(hook)
 	}
 	c.lk.imports[id] = &impent{
 		wc:       client.WeakRef(),
@@ -93,7 +93,7 @@ func (c *lockedConn) addImport(id importID, isPromise bool) capnp.Client {
 	return client
 }
 
-// An importClient implements capnp.Client for a remote capability.
+// An importClient implements shark.Client for a remote capability.
 type importClient struct {
 	c          *Conn
 	id         importID
@@ -104,15 +104,15 @@ func (ic *importClient) String() string {
 	return "importClient{c: 0x" + str.PtrToHex(ic.c) + ", id: " + str.Utod(ic.id) + "}"
 }
 
-func (ic *importClient) Send(ctx context.Context, s capnp.Send) (*capnp.Answer, capnp.ReleaseFunc) {
-	return withLockedConn2(ic.c, func(c *lockedConn) (*capnp.Answer, capnp.ReleaseFunc) {
+func (ic *importClient) Send(ctx context.Context, s shark.Send) (*shark.Answer, shark.ReleaseFunc) {
+	return withLockedConn2(ic.c, func(c *lockedConn) (*shark.Answer, shark.ReleaseFunc) {
 		if !c.startTask() {
-			return capnp.ErrorAnswer(s.Method, ExcClosed), func() {}
+			return shark.ErrorAnswer(s.Method, ExcClosed), func() {}
 		}
 		defer c.tasks.Done()
 		ent := c.lk.imports[ic.id]
 		if ent == nil || ic.generation != ent.generation {
-			return capnp.ErrorAnswer(s.Method, rpcerr.Disconnected(errors.New("send on closed import"))), func() {}
+			return shark.ErrorAnswer(s.Method, rpcerr.Disconnected(errors.New("send on closed import"))), func() {}
 		}
 		q := c.newQuestion(s.Method)
 
@@ -148,7 +148,7 @@ func (ic *importClient) Send(ctx context.Context, s capnp.Send) (*capnp.Answer, 
 }
 
 // newImportCallMessage builds a Call message targeted to an import.
-func (c *lockedConn) newImportCallMessage(msg rpccp.Message, imp importID, qid questionID, s capnp.Send) error {
+func (c *lockedConn) newImportCallMessage(msg rpccp.Message, imp importID, qid questionID, s shark.Send) error {
 	call, err := msg.NewCall()
 	if err != nil {
 		return rpcerr.WrapFailed("build call message", err)
@@ -165,7 +165,7 @@ func (c *lockedConn) newImportCallMessage(msg rpccp.Message, imp importID, qid q
 	if err != nil {
 		return rpcerr.WrapFailed("build call message", err)
 	}
-	args, err := capnp.NewStruct(payload.Segment(), s.ArgsSize)
+	args, err := shark.NewStruct(payload.Segment(), s.ArgsSize)
 	if err != nil {
 		return rpcerr.WrapFailed("build call message", err)
 	}
@@ -187,11 +187,11 @@ func (c *lockedConn) newImportCallMessage(msg rpccp.Message, imp importID, qid q
 	return nil
 }
 
-func (ic *importClient) Recv(ctx context.Context, r capnp.Recv) capnp.PipelineCaller {
-	ans, finish := ic.Send(ctx, capnp.Send{
+func (ic *importClient) Recv(ctx context.Context, r shark.Recv) shark.PipelineCaller {
+	ans, finish := ic.Send(ctx, shark.Send{
 		Method:   r.Method,
 		ArgsSize: r.Args.Size(),
-		PlaceArgs: func(s capnp.Struct) error {
+		PlaceArgs: func(s shark.Struct) error {
 			err := s.CopyFrom(r.Args)
 			r.ReleaseArgs()
 			return err
@@ -208,7 +208,7 @@ func (ic *importClient) Recv(ctx context.Context, r capnp.Recv) capnp.PipelineCa
 	}
 }
 
-func returnAnswer(ret capnp.Returner, ans *capnp.Answer, finish func()) {
+func returnAnswer(ret shark.Returner, ans *shark.Answer, finish func()) {
 	defer finish()
 	defer ret.ReleaseResults()
 	result, err := ans.Struct()
@@ -232,8 +232,8 @@ func returnAnswer(ret capnp.Returner, ans *capnp.Answer, finish func()) {
 	ret.Return()
 }
 
-func (ic *importClient) Brand() capnp.Brand {
-	return capnp.Brand{Value: ic}
+func (ic *importClient) Brand() shark.Brand {
+	return shark.Brand{Value: ic}
 }
 
 func (ic *importClient) Shutdown() {

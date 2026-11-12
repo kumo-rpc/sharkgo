@@ -12,10 +12,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/flowcontrol"
-	"capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
-	"capnproto.org/go/capnp/v3/rpc/transport"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/flowcontrol"
+	"github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
+	"github.com/kumo-rpc/sharkgo/rpc/transport"
 )
 
 // measureTransport is a wrapper around another transport, and measures the
@@ -91,9 +91,9 @@ func TestFixedFlowLimit(t *testing.T) {
 	go func() {
 		// Server
 
-		bootstrap := testcapnp.StreamTest_ServerToClient(slowStreamTestServer{})
+		bootstrap := testshark.StreamTest_ServerToClient(slowStreamTestServer{})
 		conn := NewConn(serverTrans, &Options{
-			BootstrapClient: capnp.Client(bootstrap),
+			BootstrapClient: shark.Client(bootstrap),
 		})
 		defer conn.Close()
 		<-ctx.Done()
@@ -107,7 +107,7 @@ func TestFixedFlowLimit(t *testing.T) {
 		conn := NewConn(trans, nil)
 		defer conn.Close()
 
-		client := testcapnp.StreamTest(conn.Bootstrap(ctx))
+		client := testshark.StreamTest(conn.Bootstrap(ctx))
 		defer client.Release()
 
 		// Make a decently sized payload, so we can expect the size of the
@@ -116,9 +116,9 @@ func TestFixedFlowLimit(t *testing.T) {
 
 		// Rig up the flow control, then send calls as fast as the limiter will
 		// let us:
-		capnp.Client(client).SetFlowLimiter(flowcontrol.NewFixedLimiter(limit))
+		shark.Client(client).SetFlowLimiter(flowcontrol.NewFixedLimiter(limit))
 		for ctx.Err() == nil {
-			client.Push(ctx, func(p testcapnp.StreamTest_push_Params) error {
+			client.Push(ctx, func(p testshark.StreamTest_push_Params) error {
 				return p.SetData(data)
 			})
 		}
@@ -148,7 +148,7 @@ func TestFixedFlowLimit(t *testing.T) {
 
 type slowStreamTestServer struct{}
 
-func (slowStreamTestServer) Push(ctx context.Context, p testcapnp.StreamTest_push) error {
+func (slowStreamTestServer) Push(ctx context.Context, p testshark.StreamTest_push) error {
 	p.Go()
 	// Take a while processing this, so calls can build up
 	time.Sleep(200 * time.Millisecond)

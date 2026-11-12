@@ -1,54 +1,67 @@
 #!/bin/bash
 
 std_dir="$(dirname "$0")"
+repo_root="$(cd "$std_dir/.." && pwd)"
 
 infer_package_name() {
-	# Convert the filename $1 to a package name. We munge the name as follows:
-	#
-	# 1. strip off the capnp file extension and dirname
-	# 2. remove dashes
-	# 3. convert '+' to 'x'. This is really just for c++.capnp, but it's not
-	#    any easier to special case it.
-	printf '%s' "$(basename $1)" | sed 's/\.capnp$// ; s/-//g ; s/+/x/g'
+	# Convert the filename $1 to a package name:
+	# strip the .shk extension and dirname, remove dashes, convert '+' to 'x'.
+	# cpp.shk is the renamed c++.capnp schema; its Go package stays cxx.
+	name="$(printf '%s' "$(basename "$1")" | sed 's/\.shk$// ; s/-//g ; s/+/x/g')"
+	if [ "$name" = "cpp" ]; then
+		name="cxx"
+	fi
+	printf '%s' "$name"
 }
 
 gen_annotated_schema() {
-	# Copy the schema from file "$2" to the std/capnp directory, and add
-	# appropriate $Go annotations. "$1" is the root of the input directory,
-	# which is used to determine how much prefix to chop off.
+	# Copy the schema from file "$2" into std/shark, and add Go annotations.
+	# "$1" is the root of the input directory, used to trim the path prefix.
 	indir="$1"
 	infile="$2"
 
-	base=$(echo -n "$infile" | sed -e "s@$indir@@")
-	outdir="$std_dir/capnp"
+	base=$(echo -n "$infile" | sed -e "s@$indir@@" -e 's/\.capnp$/.shk/')
+	outdir="$std_dir/shark"
 	outfile="$outdir/$base"
 	package_name="$(infer_package_name "$outfile")"
-	[ -d "$(dirname $outfile)" ] || mkdir -p "$(dirname $outfile)"
+	[ -d "$(dirname "$outfile")" ] || mkdir -p "$(dirname "$outfile")"
 	cat "$infile" - > "$outfile" << EOF
-using Go = import "/go.capnp";
+using Go = import "/go.shk";
 \$Go.package("$package_name");
-\$Go.import("capnproto.org/go/capnp/v3/std/capnp/$package_name");
+\$Go.import("github.com/kumo-rpc/sharkgo/std/shark/$package_name");
 EOF
 }
 
-find_capnp_files() {
-	find "$1" -type f -name '*.capnp'
+find_shk_files() {
+	find "$1" -type f -name '*.shk'
+}
+
+# shark compile treats a bare language name as capnpc-<lang>. Pass the
+# shark-go executable path so the plugin is this repo's generator.
+shark_go_plugin() {
+	if [ -n "${SHARK_GO:-}" ]; then
+		printf '%s' "$SHARK_GO"
+		return
+	fi
+	plugin="$(mktemp)"
+	(cd "$repo_root" && go build -o "$plugin" ./shark-go) || return 1
+	printf '%s' "$plugin"
 }
 
 gen_go_src() {
 	# Generate go source code from the schema file $1. Create the package
-	# directory if necessary.
+	# directory if necessary. Output is <name>.sk.go.
 	file="$1"
-        filedir="$(dirname "$file")"
+	filedir="$(dirname "$file")"
 	package_name="$(infer_package_name "$file")"
 	mkdir -p "$filedir/$package_name" && \
-        	capnp compile --no-standard-import -I"$std_dir" -ogo:"$filedir/$package_name" --src-prefix="$filedir" "$file"
+		shark compile --no-standard-import -I"$std_dir" -o"$shark_go":"$filedir/$package_name" --src-prefix="$filedir" "$file"
 }
 
 usage() {
 	echo "Usage:"
 	echo ""
-	echo "    $0 import <path/to/capnp/c++/src/capnp>"
+	echo "    $0 import <path/to/shark/c++/src/shark>"
 	echo "    $0 patch      # Apply necessary patches to schema"
 	echo "    $0 compile    # Generate go source files"
 	echo "    $0 clean-go   # Remove go source files"
@@ -58,7 +71,7 @@ usage() {
 # do_* implements the corresponding subcommand described in usage's output.
 do_import() {
 	input_dir="$1"
-	for file in $(find_capnp_files "$input_dir"); do
+	for file in $(find "$input_dir" -type f -name '*.shk'); do
 		gen_annotated_schema "$input_dir" "$file" || return 1
 	done
 }
@@ -68,19 +81,20 @@ do_patch() {
 }
 
 do_compile() {
-	for file in $(find_capnp_files "$std_dir"); do
+	shark_go="$(shark_go_plugin)" || return 1
+	for file in $(find_shk_files "$std_dir"); do
 		gen_go_src "$file" || return 1
 	done
 }
 
 do_clean_go() {
-	find "$std_dir" -name '*.capnp.go' -delete
+	find "$std_dir" -name '*.sk.go' -delete
 	find "$std_dir" -type d -empty -delete
 }
 
 do_clean_all() {
 	do_clean_go
-	find "$std_dir/capnp" -name '*.capnp' -delete
+	find "$std_dir/shark" -name '*.shk' -delete
 }
 
 eq_or_usage() {

@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	air "capnproto.org/go/capnp/v3/internal/aircraftlib"
-	"capnproto.org/go/capnp/v3/schemas"
+	"github.com/kumo-rpc/sharkgo"
+	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
+	"github.com/kumo-rpc/sharkgo/schemas"
 )
 
 func init() {
@@ -31,14 +31,14 @@ type F16 struct {
 }
 
 func TestExtract_Embed(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	v1, err := air.NewRootVerOneData(seg)
 	if err != nil {
 		t.Fatalf("NewRootVerOneData: %v", err)
 	}
 	v1.SetVal(123)
 	out := new(VerOneData)
-	if err := Extract(out, air.VerOneData_TypeID, capnp.Struct(v1)); err != nil {
+	if err := Extract(out, air.VerOneData_TypeID, shark.Struct(v1)); err != nil {
 		t.Errorf("Extract error: %v", err)
 	}
 	if out.Val != 123 {
@@ -47,7 +47,7 @@ func TestExtract_Embed(t *testing.T) {
 }
 
 func TestExtract_EmbedPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	v2, err := air.NewRootVerTwoData(seg)
 	if err != nil {
 		t.Fatalf("NewRootVerTwoData: %v", err)
@@ -55,7 +55,7 @@ func TestExtract_EmbedPtr(t *testing.T) {
 	v2.SetVal(123)
 	v2.SetDuo(456)
 	out := new(VerTwoData)
-	if err := Extract(out, air.VerTwoData_TypeID, capnp.Struct(v2)); err != nil {
+	if err := Extract(out, air.VerTwoData_TypeID, shark.Struct(v2)); err != nil {
 		t.Errorf("Extract error: %v", err)
 	}
 	if out.VerVal == nil || out.Val != 123 || out.Duo != 456 {
@@ -64,7 +64,7 @@ func TestExtract_EmbedPtr(t *testing.T) {
 }
 
 func TestExtract_EmbedOmit(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	v2, err := air.NewRootVerTwoData(seg)
 	if err != nil {
 		t.Fatalf("NewRootVerTwoData: %v", err)
@@ -72,7 +72,7 @@ func TestExtract_EmbedOmit(t *testing.T) {
 	v2.SetVal(123)
 	v2.SetDuo(456)
 	out := new(VerTwoDataOmit)
-	if err := Extract(out, air.VerTwoData_TypeID, capnp.Struct(v2)); err != nil {
+	if err := Extract(out, air.VerTwoData_TypeID, shark.Struct(v2)); err != nil {
 		t.Errorf("Extract error: %v", err)
 	}
 	if out.Val != 0 || out.Duo != 456 {
@@ -81,7 +81,7 @@ func TestExtract_EmbedOmit(t *testing.T) {
 }
 
 func TestExtract_EmbedName(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	f16, err := air.NewRootF16(seg)
 	if err != nil {
 		t.Fatalf("NewRootF16: %v", err)
@@ -97,7 +97,7 @@ func TestExtract_EmbedName(t *testing.T) {
 	base.SetCanFly(true)
 
 	out := new(F16)
-	if err := Extract(out, air.F16_TypeID, capnp.Struct(f16)); err != nil {
+	if err := Extract(out, air.F16_TypeID, shark.Struct(f16)); err != nil {
 		t.Errorf("Extract error: %v", err)
 	}
 	if out.Name != "ALL YOUR BASE" || out.Rating != 5 || !out.CanFly {
@@ -106,13 +106,13 @@ func TestExtract_EmbedName(t *testing.T) {
 }
 
 func TestInsert_Embed(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	v1, err := air.NewRootVerOneData(seg)
 	if err != nil {
 		t.Fatalf("NewRootVerOneData: %v", err)
 	}
 	gv1 := &VerOneData{VerVal{123}}
-	err = Insert(air.VerOneData_TypeID, capnp.Struct(v1), gv1)
+	err = Insert(air.VerOneData_TypeID, shark.Struct(v1), gv1)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(gv1), err)
 	}
@@ -122,13 +122,13 @@ func TestInsert_Embed(t *testing.T) {
 }
 
 func TestInsert_EmbedPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	v2, err := air.NewRootVerTwoData(seg)
 	if err != nil {
 		t.Fatalf("NewRootVerTwoData: %v", err)
 	}
 	gv2 := &VerTwoData{&VerVal{123}, 456}
-	err = Insert(air.VerTwoData_TypeID, capnp.Struct(v2), gv2)
+	err = Insert(air.VerTwoData_TypeID, shark.Struct(v2), gv2)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(gv2), err)
 	}
@@ -138,13 +138,13 @@ func TestInsert_EmbedPtr(t *testing.T) {
 }
 
 func TestInsert_EmbedNilPtr(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	v2, err := air.NewRootVerTwoData(seg)
 	if err != nil {
 		t.Fatalf("NewRootVerTwoData: %v", err)
 	}
 	gv2 := &VerTwoData{nil, 456}
-	err = Insert(air.VerTwoData_TypeID, capnp.Struct(v2), gv2)
+	err = Insert(air.VerTwoData_TypeID, shark.Struct(v2), gv2)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(gv2), err)
 	}
@@ -154,13 +154,13 @@ func TestInsert_EmbedNilPtr(t *testing.T) {
 }
 
 func TestInsert_EmbedOmit(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	v2, err := air.NewRootVerTwoData(seg)
 	if err != nil {
 		t.Fatalf("NewRootVerTwoData: %v", err)
 	}
 	in := &VerTwoDataOmit{VerVal{123}, 456}
-	err = Insert(air.VerTwoData_TypeID, capnp.Struct(v2), in)
+	err = Insert(air.VerTwoData_TypeID, shark.Struct(v2), in)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(in), err)
 	}
@@ -170,13 +170,13 @@ func TestInsert_EmbedOmit(t *testing.T) {
 }
 
 func TestInsert_EmbedNamed(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	f16, err := air.NewRootF16(seg)
 	if err != nil {
 		t.Fatalf("NewRootF16: %v", err)
 	}
 	in := &F16{PlaneBase{Name: "ALL YOUR BASE", Rating: 5, CanFly: true}}
-	err = Insert(air.F16_TypeID, capnp.Struct(f16), in)
+	err = Insert(air.F16_TypeID, shark.Struct(f16), in)
 	if err != nil {
 		t.Errorf("Insert(%s) error: %v", zpretty.Sprint(in), err)
 	}
@@ -253,7 +253,7 @@ type VerOneData3Tags struct {
 }
 
 func TestExtract_EmbedCollide(t *testing.T) {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	v1, err := air.NewRootVerOneData(seg)
 	if err != nil {
 		t.Fatalf("NewRootVerOneData: %v", err)
@@ -274,7 +274,7 @@ func TestExtract_EmbedCollide(t *testing.T) {
 	}
 	for _, test := range tests {
 		out := reflect.New(reflect.TypeOf(test.want).Elem()).Interface()
-		if err := Extract(out, air.VerOneData_TypeID, capnp.Struct(v1)); err != nil {
+		if err := Extract(out, air.VerOneData_TypeID, shark.Struct(v1)); err != nil {
 			t.Errorf("%s: Extract error: %v", test.name, err)
 		}
 		if !reflect.DeepEqual(out, test.want) {
@@ -314,13 +314,13 @@ func TestInsert_EmbedCollide(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		_, seg := capnp.NewSingleSegmentMessage(nil)
+		_, seg := shark.NewSingleSegmentMessage(nil)
 		v1, err := air.NewRootVerOneData(seg)
 		if err != nil {
 			t.Errorf("%s: NewRootVerOneData: %v", test.name, err)
 			continue
 		}
-		err = Insert(air.VerOneData_TypeID, capnp.Struct(v1), test.in)
+		err = Insert(air.VerOneData_TypeID, shark.Struct(v1), test.in)
 		if err != nil {
 			t.Errorf("%s: Insert(..., %s): %v", test.name, zpretty.Sprint(test.in), err)
 		}

@@ -1,0 +1,17 @@
+func (s {{.Node.Name}}) {{.Field.Name|title}}() {{.FieldType}} {
+	{{template "_checktag" . -}}
+	p, _ := shark.Struct(s).Ptr({{.Field.Slot.Offset}})
+	return p.Interface().Client()
+}
+
+{{template "_hasfield" .}}
+
+func (s {{.Node.Name}}) Set{{.Field.Name|title}}(c {{.FieldType}}) error {
+	{{template "_settag" . -}}
+	if !c.IsValid() {
+		return shark.Struct(s).SetPtr({{.Field.Slot.Offset}}, shark.Ptr{})
+	}
+	seg := s.Segment()
+	in := shark.NewInterface(seg, seg.Message().CapTable().Add(c))
+	return shark.Struct(s).SetPtr({{.Field.Slot.Offset}}, in.ToPtr())
+}

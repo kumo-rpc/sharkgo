@@ -3,9 +3,9 @@ package rpc
 import (
 	"context"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/syncutil"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/syncutil"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 )
 
 // A questionID is an index into the questions table.
@@ -15,14 +15,14 @@ type question struct {
 	c  *Conn
 	id questionID
 
-	p       *capnp.Promise
-	release capnp.ReleaseFunc // written before resolving p
+	p       *shark.Promise
+	release shark.ReleaseFunc // written before resolving p
 
 	// Protected by c.mu:
 
 	flags         questionFlags
 	finishMsgSend chan struct{}        // closed after attempting to send the Finish message
-	called        [][]capnp.PipelineOp // paths to called clients
+	called        [][]shark.PipelineOp // paths to called clients
 }
 
 // questionFlags is a bitmask of which events have occurred in a question's
@@ -48,14 +48,14 @@ func (flags questionFlags) Contains(flag questionFlags) bool {
 }
 
 // newQuestion adds a new question to c's table.
-func (c *lockedConn) newQuestion(method capnp.Method) *question {
+func (c *lockedConn) newQuestion(method shark.Method) *question {
 	q := &question{
 		c:             (*Conn)(c),
 		id:            c.lk.questionID.next(),
 		release:       func() {},
 		finishMsgSend: make(chan struct{}),
 	}
-	q.p = capnp.NewPromise(method, q, nil) // TODO(someday): customize error message for bootstrap
+	q.p = shark.NewPromise(method, q, nil) // TODO(someday): customize error message for bootstrap
 	c.setAnswerQuestion(q.p.Answer(), q)
 	if int(q.id) == len(c.lk.questions) {
 		c.lk.questions = append(c.lk.questions, q)
@@ -65,7 +65,7 @@ func (c *lockedConn) newQuestion(method capnp.Method) *question {
 	return q
 }
 
-func (c *lockedConn) getAnswerQuestion(ans *capnp.Answer) (*question, bool) {
+func (c *lockedConn) getAnswerQuestion(ans *shark.Answer) (*question, bool) {
 	m := ans.Metadata()
 	m.Lock()
 	defer m.Unlock()
@@ -76,7 +76,7 @@ func (c *lockedConn) getAnswerQuestion(ans *capnp.Answer) (*question, bool) {
 	return q.(*question), true
 }
 
-func (c *lockedConn) setAnswerQuestion(ans *capnp.Answer, q *question) {
+func (c *lockedConn) setAnswerQuestion(ans *shark.Answer, q *question) {
 	m := ans.Metadata()
 	syncutil.With(m, func() {
 		m.Put(questionKey{(*Conn)(c)}, q)
@@ -130,10 +130,10 @@ func (q *question) handleCancel(ctx context.Context) {
 	})
 }
 
-func (q *question) PipelineSend(ctx context.Context, transform []capnp.PipelineOp, s capnp.Send) (*capnp.Answer, capnp.ReleaseFunc) {
-	return withLockedConn2(q.c, func(c *lockedConn) (*capnp.Answer, capnp.ReleaseFunc) {
+func (q *question) PipelineSend(ctx context.Context, transform []shark.PipelineOp, s shark.Send) (*shark.Answer, shark.ReleaseFunc) {
+	return withLockedConn2(q.c, func(c *lockedConn) (*shark.Answer, shark.ReleaseFunc) {
 		if !c.startTask() {
-			return capnp.ErrorAnswer(s.Method, ExcClosed), func() {}
+			return shark.ErrorAnswer(s.Method, ExcClosed), func() {}
 		}
 		defer c.tasks.Done()
 
@@ -178,7 +178,7 @@ func (q *question) PipelineSend(ctx context.Context, transform []capnp.PipelineO
 }
 
 // newPipelineCallMessage builds a Call message targeted to a promised answer..
-func (c *lockedConn) newPipelineCallMessage(msg rpccp.Message, tgt questionID, transform []capnp.PipelineOp, qid questionID, s capnp.Send) error {
+func (c *lockedConn) newPipelineCallMessage(msg rpccp.Message, tgt questionID, transform []shark.PipelineOp, qid questionID, s shark.Send) error {
 	call, err := msg.NewCall()
 	if err != nil {
 		return rpcerr.WrapFailed("build call message", err)
@@ -208,7 +208,7 @@ func (c *lockedConn) newPipelineCallMessage(msg rpccp.Message, tgt questionID, t
 	if err != nil {
 		return rpcerr.WrapFailed("build call message", err)
 	}
-	args, err := capnp.NewStruct(payload.Segment(), s.ArgsSize)
+	args, err := shark.NewStruct(payload.Segment(), s.ArgsSize)
 	if err != nil {
 		return rpcerr.WrapFailed("build call message", err)
 	}
@@ -232,11 +232,11 @@ func (c *lockedConn) newPipelineCallMessage(msg rpccp.Message, tgt questionID, t
 	return err
 }
 
-func (q *question) PipelineRecv(ctx context.Context, transform []capnp.PipelineOp, r capnp.Recv) capnp.PipelineCaller {
-	ans, finish := q.PipelineSend(ctx, transform, capnp.Send{
+func (q *question) PipelineRecv(ctx context.Context, transform []shark.PipelineOp, r shark.Recv) shark.PipelineCaller {
+	ans, finish := q.PipelineSend(ctx, transform, shark.Send{
 		Method:   r.Method,
 		ArgsSize: r.Args.Size(),
-		PlaceArgs: func(s capnp.Struct) error {
+		PlaceArgs: func(s shark.Struct) error {
 			err := s.CopyFrom(r.Args)
 			r.ReleaseArgs()
 			return err
@@ -255,7 +255,7 @@ func (q *question) PipelineRecv(ctx context.Context, transform []capnp.PipelineO
 
 // mark adds the promised answer transform to the set of pipelined
 // questions sent.  The caller must be holding onto q.c.lk.
-func (q *question) mark(xform []capnp.PipelineOp) {
+func (q *question) mark(xform []shark.PipelineOp) {
 	for _, x := range q.called {
 		if transformsEqual(x, xform) {
 			// Already in set.
@@ -263,7 +263,7 @@ func (q *question) mark(xform []capnp.PipelineOp) {
 		}
 	}
 	// Add a copy (don't retain default values).
-	xform2 := make([]capnp.PipelineOp, len(xform))
+	xform2 := make([]shark.PipelineOp, len(xform))
 	for i := range xform {
 		xform2[i].Field = xform[i].Field
 	}
@@ -276,7 +276,7 @@ func (q *question) Reject(err error) {
 	}
 }
 
-func transformsEqual(x1, x2 []capnp.PipelineOp) bool {
+func transformsEqual(x1, x2 []shark.PipelineOp) bool {
 	if len(x1) != len(x2) {
 		return false
 	}

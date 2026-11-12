@@ -4,7 +4,7 @@ from Go structs.  pogs operates similarly to encoding/json: define a
 struct that is optionally marked up with tags, then Insert and Extract
 will copy the fields to and from the corresponding Cap'n Proto struct.
 
-Inserting
+# Inserting
 
 To copy data into a Cap'n Proto struct, we use the Insert function.
 Consider the following schema:
@@ -25,7 +25,7 @@ and the Go struct:
 
 We can copy the Go struct into a Cap'n Proto struct like this:
 
-	_, arena := capnp.NewSingleSegmentMessage(nil)
+	_, arena := shark.NewSingleSegmentMessage(nil)
 	root, _ := myschema.NewRootMessage(arena)
 	m := &Message{"Alice", "Hello", 1294706395881547000}
 	err := pogs.Insert(myschema.Message_TypeID, root.Struct, m)
@@ -34,7 +34,7 @@ Note that if any field names in our Go struct don't match to a field in
 the Cap'n Proto struct, Insert returns an error.  We'll see how to fix
 that in a moment.
 
-Extracting
+# Extracting
 
 Copying data back out from a Cap'n Proto struct is quite similar: we
 pass a pointer to our Go struct to Extract.
@@ -42,7 +42,7 @@ pass a pointer to our Go struct to Extract.
 	m := new(Message)
 	err := pogs.Extract(m, myschema.Message_TypeID, root.Struct)
 
-Types
+# Types
 
 The mapping between Cap'n Proto types and underlying Go types is as
 follows:
@@ -56,15 +56,15 @@ follows:
 	List                          -> slice
 	enum                          -> uint16
 	struct                        -> a struct or pointer to struct
-	interface                     -> a *capnp.Client or struct with
+	interface                     -> a *shark.Client or struct with
 	                                 exactly one field, named
-	                                 "Client", of type *capnp.Client
+	                                 "Client", of type *shark.Client
 
 Note that the unsized int and uint type can't be used: int and float
 types must match in size.  For Data and Text fields using []byte, the
 filled-in byte slice will point to original segment.
 
-Renaming and Omitting Fields
+# Renaming and Omitting Fields
 
 By default, the Go field name is the same as the Cap'n Proto schema
 field name with the first letter capitalized.  If we want to change this
@@ -86,7 +86,7 @@ Extract functions.
 		Time int64
 	}
 
-Unions
+# Unions
 
 Since Go does not have support for variant types, Go structs that want
 to use fields inside a Cap'n Proto union must have an explicit
@@ -139,7 +139,7 @@ which field in the union is set.
 		// ...
 	}
 
-Embedding
+# Embedding
 
 Anonymous struct fields are usually extracted or inserted as if their
 inner exported fields were fields in the outer struct, subject to the
@@ -161,4 +161,4 @@ rule), that is selected.
 3) Otherwise, there are multiple fields, and all are ignored; no error
 occurs.
 */
-package pogs // import "capnproto.org/go/capnp/v3/pogs"
+package pogs // import "github.com/kumo-rpc/sharkgo/pogs"

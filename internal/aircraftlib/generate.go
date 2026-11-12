@@ -1,3 +1,3 @@
 package aircraftlib
 
-//go:generate capnp compile -I ../../std -ogo aircraft.capnp
+//go:generate shark compile -I ../../std -ogo aircraft.shk

@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 // The TypeParam interface must be satisified by a type to be used as a capnproto
 // type parameter. This is satisified by all capnproto pointer types. T should

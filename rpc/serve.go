@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net"
 
-	"capnproto.org/go/capnp/v3"
+	"github.com/kumo-rpc/sharkgo"
 )
 
 // serveOpts are options for the Cap'n Proto server.
@@ -41,7 +41,7 @@ func WithPackedStreamingTransport() ServeOption {
 // Serve will take ownership of bootstrapClient and release it after the listener closes.
 //
 // Serve exits with the listener error if the listener is closed by the owner.
-func Serve(lis net.Listener, boot capnp.Client, opts ...ServeOption) error {
+func Serve(lis net.Listener, boot shark.Client, opts ...ServeOption) error {
 	if !boot.IsValid() {
 		err := errors.New("bootstrap client is not valid")
 		return err
@@ -77,7 +77,7 @@ func Serve(lis net.Listener, boot capnp.Client, opts ...ServeOption) error {
 // and "tcp" for regular TCP IP4 or IP6 connections.
 //
 // ListenAndServe will take ownership of bootstrapClient and release it on exit.
-func ListenAndServe(ctx context.Context, network, addr string, bootstrapClient capnp.Client, opts ...ServeOption) error {
+func ListenAndServe(ctx context.Context, network, addr string, bootstrapClient shark.Client, opts ...ServeOption) error {
 
 	listener, err := net.Listen(network, addr)
 

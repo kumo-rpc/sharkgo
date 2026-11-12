@@ -1,9 +1,9 @@
 # Cap'n Proto bindings for Go
 
 ![License](https://img.shields.io/badge/license-MIT-brightgreen?style=flat-square)
-[![CodeQuality](https://goreportcard.com/badge/capnproto.org/go/capnp)](https://goreportcard.com/report/capnproto.org/go/capnp/v3)
+[![CodeQuality](https://goreportcard.com/badge/capnproto.org/go/capnp)](https://goreportcard.com/report/github.com/kumo-rpc/sharkgo)
 [![Go](https://github.com/capnproto/go-capnproto2/actions/workflows/go.yml/badge.svg)](https://github.com/capnproto/go-capnproto2/actions/workflows/go.yml)
-[![GoDoc](https://godoc.org/capnproto.org/go/capnp/v3?status.svg)][godoc]
+[![GoDoc](https://godoc.org/github.com/kumo-rpc/sharkgo?status.svg)][godoc]
 [![Matrix](https://img.shields.io/matrix/go-capnp:matrix.org?color=lightpink&label=Get%20Help&logo=matrix&style=flat-square)](https://matrix.to/#/#go-capnp:matrix.org)
 
 [Cap’n Proto](https://capnproto.org/) is an insanely fast data interchange format similar to [Protocol Buffers](https://github.com/protocolbuffers/protobuf), but much faster.
@@ -48,7 +48,7 @@ Note also we may merge breaking changes to the `main` branch without notice.  Us
 
 MIT - see [LICENSE][] file
 
-[godoc]: http://pkg.go.dev/capnproto.org/go/capnp/v3
+[godoc]: http://pkg.go.dev/github.com/kumo-rpc/sharkgo
 [gocompat]: https://golang.org/doc/go1compat
 [LICENSE]: https://github.com/capnproto/go-capnproto2/blob/master/LICENSE
 [getting-started]: docs/Getting-Started.md

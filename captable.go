@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 // CapTable is the indexed list of the clients referenced in the
 // message. Capability pointers inside the message will use this

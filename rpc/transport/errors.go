@@ -1,5 +1,5 @@
 package transport
 
-import "capnproto.org/go/capnp/v3/exc"
+import "github.com/kumo-rpc/sharkgo/exc"
 
 var transporterr = exc.Annotator("transport")

@@ -3,7 +3,7 @@ package flowcontrol
 import (
 	"context"
 
-	"capnproto.org/go/capnp/v3/internal/str"
+	"github.com/kumo-rpc/sharkgo/internal/str"
 	"golang.org/x/sync/semaphore"
 )
 

@@ -1,16 +1,16 @@
-package capnp_test
+package shark_test
 
 import (
 	"fmt"
 	"os"
 
-	"capnproto.org/go/capnp/v3"
-	air "capnproto.org/go/capnp/v3/internal/aircraftlib"
+	"github.com/kumo-rpc/sharkgo"
+	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
 )
 
 func Example() {
 	// Make a brand new empty message.
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
+	msg, seg := shark.NewSingleSegmentMessage(nil)
 
 	// If you want runtime-type identification, this is easily obtained. Just
 	// wrap everything in a struct that contains a single anoymous union (e.g. struct Z).
@@ -77,14 +77,14 @@ func Example() {
 	}
 	defer file.Close()
 	defer os.Remove(file.Name())
-	err = capnp.NewEncoder(file).Encode(msg)
+	err = shark.NewEncoder(file).Encode(msg)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func ExampleUnmarshal() {
-	msg, s := capnp.NewSingleSegmentMessage(nil)
+	msg, s := shark.NewSingleSegmentMessage(nil)
 	d, err := air.NewRootZdate(s)
 	if err != nil {
 		fmt.Printf("root error %v\n", err)
@@ -100,7 +100,7 @@ func ExampleUnmarshal() {
 	}
 
 	// Read
-	msg, err = capnp.Unmarshal(data)
+	msg, err = shark.Unmarshal(data)
 	if err != nil {
 		fmt.Printf("unmarshal error %v\n", err)
 		return

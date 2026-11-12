@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 import (
 	"bufio"
@@ -7,10 +7,10 @@ import (
 	"io"
 	"net"
 
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/exp/bufferpool"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/packed"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/exp/bufferpool"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/packed"
 )
 
 // A Decoder represents a framer that deserializes a particular Cap'n

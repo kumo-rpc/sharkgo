@@ -8,12 +8,12 @@ import (
 	"math"
 	"strconv"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/nodemap"
-	"capnproto.org/go/capnp/v3/internal/schema"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/internal/strquote"
-	"capnproto.org/go/capnp/v3/schemas"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/nodemap"
+	"github.com/kumo-rpc/sharkgo/internal/schema"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/internal/strquote"
+	"github.com/kumo-rpc/sharkgo/schemas"
 )
 
 // Marker strings.
@@ -25,7 +25,7 @@ const (
 )
 
 // Marshal returns the text representation of a struct.
-func Marshal(typeID uint64, s capnp.Struct) (string, error) {
+func Marshal(typeID uint64, s shark.Struct) (string, error) {
 	buf := new(bytes.Buffer)
 	if err := NewEncoder(buf).Encode(typeID, s); err != nil {
 		return "", err
@@ -34,7 +34,7 @@ func Marshal(typeID uint64, s capnp.Struct) (string, error) {
 }
 
 // MarshalList returns the text representation of a struct list.
-func MarshalList(typeID uint64, l capnp.List) (string, error) {
+func MarshalList(typeID uint64, l shark.List) (string, error) {
 	buf := new(bytes.Buffer)
 	if err := NewEncoder(buf).EncodeList(typeID, l); err != nil {
 		return "", err
@@ -61,7 +61,7 @@ func (enc *Encoder) UseRegistry(reg *schemas.Registry) {
 }
 
 // Encode writes the text representation of s to the stream.
-func (enc *Encoder) Encode(typeID uint64, s capnp.Struct) error {
+func (enc *Encoder) Encode(typeID uint64, s shark.Struct) error {
 	if enc.w.err != nil {
 		return enc.w.err
 	}
@@ -73,8 +73,8 @@ func (enc *Encoder) Encode(typeID uint64, s capnp.Struct) error {
 }
 
 // EncodeList writes the text representation of struct list l to the stream.
-func (enc *Encoder) EncodeList(typeID uint64, l capnp.List) error {
-	_, seg := capnp.NewSingleSegmentMessage(nil)
+func (enc *Encoder) EncodeList(typeID uint64, l shark.List) error {
+	_, seg := shark.NewSingleSegmentMessage(nil)
 	typ, _ := schema.NewRootType(seg)
 	typ.SetStructType()
 	typ.StructType().SetTypeId(typeID)
@@ -114,7 +114,7 @@ func (enc *Encoder) marshalText(t []byte) {
 	enc.w.Write(enc.tmp)
 }
 
-func (enc *Encoder) marshalStruct(typeID uint64, s capnp.Struct) error {
+func (enc *Encoder) marshalStruct(typeID uint64, s shark.Struct) error {
 	n, err := enc.nodes.Find(typeID)
 	if err != nil {
 		return err
@@ -124,7 +124,7 @@ func (enc *Encoder) marshalStruct(typeID uint64, s capnp.Struct) error {
 	}
 	var discriminant uint16
 	if n.StructNode().DiscriminantCount() > 0 {
-		discriminant = s.Uint16(capnp.DataOffset(n.StructNode().DiscriminantOffset() * 2))
+		discriminant = s.Uint16(shark.DataOffset(n.StructNode().DiscriminantOffset() * 2))
 	}
 	enc.w.WriteByte('(')
 	fields := codeOrderFields(n.StructNode())
@@ -161,7 +161,7 @@ func (enc *Encoder) marshalStruct(typeID uint64, s capnp.Struct) error {
 	return nil
 }
 
-func (enc *Encoder) marshalFieldValue(s capnp.Struct, f schema.Field) error {
+func (enc *Encoder) marshalFieldValue(s shark.Struct, f schema.Field) error {
 	typ, err := f.Slot().Type()
 	if err != nil {
 		return err
@@ -182,47 +182,47 @@ func (enc *Encoder) marshalFieldValue(s capnp.Struct, f schema.Field) error {
 	case schema.Type_Which_void:
 		enc.w.WriteString(voidMarker)
 	case schema.Type_Which_bool:
-		v := s.Bit(capnp.BitOffset(f.Slot().Offset()))
+		v := s.Bit(shark.BitOffset(f.Slot().Offset()))
 		d := dv.Bool()
 		enc.marshalBool(!d && v || d && !v)
 	case schema.Type_Which_int8:
-		v := s.Uint8(capnp.DataOffset(f.Slot().Offset()))
+		v := s.Uint8(shark.DataOffset(f.Slot().Offset()))
 		d := uint8(dv.Int8())
 		enc.marshalInt(int64(int8(v ^ d)))
 	case schema.Type_Which_int16:
-		v := s.Uint16(capnp.DataOffset(f.Slot().Offset() * 2))
+		v := s.Uint16(shark.DataOffset(f.Slot().Offset() * 2))
 		d := uint16(dv.Int16())
 		enc.marshalInt(int64(int16(v ^ d)))
 	case schema.Type_Which_int32:
-		v := s.Uint32(capnp.DataOffset(f.Slot().Offset() * 4))
+		v := s.Uint32(shark.DataOffset(f.Slot().Offset() * 4))
 		d := uint32(dv.Int32())
 		enc.marshalInt(int64(int32(v ^ d)))
 	case schema.Type_Which_int64:
-		v := s.Uint64(capnp.DataOffset(f.Slot().Offset() * 8))
+		v := s.Uint64(shark.DataOffset(f.Slot().Offset() * 8))
 		d := uint64(dv.Int64())
 		enc.marshalInt(int64(v ^ d))
 	case schema.Type_Which_uint8:
-		v := s.Uint8(capnp.DataOffset(f.Slot().Offset()))
+		v := s.Uint8(shark.DataOffset(f.Slot().Offset()))
 		d := dv.Uint8()
 		enc.marshalUint(uint64(v ^ d))
 	case schema.Type_Which_uint16:
-		v := s.Uint16(capnp.DataOffset(f.Slot().Offset() * 2))
+		v := s.Uint16(shark.DataOffset(f.Slot().Offset() * 2))
 		d := dv.Uint16()
 		enc.marshalUint(uint64(v ^ d))
 	case schema.Type_Which_uint32:
-		v := s.Uint32(capnp.DataOffset(f.Slot().Offset() * 4))
+		v := s.Uint32(shark.DataOffset(f.Slot().Offset() * 4))
 		d := dv.Uint32()
 		enc.marshalUint(uint64(v ^ d))
 	case schema.Type_Which_uint64:
-		v := s.Uint64(capnp.DataOffset(f.Slot().Offset() * 8))
+		v := s.Uint64(shark.DataOffset(f.Slot().Offset() * 8))
 		d := dv.Uint64()
 		enc.marshalUint(v ^ d)
 	case schema.Type_Which_float32:
-		v := s.Uint32(capnp.DataOffset(f.Slot().Offset() * 4))
+		v := s.Uint32(shark.DataOffset(f.Slot().Offset() * 4))
 		d := math.Float32bits(dv.Float32())
 		enc.marshalFloat32(math.Float32frombits(v ^ d))
 	case schema.Type_Which_float64:
-		v := s.Uint64(capnp.DataOffset(f.Slot().Offset() * 8))
+		v := s.Uint64(shark.DataOffset(f.Slot().Offset() * 8))
 		d := math.Float64bits(dv.Float64())
 		enc.marshalFloat64(math.Float64frombits(v ^ d))
 	case schema.Type_Which_structType:
@@ -270,7 +270,7 @@ func (enc *Encoder) marshalFieldValue(s capnp.Struct, f schema.Field) error {
 		}
 		return enc.marshalList(elem, p.List())
 	case schema.Type_Which_enum:
-		v := s.Uint16(capnp.DataOffset(f.Slot().Offset() * 2))
+		v := s.Uint16(shark.DataOffset(f.Slot().Offset() * 2))
 		d := dv.Enum()
 		return enc.marshalEnum(typ.Enum().TypeId(), v^d)
 	case schema.Type_Which_interface:
@@ -298,36 +298,36 @@ func codeOrderFields(s schema.Node_structNode) []schema.Field {
 	return fields
 }
 
-func (enc *Encoder) marshalList(elem schema.Type, l capnp.List) error {
+func (enc *Encoder) marshalList(elem schema.Type, l shark.List) error {
 	switch elem.Which() {
 	case schema.Type_Which_void:
-		enc.w.WriteString(capnp.VoidList(l).String())
+		enc.w.WriteString(shark.VoidList(l).String())
 	case schema.Type_Which_bool:
-		enc.w.WriteString(capnp.BitList(l).String())
+		enc.w.WriteString(shark.BitList(l).String())
 	case schema.Type_Which_int8:
-		enc.w.WriteString(capnp.Int8List(l).String())
+		enc.w.WriteString(shark.Int8List(l).String())
 	case schema.Type_Which_int16:
-		enc.w.WriteString(capnp.Int16List(l).String())
+		enc.w.WriteString(shark.Int16List(l).String())
 	case schema.Type_Which_int32:
-		enc.w.WriteString(capnp.Int32List(l).String())
+		enc.w.WriteString(shark.Int32List(l).String())
 	case schema.Type_Which_int64:
-		enc.w.WriteString(capnp.Int64List(l).String())
+		enc.w.WriteString(shark.Int64List(l).String())
 	case schema.Type_Which_uint8:
-		enc.w.WriteString(capnp.UInt8List(l).String())
+		enc.w.WriteString(shark.UInt8List(l).String())
 	case schema.Type_Which_uint16:
-		enc.w.WriteString(capnp.UInt16List(l).String())
+		enc.w.WriteString(shark.UInt16List(l).String())
 	case schema.Type_Which_uint32:
-		enc.w.WriteString(capnp.UInt32List(l).String())
+		enc.w.WriteString(shark.UInt32List(l).String())
 	case schema.Type_Which_uint64:
-		enc.w.WriteString(capnp.UInt64List(l).String())
+		enc.w.WriteString(shark.UInt64List(l).String())
 	case schema.Type_Which_float32:
-		enc.w.WriteString(capnp.Float32List(l).String())
+		enc.w.WriteString(shark.Float32List(l).String())
 	case schema.Type_Which_float64:
-		enc.w.WriteString(capnp.Float64List(l).String())
+		enc.w.WriteString(shark.Float64List(l).String())
 	case schema.Type_Which_data:
-		enc.w.WriteString(capnp.DataList(l).String())
+		enc.w.WriteString(shark.DataList(l).String())
 	case schema.Type_Which_text:
-		enc.w.WriteString(capnp.TextList(l).String())
+		enc.w.WriteString(shark.TextList(l).String())
 	case schema.Type_Which_structType:
 		enc.w.WriteByte('[')
 		for i := 0; i < l.Len(); i++ {
@@ -350,7 +350,7 @@ func (enc *Encoder) marshalList(elem schema.Type, l capnp.List) error {
 			if i > 0 {
 				enc.w.WriteString(", ")
 			}
-			p, err := capnp.PointerList(l).At(i)
+			p, err := shark.PointerList(l).At(i)
 			if err != nil {
 				return err
 			}
@@ -362,7 +362,7 @@ func (enc *Encoder) marshalList(elem schema.Type, l capnp.List) error {
 		enc.w.WriteByte(']')
 	case schema.Type_Which_enum:
 		enc.w.WriteByte('[')
-		il := capnp.UInt16List(l)
+		il := shark.UInt16List(l)
 		typ := elem.Enum().TypeId()
 		// TODO(light): only search for node once
 		for i := 0; i < il.Len(); i++ {
@@ -378,7 +378,7 @@ func (enc *Encoder) marshalList(elem schema.Type, l capnp.List) error {
 			if i > 0 {
 				enc.w.WriteString(", ")
 			}
-			p, err := capnp.PointerList(l).At(i)
+			p, err := shark.PointerList(l).At(i)
 			if err != nil {
 				return err
 			}

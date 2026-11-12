@@ -5,7 +5,7 @@ package rpc
 import (
 	"io"
 
-	"capnproto.org/go/capnp/v3/rpc/transport"
+	"github.com/kumo-rpc/sharkgo/rpc/transport"
 )
 
 type Codec = transport.Codec

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"capnproto.org/go/capnp/v3/exc"
+	"github.com/kumo-rpc/sharkgo/exc"
 	"github.com/stretchr/testify/assert"
 )
 

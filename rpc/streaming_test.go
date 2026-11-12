@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
+	"github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +13,7 @@ import (
 // WaitStreaming retnurs nil.
 func TestStreamingWaitOk(t *testing.T) {
 	ctx := context.Background()
-	client := testcapnp.StreamTest_ServerToClient(&maxPushStream{limit: 1})
+	client := testshark.StreamTest_ServerToClient(&maxPushStream{limit: 1})
 	defer client.Release()
 	assert.NoError(t, client.Push(ctx, nil))
 	assert.NoError(t, client.WaitStreaming())
@@ -23,7 +23,7 @@ func TestStreamingWaitOk(t *testing.T) {
 // it shows up in a subsequent call to WaitStreaming().
 func TestStreamingWaitErr(t *testing.T) {
 	ctx := context.Background()
-	client := testcapnp.StreamTest_ServerToClient(&maxPushStream{limit: 0})
+	client := testshark.StreamTest_ServerToClient(&maxPushStream{limit: 0})
 	defer client.Release()
 	assert.NoError(t, client.Push(ctx, nil))
 	assert.NotNil(t, client.WaitStreaming())
@@ -36,7 +36,7 @@ type maxPushStream struct {
 	limit int // How many calls are permitted?
 }
 
-func (m *maxPushStream) Push(context.Context, testcapnp.StreamTest_push) error {
+func (m *maxPushStream) Push(context.Context, testshark.StreamTest_push) error {
 	m.count++
 	if m.count > m.limit {
 		return fmt.Errorf("Exceeded limit of %v calls", m.limit)

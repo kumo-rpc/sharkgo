@@ -3,13 +3,13 @@ package server_test
 import (
 	"fmt"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/server"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/server"
 )
 
 func ExampleIsServer() {
 	x := int(42)
-	c := capnp.NewClient(server.New([]server.Method{}, x, nil))
+	c := shark.NewClient(server.New([]server.Method{}, x, nil))
 	snapshot := c.Snapshot()
 	brand := snapshot.Brand()
 	snapshot.Release()

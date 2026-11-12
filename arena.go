@@ -1,11 +1,11 @@
-package capnp
+package shark
 
 import (
 	"errors"
 	"sync"
 
-	"capnproto.org/go/capnp/v3/exp/bufferpool"
-	"capnproto.org/go/capnp/v3/internal/str"
+	"github.com/kumo-rpc/sharkgo/exp/bufferpool"
+	"github.com/kumo-rpc/sharkgo/internal/str"
 )
 
 // An Arena loads and allocates segments for a Message.

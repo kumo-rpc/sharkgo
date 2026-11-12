@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 import (
 	"encoding/binary"
@@ -7,9 +7,9 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/packed"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/packed"
 )
 
 // Security limits. Matches C++ implementation.
@@ -225,7 +225,7 @@ func (m *Message) Root() (Ptr, error) {
 // SetRoot sets the message's root object to p.
 func (m *Message) SetRoot(p Ptr) error {
 	// TODO: enforcement of root pointer space is only needed here because
-	// a single call in package capnpc-go (in file fileparts.go) calls
+	// a single call in package shark-go (in file fileparts.go) calls
 	// SetRoot() without first allocating space. This is likely an erroneous
 	// usage and should be investigated in the future. If that is fixed,
 	// then this can be simplified (and improved for performance).

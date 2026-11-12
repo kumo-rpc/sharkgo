@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/pogs"
-	"capnproto.org/go/capnp/v3/rpc"
-	"capnproto.org/go/capnp/v3/rpc/transport"
-	"capnproto.org/go/capnp/v3/server"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/pogs"
+	"github.com/kumo-rpc/sharkgo/rpc"
+	"github.com/kumo-rpc/sharkgo/rpc/transport"
+	"github.com/kumo-rpc/sharkgo/server"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 )
 
 func TestSendDisembargo(t *testing.T) {
@@ -61,8 +61,8 @@ func testSendDisembargo(t *testing.T, sendPrimeTo rpccp.Call_sendResultsTo_Which
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		iptr := capnp.NewInterface(outMsg.Message().Segment(), 0)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		iptr := shark.NewInterface(outMsg.Message().Segment(), 0)
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID: bootQID,
@@ -114,7 +114,7 @@ func testSendDisembargo(t *testing.T, sendPrimeTo rpccp.Call_sendResultsTo_Which
 			return err
 		}
 		callSeq++
-		res, err := call.AllocResults(capnp.ObjectSize{DataSize: 8})
+		res, err := call.AllocResults(shark.ObjectSize{DataSize: 8})
 		if err != nil {
 			return err
 		}
@@ -123,15 +123,15 @@ func testSendDisembargo(t *testing.T, sendPrimeTo rpccp.Call_sendResultsTo_Which
 	}, nil)
 	defer srv.Release()
 	ctxA, cancelA := context.WithCancel(ctx)
-	ansA, releaseCallA := client.SendCall(ctxA, capnp.Send{
-		Method: capnp.Method{
+	ansA, releaseCallA := client.SendCall(ctxA, shark.Send{
+		Method: shark.Method{
 			InterfaceID: interfaceID,
 			MethodID:    methodID,
 		},
-		ArgsSize: capnp.ObjectSize{PointerCount: 1},
-		PlaceArgs: func(s capnp.Struct) error {
+		ArgsSize: shark.ObjectSize{PointerCount: 1},
+		PlaceArgs: func(s shark.Struct) error {
 			id := s.Message().CapTable().Add(srv)
-			ptr := capnp.NewInterface(s.Segment(), id).ToPtr()
+			ptr := shark.NewInterface(s.Segment(), id).ToPtr()
 			return s.SetPtr(0, ptr)
 		},
 	})
@@ -178,17 +178,17 @@ func testSendDisembargo(t *testing.T, sendPrimeTo rpccp.Call_sendResultsTo_Which
 	}
 
 	// 5. Make a pipelined call (call B) on answer
-	sendCall := func(ctx context.Context, n uint64) (*capnp.Answer, capnp.ReleaseFunc) {
-		transform := []capnp.PipelineOp{
+	sendCall := func(ctx context.Context, n uint64) (*shark.Answer, shark.ReleaseFunc) {
+		transform := []shark.PipelineOp{
 			{Field: 0},
 		}
-		return ansA.PipelineSend(ctx, transform, capnp.Send{
-			Method: capnp.Method{
+		return ansA.PipelineSend(ctx, transform, shark.Send{
+			Method: shark.Method{
 				InterfaceID: interfaceID,
 				MethodID:    methodID,
 			},
-			ArgsSize: capnp.ObjectSize{DataSize: 8},
-			PlaceArgs: func(s capnp.Struct) error {
+			ArgsSize: shark.ObjectSize{DataSize: 8},
+			PlaceArgs: func(s shark.Struct) error {
 				s.SetUint64(0, n)
 				return nil
 			},
@@ -201,7 +201,7 @@ func testSendDisembargo(t *testing.T, sendPrimeTo rpccp.Call_sendResultsTo_Which
 		releaseCallB()
 	}()
 	var qidB uint32
-	var bParams capnp.Ptr
+	var bParams shark.Ptr
 	{
 		msg, release, err := recvMessage(ctx, p2)
 		if err != nil {
@@ -239,14 +239,14 @@ func testSendDisembargo(t *testing.T, sendPrimeTo rpccp.Call_sendResultsTo_Which
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		results, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{PointerCount: 1})
+		results, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{PointerCount: 1})
 		if err != nil {
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
-		if err := results.SetPtr(0, capnp.NewInterface(outMsg.Message().Segment(), 0).ToPtr()); err != nil {
+		if err := results.SetPtr(0, shark.NewInterface(outMsg.Message().Segment(), 0).ToPtr()); err != nil {
 			t.Fatal("results.SetPtr:", err)
 		}
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID: qidA,
@@ -325,8 +325,8 @@ func testSendDisembargo(t *testing.T, sendPrimeTo rpccp.Call_sendResultsTo_Which
 	ctxC, cancelC := context.WithCancel(ctx)
 	var (
 		ansCReady    = make(chan struct{})
-		ansC         *capnp.Answer
-		releaseCallC capnp.ReleaseFunc
+		ansC         *shark.Answer
+		releaseCallC shark.ReleaseFunc
 	)
 	go func() {
 		ansC, releaseCallC = sendCall(ctxC, 2)
@@ -497,7 +497,7 @@ func TestRecvDisembargo(t *testing.T) {
 		if err != nil {
 			return fmt.Errorf("capability arg: %v", err)
 		}
-		res, err := call.AllocResults(capnp.ObjectSize{PointerCount: 1})
+		res, err := call.AllocResults(shark.ObjectSize{PointerCount: 1})
 		if err != nil {
 			return err
 		}
@@ -557,17 +557,17 @@ func TestRecvDisembargo(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		params, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{PointerCount: 1})
+		params, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{PointerCount: 1})
 		if err != nil {
 			outMsg.Release()
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
-		err = params.SetPtr(0, capnp.NewInterface(params.Segment(), 0).ToPtr())
+		err = params.SetPtr(0, shark.NewInterface(params.Segment(), 0).ToPtr())
 		if err != nil {
 			outMsg.Release()
-			t.Fatal("capnp.NewStruct.SetPtr:", err)
+			t.Fatal("shark.NewStruct.SetPtr:", err)
 		}
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_call,
 			Call: &rpcCall{
 				QuestionID: callQID,
@@ -789,8 +789,8 @@ func TestIssue3(t *testing.T) {
 		if err != nil {
 			return fmt.Errorf("capability arg: %v", err)
 		}
-		ans, release := in.Interface().Client().SendCall(ctx, capnp.Send{
-			Method: capnp.Method{
+		ans, release := in.Interface().Client().SendCall(ctx, shark.Send{
+			Method: shark.Method{
 				InterfaceID: callbackInterfaceID,
 				MethodID:    callbackMethodID,
 			},
@@ -861,17 +861,17 @@ func TestIssue3(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		params, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{PointerCount: 1})
+		params, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{PointerCount: 1})
 		if err != nil {
 			outMsg.Release()
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
-		err = params.SetPtr(0, capnp.NewInterface(params.Segment(), 0).ToPtr())
+		err = params.SetPtr(0, shark.NewInterface(params.Segment(), 0).ToPtr())
 		if err != nil {
 			outMsg.Release()
-			t.Fatal("capnp.NewStruct.SetPtr:", err)
+			t.Fatal("shark.NewStruct.SetPtr:", err)
 		}
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_call,
 			Call: &rpcCall{
 				QuestionID: callQID,
@@ -919,8 +919,8 @@ func TestIssue3(t *testing.T) {
 		}
 		callbackQID = rmsg.Call.QuestionID
 		if rmsg.Call.InterfaceID != callbackInterfaceID || rmsg.Call.MethodID != callbackMethodID {
-			got := capnp.Method{InterfaceID: rmsg.Call.InterfaceID, MethodID: rmsg.Call.MethodID}
-			want := capnp.Method{InterfaceID: callbackInterfaceID, MethodID: callbackMethodID}
+			got := shark.Method{InterfaceID: rmsg.Call.InterfaceID, MethodID: rmsg.Call.MethodID}
+			want := shark.Method{InterfaceID: callbackInterfaceID, MethodID: callbackMethodID}
 			t.Fatalf("Received call for %v; want %v", got, want)
 		}
 		if rmsg.Call.Target.Which != rpccp.MessageTarget_Which_importedCap {
@@ -938,13 +938,13 @@ func TestIssue3(t *testing.T) {
 		if err != nil {
 			t.Fatal("p2.NewMessage():", err)
 		}
-		results, err := capnp.NewStruct(outMsg.Message().Segment(), capnp.ObjectSize{DataSize: 8})
+		results, err := shark.NewStruct(outMsg.Message().Segment(), shark.ObjectSize{DataSize: 8})
 		if err != nil {
 			outMsg.Release()
-			t.Fatal("capnp.NewStruct:", err)
+			t.Fatal("shark.NewStruct:", err)
 		}
 		results.SetUint64(0, 0xdeadbeef)
-		err = pogs.Insert(rpccp.Message_TypeID, capnp.Struct(outMsg.Message()), &rpcMessage{
+		err = pogs.Insert(rpccp.Message_TypeID, shark.Struct(outMsg.Message()), &rpcMessage{
 			Which: rpccp.Message_Which_return,
 			Return: &rpcReturn{
 				AnswerID:         callbackQID,
@@ -1053,5 +1053,5 @@ type rpcDisembargoContext struct {
 	Which            rpccp.Disembargo_context_Which
 	SenderLoopback   uint32
 	ReceiverLoopback uint32
-	Accept           capnp.Ptr
+	Accept           shark.Ptr
 }

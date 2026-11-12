@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// Type indicates the type of error, mirroring those in rpc.capnp.
+// Type indicates the type of error, mirroring those in rpc.shark.
 type Type int
 
 // Error types.

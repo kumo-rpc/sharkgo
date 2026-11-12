@@ -3,7 +3,7 @@ capnproto schema:
 
 ```
 cd $GOPATH/src/go-capnproto2/example/books
-capnp compile -I ../../std/ -ogo books/books.capnp
+shark compile -I ../../std/ -ogo books/books.capnp
 ```
 
 Then build and run each example:

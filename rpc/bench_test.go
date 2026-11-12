@@ -6,10 +6,10 @@ import (
 	"net"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/flowcontrol"
-	"capnproto.org/go/capnp/v3/rpc"
-	testcp "capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/flowcontrol"
+	"github.com/kumo-rpc/sharkgo/rpc"
+	testcp "github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
 )
 
 type benchmarkStreamingConfig struct {
@@ -39,7 +39,7 @@ func benchmarkStreaming(b *testing.B, cfg *benchmarkStreamingConfig) {
 	p1, p2 := net.Pipe()
 	srv := testcp.StreamTest_ServerToClient(nullStream{})
 	conn1 := rpc.NewConn(rpc.NewStreamTransport(p1), &rpc.Options{
-		BootstrapClient: capnp.Client(srv),
+		BootstrapClient: shark.Client(srv),
 	})
 	defer conn1.Close()
 	conn2 := rpc.NewConn(rpc.NewStreamTransport(p2), nil)
@@ -77,7 +77,7 @@ func BenchmarkPingPong(b *testing.B) {
 	srv := testcp.PingPong_ServerToClient(pingPongServer{})
 	conn1 := rpc.NewConn(rpc.NewStreamTransport(p2), &rpc.Options{
 		Logger:          testErrorReporter{tb: b},
-		BootstrapClient: capnp.Client(srv),
+		BootstrapClient: shark.Client(srv),
 	})
 	defer func() {
 		<-conn1.Done()

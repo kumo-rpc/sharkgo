@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"capnproto.org/go/capnp/v3/exp/clock"
+	"github.com/kumo-rpc/sharkgo/exp/clock"
 )
 
 func (s Snapshot) report(t *testing.T) {

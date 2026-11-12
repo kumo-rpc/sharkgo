@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/demo/books"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/demo/books"
 )
 
 func Example_book() {
@@ -18,7 +18,7 @@ func Example_book() {
 
 func writer(out io.Writer) {
 	// Make a brand new empty message.  A Message allocates Cap'n Proto structs.
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
+	msg, seg := shark.NewSingleSegmentMessage(nil)
 
 	// Create a new Book struct.  Every message must have a root struct.
 	book, err := books.NewRootBook(seg)
@@ -29,7 +29,7 @@ func writer(out io.Writer) {
 	book.SetPageCount(1440)
 
 	// Write the message to stdout.
-	err = capnp.NewEncoder(out).Encode(msg)
+	err = shark.NewEncoder(out).Encode(msg)
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +37,7 @@ func writer(out io.Writer) {
 
 func reader(in io.Reader) {
 	// Read the message from stdin.
-	msg, err := capnp.NewDecoder(in).Decode()
+	msg, err := shark.NewDecoder(in).Decode()
 	if err != nil {
 		panic(err)
 	}

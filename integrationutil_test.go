@@ -1,4 +1,4 @@
-package capnp_test
+package shark_test
 
 import (
 	"bytes"
@@ -8,9 +8,9 @@ import (
 	"runtime"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	air "capnproto.org/go/capnp/v3/internal/aircraftlib"
-	"capnproto.org/go/capnp/v3/internal/capnptool"
+	"github.com/kumo-rpc/sharkgo"
+	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
+	"github.com/kumo-rpc/sharkgo/internal/capnptool"
 )
 
 const schemaPath = "internal/aircraftlib/aircraft.capnp"
@@ -27,8 +27,8 @@ func initNester(t *testing.T, n air.Nester1Capn, strs ...string) {
 	}
 }
 
-func zdateFilledMessage(t testing.TB, n int32) *capnp.Message {
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
+func zdateFilledMessage(t testing.TB, n int32) *shark.Message {
+	msg, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatal(err)
@@ -52,8 +52,8 @@ func zdateFilledMessage(t testing.TB, n int32) *capnp.Message {
 	return msg
 }
 
-func zdataFilledMessage(t testing.TB, n int) *capnp.Message {
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
+func zdataFilledMessage(t testing.TB, n int) *shark.Message {
+	msg, seg := shark.NewSingleSegmentMessage(nil)
 	z, err := air.NewRootZ(seg)
 	if err != nil {
 		t.Fatal(err)

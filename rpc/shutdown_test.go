@@ -5,10 +5,10 @@ import (
 	"net"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/rpc"
-	"capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
-	"capnproto.org/go/capnp/v3/rpc/transport"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/rpc"
+	"github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
+	"github.com/kumo-rpc/sharkgo/rpc/transport"
 )
 
 // TestRejectOnDisconnect verifies that, when a connection is dropped, outstanding calls
@@ -27,21 +27,21 @@ func TestRejectOnDisconnect(t *testing.T) {
 	readyCh := make(chan struct{})
 
 	serverRpcConn := rpc.NewConn(transport.NewStream(serverNetConn), &rpc.Options{
-		BootstrapClient: capnp.Client(testcapnp.PingPong_ServerToClient(dropPingServer{
+		BootstrapClient: shark.Client(testshark.PingPong_ServerToClient(dropPingServer{
 			readyCh: readyCh,
 		})),
 	})
 
 	clientRpcConn := rpc.NewConn(transport.NewStream(clientNetConn), nil)
 
-	client := testcapnp.PingPong(clientRpcConn.Bootstrap(ctx))
+	client := testshark.PingPong(clientRpcConn.Bootstrap(ctx))
 	defer client.Release()
 	future, release := client.EchoNum(ctx, nil)
 	defer release()
 	<-readyCh
 	serverNetConn.Close()
 	_, err := future.Struct()
-	if !capnp.IsDisconnected(err) {
+	if !shark.IsDisconnected(err) {
 		t.Fatalf("Wanted disconnected error but got %v", err)
 	}
 	<-serverRpcConn.Done()
@@ -52,7 +52,7 @@ type dropPingServer struct {
 	readyCh chan<- struct{}
 }
 
-func (s dropPingServer) EchoNum(ctx context.Context, p testcapnp.PingPong_echoNum) error {
+func (s dropPingServer) EchoNum(ctx context.Context, p testshark.PingPong_echoNum) error {
 	p.Go()
 	close(s.readyCh)
 	<-ctx.Done()

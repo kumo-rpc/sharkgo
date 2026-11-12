@@ -1,4 +1,4 @@
-package capnp
+package shark
 
 import (
 	"sync"

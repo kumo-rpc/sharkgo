@@ -1,5 +1,5 @@
 // Package rpc implements the Cap'n Proto RPC protocol.
-package rpc // import "capnproto.org/go/capnp/v3/rpc"
+package rpc // import "github.com/kumo-rpc/sharkgo/rpc"
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/exp/spsc"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/internal/syncutil"
-	"capnproto.org/go/capnp/v3/rpc/transport"
-	rpccp "capnproto.org/go/capnp/v3/std/capnp/rpc"
-	"capnproto.org/go/capnp/v3/util"
-	"capnproto.org/go/capnp/v3/util/deferred"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/exp/spsc"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/internal/syncutil"
+	"github.com/kumo-rpc/sharkgo/rpc/transport"
+	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
+	"github.com/kumo-rpc/sharkgo/util"
+	"github.com/kumo-rpc/sharkgo/util/deferred"
 )
 
 /*
@@ -46,9 +46,9 @@ by the application.  This reduces contention, but more importantly,
 prevents deadlocks.  An application- provided operation can (and
 commonly will) call back into the Conn.
 
-Note that importantly, capnp.ClientHooks should be considered
+Note that importantly, shark.ClientHooks should be considered
 potentially "provided by the application," since it is an interface,
-and since capnp.Clients and capnp.Promises may call into ClientHooks,
+and since shark.Clients and shark.Promises may call into ClientHooks,
 methods on those should not be invoked while holding the lock; in the
 past this has been the source of *many* bugs.
 
@@ -85,7 +85,7 @@ type Conn struct {
 	remotePeerID PeerID
 	network      Network
 
-	bootstrap    capnp.Client
+	bootstrap    shark.Client
 	er           errReporter
 	abortTimeout time.Duration
 	baseContext  func() context.Context
@@ -181,7 +181,7 @@ type Options struct {
 	// remote peer when receiving a Bootstrap message.  NewConn "steals"
 	// this reference: it will release the client when the connection is
 	// closed.
-	BootstrapClient capnp.Client
+	BootstrapClient shark.Client
 
 	// Logger is used for logging by the RPC system, including errors that
 	// occur while the Conn is receiving messages from the remote vat.
@@ -322,16 +322,16 @@ func (c *Conn) RemotePeerID() PeerID {
 
 // Bootstrap returns the remote vat's bootstrap interface.  This creates
 // a new client that the caller is responsible for releasing.
-func (c *Conn) Bootstrap(ctx context.Context) (bc capnp.Client) {
-	return withLockedConn1(c, func(c *lockedConn) (bc capnp.Client) {
+func (c *Conn) Bootstrap(ctx context.Context) (bc shark.Client) {
+	return withLockedConn1(c, func(c *lockedConn) (bc shark.Client) {
 		// Start a background task to prevent the conn from shutting down
 		// while sending the bootstrap message.
 		if !c.startTask() {
-			return capnp.ErrorClient(rpcerr.Disconnected(errors.New("connection closed")))
+			return shark.ErrorClient(rpcerr.Disconnected(errors.New("connection closed")))
 		}
 		defer c.tasks.Done()
 
-		q := c.newQuestion(capnp.Method{})
+		q := c.newQuestion(shark.Method{})
 		bc = q.p.Answer().Client().AddRef()
 		bc.AttachReleaser(func() {
 			q.p.ReleaseClients()
@@ -473,7 +473,7 @@ func (c *lockedConn) release(dq *deferred.Queue) {
 
 func (c *lockedConn) releaseBootstrap(dq *deferred.Queue) {
 	dq.Defer(c.bootstrap.Release)
-	c.bootstrap = capnp.Client{}
+	c.bootstrap = shark.Client{}
 }
 
 func (c *lockedConn) releaseExports(dq *deferred.Queue, exports []*expent) {
@@ -857,7 +857,7 @@ func (c *Conn) handleCall(ctx context.Context, in transport.IncomingMessage) err
 			return nil
 		}
 
-		recv := capnp.Recv{
+		recv := shark.Recv{
 			Args:        p.args,
 			Method:      p.method,
 			ReleaseArgs: util.Idempotent(in.Release),
@@ -920,7 +920,7 @@ func (c *Conn) handleCall(ctx context.Context, in transport.IncomingMessage) err
 					c.er.ReportError(err)
 					return nil
 				}
-				sub, err := capnp.Transform(content, p.target.transform)
+				sub, err := shark.Transform(content, p.target.transform)
 				if err != nil {
 					// Not reporting, as this is the caller's fault.
 					ans.sendException(dq, err)
@@ -928,9 +928,9 @@ func (c *Conn) handleCall(ctx context.Context, in transport.IncomingMessage) err
 					return nil
 				}
 				iface := sub.Interface()
-				var tgt capnp.ClientSnapshot
+				var tgt shark.ClientSnapshot
 				if sub.IsValid() && !iface.IsValid() {
-					tgt = capnp.ErrorClient(rpcerr.Failed(ErrNotACapability)).Snapshot()
+					tgt = shark.ErrorClient(rpcerr.Failed(ErrNotACapability)).Snapshot()
 				} else {
 					capID := iface.Capability()
 					capTable := tgtAns.returner.resultsCapTable
@@ -979,7 +979,7 @@ func (c *Conn) handleCall(ctx context.Context, in transport.IncomingMessage) err
 // reserved.
 type promisedPipelineCaller struct {
 	ready      chan struct{}
-	underlying capnp.PipelineCaller
+	underlying shark.PipelineCaller
 }
 
 func newPromisedPipelineCaller() *promisedPipelineCaller {
@@ -990,44 +990,44 @@ func newPromisedPipelineCaller() *promisedPipelineCaller {
 }
 
 // resolve() resolves p to result.
-func (p *promisedPipelineCaller) resolve(result capnp.PipelineCaller) {
+func (p *promisedPipelineCaller) resolve(result shark.PipelineCaller) {
 	p.underlying = result
 	close(p.ready)
 }
 
 func (p *promisedPipelineCaller) PipelineSend(
 	ctx context.Context,
-	transform []capnp.PipelineOp,
-	s capnp.Send,
-) (*capnp.Answer, capnp.ReleaseFunc) {
+	transform []shark.PipelineOp,
+	s shark.Send,
+) (*shark.Answer, shark.ReleaseFunc) {
 	<-p.ready
 	return p.underlying.PipelineSend(ctx, transform, s)
 }
 
 func (p *promisedPipelineCaller) PipelineRecv(
 	ctx context.Context,
-	transform []capnp.PipelineOp,
-	r capnp.Recv,
-) capnp.PipelineCaller {
+	transform []shark.PipelineOp,
+	r shark.Recv,
+) shark.PipelineCaller {
 	<-p.ready
 	return p.underlying.PipelineRecv(ctx, transform, r)
 }
 
 type parsedCall struct {
 	target parsedMessageTarget
-	method capnp.Method
-	args   capnp.Struct
+	method shark.Method
+	args   shark.Struct
 }
 
 type parsedMessageTarget struct {
 	which          rpccp.MessageTarget_Which
 	importedCap    exportID
 	promisedAnswer answerID
-	transform      []capnp.PipelineOp
+	transform      []shark.PipelineOp
 }
 
 func (c *lockedConn) parseCall(dq *deferred.Queue, p *parsedCall, call rpccp.Call) error {
-	p.method = capnp.Method{
+	p.method = shark.Method{
 		InterfaceID: call.InterfaceId(),
 		MethodID:    call.MethodId(),
 	}
@@ -1075,15 +1075,15 @@ func parseMessageTarget(pt *parsedMessageTarget, tgt rpccp.MessageTarget) error 
 	return nil
 }
 
-func parseTransform(list rpccp.PromisedAnswer_Op_List) ([]capnp.PipelineOp, error) {
-	ops := make([]capnp.PipelineOp, 0, list.Len())
+func parseTransform(list rpccp.PromisedAnswer_Op_List) ([]shark.PipelineOp, error) {
+	ops := make([]shark.PipelineOp, 0, list.Len())
 	for i := 0; i < list.Len(); i++ {
 		li := list.At(i)
 		switch li.Which() {
 		case rpccp.PromisedAnswer_Op_Which_noop:
 			// do nothing
 		case rpccp.PromisedAnswer_Op_Which_getPointerField:
-			ops = append(ops, capnp.PipelineOp{Field: li.GetPointerField()})
+			ops = append(ops, shark.PipelineOp{Field: li.GetPointerField()})
 		default:
 			return nil, rpcerr.Failed(errors.New(
 				"transform element " + str.Itod(i) +
@@ -1264,7 +1264,7 @@ func (c *Conn) handleReturn(ctx context.Context, in transport.IncomingMessage) e
 	})
 }
 
-func (c *lockedConn) parseReturn(dq *deferred.Queue, ret rpccp.Return, called [][]capnp.PipelineOp) parsedReturn {
+func (c *lockedConn) parseReturn(dq *deferred.Queue, ret rpccp.Return, called [][]shark.PipelineOp) parsedReturn {
 	switch w := ret.Which(); w {
 	case rpccp.Return_Which_results:
 		r, err := ret.Results()
@@ -1280,7 +1280,7 @@ func (c *lockedConn) parseReturn(dq *deferred.Queue, ret rpccp.Return, called []
 		var disembargoes []senderLoopback
 		mtab := ret.Message().CapTable()
 		for _, xform := range called {
-			p2, _ := capnp.Transform(content, xform)
+			p2, _ := shark.Transform(content, xform)
 			iface := p2.Interface()
 			i := iface.Capability()
 			if !mtab.Contains(iface) || !locals.has(uint(i)) || embargoCaps.has(uint(i)) {
@@ -1328,7 +1328,7 @@ func (c *lockedConn) parseReturn(dq *deferred.Queue, ret rpccp.Return, called []
 }
 
 type parsedReturn struct {
-	result        capnp.Ptr
+	result        shark.Ptr
 	disembargoes  []senderLoopback
 	err           error
 	parseFailed   bool
@@ -1387,10 +1387,10 @@ func (c *Conn) handleFinish(ctx context.Context, in transport.IncomingMessage) e
 // error indicates a protocol violation.
 //
 // The caller must be holding onto c.lk.
-func (c *lockedConn) recvCap(d rpccp.CapDescriptor) (capnp.Client, error) {
+func (c *lockedConn) recvCap(d rpccp.CapDescriptor) (shark.Client, error) {
 	switch w := d.Which(); w {
 	case rpccp.CapDescriptor_Which_none:
-		return capnp.Client{}, nil
+		return shark.Client{}, nil
 	case rpccp.CapDescriptor_Which_senderHosted:
 		id := importID(d.SenderHosted())
 		return c.addImport(id, false), nil
@@ -1404,7 +1404,7 @@ func (c *lockedConn) recvCap(d rpccp.CapDescriptor) (capnp.Client, error) {
 			// senderHosted:
 			thirdPartyDesc, err := d.ThirdPartyHosted()
 			if err != nil {
-				return capnp.Client{}, exc.WrapError(
+				return shark.Client{}, exc.WrapError(
 					"reading ThridPartyCapDescriptor",
 					err,
 				)
@@ -1417,7 +1417,7 @@ func (c *lockedConn) recvCap(d rpccp.CapDescriptor) (capnp.Client, error) {
 		id := exportID(d.ReceiverHosted())
 		ent := c.findExport(id)
 		if ent == nil {
-			return capnp.Client{}, rpcerr.Failed(errors.New(
+			return shark.Client{}, rpcerr.Failed(errors.New(
 				"receive capability: invalid export " + str.Utod(id),
 			))
 		}
@@ -1425,35 +1425,35 @@ func (c *lockedConn) recvCap(d rpccp.CapDescriptor) (capnp.Client, error) {
 	case rpccp.CapDescriptor_Which_receiverAnswer:
 		promisedAnswer, err := d.ReceiverAnswer()
 		if err != nil {
-			return capnp.Client{}, rpcerr.WrapFailed("receive capability: reading promised answer", err)
+			return shark.Client{}, rpcerr.WrapFailed("receive capability: reading promised answer", err)
 		}
 		rawTransform, err := promisedAnswer.Transform()
 		if err != nil {
-			return capnp.Client{}, rpcerr.WrapFailed("receive capability: reading promised answer transform", err)
+			return shark.Client{}, rpcerr.WrapFailed("receive capability: reading promised answer transform", err)
 		}
 		transform, err := parseTransform(rawTransform)
 		if err != nil {
-			return capnp.Client{}, rpcerr.WrapFailed("read target transform", err)
+			return shark.Client{}, rpcerr.WrapFailed("read target transform", err)
 		}
 
 		id := answerID(promisedAnswer.QuestionId())
 		ans, ok := c.lk.answers[id]
 		if !ok {
-			return capnp.Client{}, rpcerr.Failed(errors.New(
+			return shark.Client{}, rpcerr.Failed(errors.New(
 				"receive capability: no such question id: " + str.Utod(id),
 			))
 		}
 
 		return c.recvCapReceiverAnswer(ans, transform), nil
 	default:
-		return capnp.ErrorClient(rpcerr.Failed(errors.New(
+		return shark.ErrorClient(rpcerr.Failed(errors.New(
 			"unknown CapDescriptor type " + w.String(),
 		))), nil
 	}
 }
 
 // Helper for lockedConn.recvCap(); handles the receiverAnswer case.
-func (c *lockedConn) recvCapReceiverAnswer(ans *ansent, transform []capnp.PipelineOp) capnp.Client {
+func (c *lockedConn) recvCapReceiverAnswer(ans *ansent, transform []shark.PipelineOp) shark.Client {
 	if ans.promise != nil {
 		// Still unresolved.
 		future := ans.promise.Answer().Future()
@@ -1464,20 +1464,20 @@ func (c *lockedConn) recvCapReceiverAnswer(ans *ansent, transform []capnp.Pipeli
 	}
 
 	if ans.err != nil {
-		return capnp.ErrorClient(ans.err)
+		return shark.ErrorClient(ans.err)
 	}
 
 	ptr, err := ans.returner.results.Content()
 	if err != nil {
-		return capnp.ErrorClient(rpcerr.WrapFailed("except.Failed reading results", err))
+		return shark.ErrorClient(rpcerr.WrapFailed("except.Failed reading results", err))
 	}
-	ptr, err = capnp.Transform(ptr, transform)
+	ptr, err = shark.Transform(ptr, transform)
 	if err != nil {
-		return capnp.ErrorClient(rpcerr.WrapFailed("Applying transform to results", err))
+		return shark.ErrorClient(rpcerr.WrapFailed("Applying transform to results", err))
 	}
 	iface := ptr.Interface()
 	if !iface.IsValid() {
-		return capnp.ErrorClient(rpcerr.Failed(errors.New("Result is not a capability")))
+		return shark.ErrorClient(rpcerr.Failed(errors.New("Result is not a capability")))
 	}
 
 	return iface.Client().AddRef()
@@ -1485,8 +1485,8 @@ func (c *lockedConn) recvCapReceiverAnswer(ans *ansent, transform []capnp.Pipeli
 
 // Returns whether the client should be treated as local, for the purpose of
 // embargoes.
-func (c *lockedConn) isLocalClient(client capnp.Client) bool {
-	if (client == capnp.Client{}) {
+func (c *lockedConn) isLocalClient(client shark.Client) bool {
+	if (client == shark.Client{}) {
 		return false
 	}
 
@@ -1509,7 +1509,7 @@ func (c *lockedConn) isLocalClient(client capnp.Client) bool {
 		panic("TODO: 3PH")
 	}
 
-	if pc, ok := bv.(capnp.PipelineClient); ok {
+	if pc, ok := bv.(shark.PipelineClient); ok {
 		// Same logic re: proxying as with imports:
 		if q, ok := c.getAnswerQuestion(pc.Answer()); ok {
 			if q.c == (*Conn)(c) {
@@ -1523,7 +1523,7 @@ func (c *lockedConn) isLocalClient(client capnp.Client) bool {
 	}
 
 	if _, ok := bv.(error); ok {
-		// Returned by capnp.ErrorClient. No need to treat this as
+		// Returned by shark.ErrorClient. No need to treat this as
 		// local; all methods will just return the error anyway,
 		// so violating E-order will have no effect on the results.
 		return false
@@ -1537,19 +1537,19 @@ func (c *lockedConn) isLocalClient(client capnp.Client) bool {
 // the capability table that represent capabilities in the local vat.
 //
 // The caller must be holding onto c.lk.
-func (c *lockedConn) recvPayload(dq *deferred.Queue, payload rpccp.Payload) (_ capnp.Ptr, locals uintSet, _ error) {
+func (c *lockedConn) recvPayload(dq *deferred.Queue, payload rpccp.Payload) (_ shark.Ptr, locals uintSet, _ error) {
 	if !payload.IsValid() {
 		// null pointer; in this case we can treat the cap table as being empty
 		// and just return.
-		return capnp.Ptr{}, nil, nil
+		return shark.Ptr{}, nil, nil
 	}
 	if payload.Message().CapTable().Len() != 0 {
 		// RecvMessage likely violated its invariant.
-		return capnp.Ptr{}, nil, rpcerr.WrapFailed("read payload", ErrCapTablePopulated)
+		return shark.Ptr{}, nil, rpcerr.WrapFailed("read payload", ErrCapTablePopulated)
 	}
 	p, err := payload.Content()
 	if err != nil {
-		return capnp.Ptr{}, nil, rpcerr.WrapFailed("read payload", err)
+		return shark.Ptr{}, nil, rpcerr.WrapFailed("read payload", err)
 	}
 	ptab, err := payload.CapTable()
 	if err != nil {
@@ -1562,7 +1562,7 @@ func (c *lockedConn) recvPayload(dq *deferred.Queue, payload rpccp.Payload) (_ c
 	mtab := payload.Message().CapTable()
 	mtab.Reset()
 
-	var cl capnp.Client
+	var cl shark.Client
 	for i := 0; i < ptab.Len(); i++ {
 		if cl, err = c.recvCap(ptab.At(i)); err != nil {
 			// It's not safe to release clients while holding the connection lock,
@@ -1650,7 +1650,7 @@ func (c *Conn) handleDisembargo(ctx context.Context, in transport.IncomingMessag
 		e.lift()
 
 	case rpccp.Disembargo_context_Which_senderLoopback:
-		snapshot, err := withLockedConn2(c, func(c *lockedConn) (_ capnp.ClientSnapshot, err error) {
+		snapshot, err := withLockedConn2(c, func(c *lockedConn) (_ shark.ClientSnapshot, err error) {
 			switch tgt.which {
 			case rpccp.MessageTarget_Which_promisedAnswer:
 				return c.getAnswerSnapshot(
@@ -1715,7 +1715,7 @@ func (c *Conn) handleDisembargo(ctx context.Context, in transport.IncomingMessag
 				}
 
 				brand := snapshot.Brand()
-				if pc, ok := brand.Value.(capnp.PipelineClient); ok {
+				if pc, ok := brand.Value.(shark.PipelineClient); ok {
 					if q, ok := c.getAnswerQuestion(pc.Answer()); ok {
 						if q.c == (*Conn)(c) {
 							pa, err := tgt.NewPromisedAnswer()
@@ -1781,8 +1781,8 @@ func (c *Conn) handleDisembargo(ctx context.Context, in transport.IncomingMessag
 
 func (c *lockedConn) getAnswerSnapshot(
 	id answerID,
-	transform []capnp.PipelineOp,
-) (_ capnp.ClientSnapshot, err error) {
+	transform []shark.PipelineOp,
+) (_ shark.ClientSnapshot, err error) {
 	ans := c.lk.answers[id]
 	if ans == nil {
 		err = rpcerr.Failed(errors.New(
@@ -1806,7 +1806,7 @@ func (c *lockedConn) getAnswerSnapshot(
 		return
 	}
 
-	var content capnp.Ptr
+	var content shark.Ptr
 	if content, err = ans.returner.results.Content(); err != nil {
 		err = rpcerr.Failed(errors.New(
 			"incoming disembargo: read answer ID " +
@@ -1815,8 +1815,8 @@ func (c *lockedConn) getAnswerSnapshot(
 		return
 	}
 
-	var ptr capnp.Ptr
-	if ptr, err = capnp.Transform(content, transform); err != nil {
+	var ptr shark.Ptr
+	if ptr, err = shark.Transform(content, transform); err != nil {
 		err = rpcerr.Failed(errors.New(
 			"incoming disembargo: read answer ID " +
 				str.Utod(id) + ": " + err.Error(),
@@ -1834,7 +1834,7 @@ func (c *lockedConn) getAnswerSnapshot(
 	caps := ans.returner.resultsCapTable
 	capID := iface.Capability()
 	if int(capID) >= len(caps) {
-		return capnp.ClientSnapshot{}, nil
+		return shark.ClientSnapshot{}, nil
 	}
 
 	return caps[capID].AddRef(), nil
@@ -2016,7 +2016,7 @@ type incomingMessage struct {
 type asyncSend struct {
 	send    func() error
 	onSent  func(error)
-	release capnp.ReleaseFunc
+	release shark.ReleaseFunc
 }
 
 func (as asyncSend) Abort(err error) {

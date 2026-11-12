@@ -1,21 +1,21 @@
-package capnp_test
+package shark_test
 
 import (
 	"errors"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
+	"github.com/kumo-rpc/sharkgo"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCapTable(t *testing.T) {
 	t.Parallel()
 
-	var ct capnp.CapTable
+	var ct shark.CapTable
 
 	assert.Zero(t, ct.Len(),
 		"zero-value CapTable should be empty")
-	assert.Zero(t, ct.Add(capnp.Client{}),
+	assert.Zero(t, ct.Add(shark.Client{}),
 		"first entry should have CapabilityID(0)")
 	assert.Equal(t, 1, ct.Len(),
 		"should increase length after adding capability")
@@ -23,12 +23,12 @@ func TestCapTable(t *testing.T) {
 	ct.Reset()
 	assert.Zero(t, ct.Len(),
 		"zero-value CapTable should be empty after Reset()")
-	ct.Reset(capnp.Client{}, capnp.Client{})
+	ct.Reset(shark.Client{}, shark.Client{})
 	assert.Equal(t, 2, ct.Len(),
 		"zero-value CapTable should be empty after Reset(c, c)")
 
 	errTest := errors.New("test")
-	ct.Set(capnp.CapabilityID(0), capnp.ErrorClient(errTest))
+	ct.Set(shark.CapabilityID(0), shark.ErrorClient(errTest))
 	snapshot := ct.At(0).Snapshot()
 	defer snapshot.Release()
 	err := snapshot.Brand().Value.(error)

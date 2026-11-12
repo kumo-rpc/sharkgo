@@ -1,10 +1,10 @@
-package capnp
+package shark
 
 import (
 	"errors"
 
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/internal/str"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/internal/str"
 )
 
 // Struct is a pointer to a struct.

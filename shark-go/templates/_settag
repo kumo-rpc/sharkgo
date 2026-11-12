@@ -1,0 +1,3 @@
+{{if .Field.HasDiscriminant -}}
+shark.Struct(s).SetUint16({{.Node.DiscriminantOffset}}, {{.Field.DiscriminantValue}})
+{{end -}}

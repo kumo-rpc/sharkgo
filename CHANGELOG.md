@@ -2,14 +2,14 @@
 
 ## 2.17.0
 
-- Add `capnp.Canonicalize` function that implements the
+- Add `shark.Canonicalize` function that implements the
   [canonicalization](https://capnproto.org/encoding.html#canonicalization)
   algorithm.  ([#92](https://github.com/capnproto/go-capnproto2/issues/92))
 - Zero-sized struct pointers are now written with an offset of
   -1 to distinguish them from a null pointer.
   ([#92](https://github.com/capnproto/go-capnproto2/issues/92))
 - Better support for alternate `Arena` implementations
-  - [Document `Arena` contract](https://godoc.org/capnproto.org/go/capnp/v3#Arena)
+  - [Document `Arena` contract](https://godoc.org/github.com/kumo-rpc/sharkgo#Arena)
     in more detail
   - Permit an `Arena` to have a single empty segment in `NewMessage`
 - `Arena` allocation optimizations: both `SingleSegment` and
@@ -37,20 +37,20 @@
 
 ## 2.15.0
 
-- capnpc-go now fails when a file does not include an import annotation.
+- shark-go now fails when a file does not include an import annotation.
   ([#41](https://github.com/capnproto/go-capnproto2/issues/41))
 - Remove rbtree dependency ([#80](https://github.com/capnproto/go-capnproto2/issues/80))
-- Add option to reduce allocations in `capnp.Decoder`
+- Add option to reduce allocations in `shark.Decoder`
   ([#79](https://github.com/capnproto/go-capnproto2/issues/79))
 - Add `String()` methods for lists
   ([#85](https://github.com/capnproto/go-capnproto2/issues/85))
-- Add `String()` methods to schema.capnp.go
+- Add `String()` methods to schema.shark.go
   ([#83](https://github.com/capnproto/go-capnproto2/issues/83))
 
 ## 2.14.1
 
 - Use [new Go generated code convention](https://golang.org/s/generatedcode) in
-  capnpc-go output ([#78](https://github.com/capnproto/go-capnproto2/issues/78))
+  shark-go output ([#78](https://github.com/capnproto/go-capnproto2/issues/78))
 
 ## Retroactive Releases
 
@@ -106,7 +106,7 @@ release.
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.11.1">2.11.1</a></th>
-      <td>Fix packed reader behavior on certain readers (<a href="https://github.com/capnproto/go-capnproto2/issues/49">#49</a>), add <code>capnp.UnmarshalPacked</code> function that performs faster, and reduce locking overhead of segment maps</td>
+      <td>Fix packed reader behavior on certain readers (<a href="https://github.com/capnproto/go-capnproto2/issues/49">#49</a>), add <code>shark.UnmarshalPacked</code> function that performs faster, and reduce locking overhead of segment maps</td>
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.11.0">2.11.0</a></th>
@@ -138,7 +138,7 @@ release.
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.6.1">2.6.1</a></th>
-      <td>Strip NUL byte from <code>TextList.BytesAt</code> and fix capnpc-go output for struct groups</td>
+      <td>Strip NUL byte from <code>TextList.BytesAt</code> and fix shark-go output for struct groups</td>
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.6.0">2.6.0</a></th>
@@ -146,7 +146,7 @@ release.
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.5.1">2.5.1</a></th>
-      <td>Fix capnpc-go regression (<a href="https://github.com/capnproto/go-capnproto2/issues/29">#29</a>) and strip trailing NUL byte in TextBytes accessor</td>
+      <td>Fix shark-go regression (<a href="https://github.com/capnproto/go-capnproto2/issues/29">#29</a>) and strip trailing NUL byte in TextBytes accessor</td>
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.5.0">2.5.0</a></th>
@@ -182,7 +182,7 @@ release.
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.0.0">2.0.0</a></th>
-      <td>First release under <code>capnproto.org/go/capnp/v3</code></td>
+      <td>First release under <code>github.com/kumo-rpc/sharkgo</code></td>
     </tr>
   </tbody>
 </table>

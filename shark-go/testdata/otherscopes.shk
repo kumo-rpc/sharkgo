@@ -1,0 +1,11 @@
+# File to be imported from scopes.shark.
+
+using Go = import "go.shk";
+
+@0x9c339b0568fe60ba;
+
+$Go.package("otherscopes");
+$Go.import("github.com/kumo-rpc/sharkgo/shark-go/testdata/otherscopes");
+
+struct Foo @0xd127518fcfe6191d {
+}

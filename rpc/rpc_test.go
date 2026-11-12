@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/rpc/internal/testcapnp"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/rpc/internal/testshark"
 )
 
 func TestConnection_BaseContext(t *testing.T) {
@@ -20,9 +20,9 @@ func TestConnection_BaseContext(t *testing.T) {
 		doneCh := make(chan struct{}, 1)
 
 		go func() {
-			bootstrapClient := testcapnp.StreamTest_ServerToClient(slowStreamTestServer{})
+			bootstrapClient := testshark.StreamTest_ServerToClient(slowStreamTestServer{})
 			conn := NewConn(NewStreamTransport(server), &Options{
-				BootstrapClient: capnp.Client(bootstrapClient),
+				BootstrapClient: shark.Client(bootstrapClient),
 			})
 			defer conn.Close()
 
@@ -37,10 +37,10 @@ func TestConnection_BaseContext(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client := testcapnp.StreamTest(conn.Bootstrap(ctx))
+			client := testshark.StreamTest(conn.Bootstrap(ctx))
 			defer client.Release()
 
-			err := client.Push(ctx, func(st testcapnp.StreamTest_push_Params) error {
+			err := client.Push(ctx, func(st testshark.StreamTest_push_Params) error {
 				return st.SetData(make([]byte, 1))
 			})
 
@@ -67,9 +67,9 @@ func TestConnection_BaseContext(t *testing.T) {
 			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 
-			bootstrapClient := testcapnp.StreamTest_ServerToClient(slowStreamTestServer{})
+			bootstrapClient := testshark.StreamTest_ServerToClient(slowStreamTestServer{})
 			conn := NewConn(NewStreamTransport(server), &Options{
-				BootstrapClient: capnp.Client(bootstrapClient),
+				BootstrapClient: shark.Client(bootstrapClient),
 				BaseContext: func() context.Context {
 					return ctx
 				},
@@ -97,7 +97,7 @@ func TestConnection_BaseContext(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client := testcapnp.StreamTest(conn.Bootstrap(ctx))
+			client := testshark.StreamTest(conn.Bootstrap(ctx))
 			defer client.Release()
 
 			if err := client.Resolve(ctx); err != nil {
@@ -107,7 +107,7 @@ func TestConnection_BaseContext(t *testing.T) {
 			clientConnectedCh <- struct{}{}
 			<-contextCancelledCh
 
-			err := client.Push(ctx, func(st testcapnp.StreamTest_push_Params) error {
+			err := client.Push(ctx, func(st testshark.StreamTest_push_Params) error {
 				return st.SetData(make([]byte, 1))
 			})
 

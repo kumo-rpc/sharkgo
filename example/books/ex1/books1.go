@@ -4,12 +4,11 @@ import (
 	"os"
 
 	"books"
-	"capnproto.org/go/capnp/v3"
 )
 
 func main() {
 	// Make a brand new empty message.  A Message allocates Cap'n Proto structs.
-	msg, seg := capnp.NewSingleSegmentMessage(nil)
+	msg, seg := shark.NewSingleSegmentMessage(nil)
 
 	// Create a new Book struct.  Every message must have a root struct.
 	book, err := books.NewRootBook(seg)
@@ -20,7 +19,7 @@ func main() {
 	book.SetPageCount(1440)
 
 	// Write the message to stdout.
-	err = capnp.NewEncoder(os.Stdout).Encode(msg)
+	err = shark.NewEncoder(os.Stdout).Encode(msg)
 	if err != nil {
 		panic(err)
 	}

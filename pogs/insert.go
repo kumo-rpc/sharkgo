@@ -6,13 +6,13 @@ import (
 	"math"
 	"reflect"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/internal/nodemap"
-	"capnproto.org/go/capnp/v3/internal/schema"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/internal/nodemap"
+	"github.com/kumo-rpc/sharkgo/internal/schema"
 )
 
 // Insert copies val, a pointer to a Go struct, into s.
-func Insert(typeID uint64, s capnp.Struct, val any) error {
+func Insert(typeID uint64, s shark.Struct, val any) error {
 	ins := new(inserter)
 	err := ins.insertStruct(typeID, s, reflect.ValueOf(val))
 	if err != nil {
@@ -25,7 +25,7 @@ type inserter struct {
 	nodes nodemap.Map
 }
 
-func (ins *inserter) insertStruct(typeID uint64, s capnp.Struct, val reflect.Value) error {
+func (ins *inserter) insertStruct(typeID uint64, s shark.Struct, val reflect.Value) error {
 	if val.Kind() == reflect.Ptr {
 		// TODO(light): ignore if nil?
 		val = val.Elem()
@@ -49,8 +49,8 @@ func (ins *inserter) insertStruct(typeID uint64, s capnp.Struct, val reflect.Val
 	if hasDiscriminant(n) {
 		discriminant, hasWhich = props.which(val)
 		if hasWhich {
-			off := capnp.DataOffset(n.StructNode().DiscriminantOffset() * 2)
-			if s.Size().DataSize < capnp.Size(off+2) {
+			off := shark.DataOffset(n.StructNode().DiscriminantOffset() * 2)
+			if s.Size().DataSize < shark.Size(off+2) {
 				return fmt.Errorf("can't set discriminant for %s: allocated struct is too small", shortDisplayName(n))
 			}
 			s.SetUint16(off, discriminant)
@@ -90,7 +90,7 @@ func (ins *inserter) insertStruct(typeID uint64, s capnp.Struct, val reflect.Val
 	return nil
 }
 
-func (ins *inserter) insertField(s capnp.Struct, f schema.Field, val reflect.Value) error {
+func (ins *inserter) insertField(s shark.Struct, f schema.Field, val reflect.Value) error {
 	typ, err := f.Slot().Type()
 	if err != nil {
 		return err
@@ -115,51 +115,51 @@ func (ins *inserter) insertField(s capnp.Struct, f schema.Field, val reflect.Val
 	case schema.Type_Which_bool:
 		v := val.Bool()
 		d := dv.Bool()
-		s.SetBit(capnp.BitOffset(f.Slot().Offset()), v != d) // != acts as XOR
+		s.SetBit(shark.BitOffset(f.Slot().Offset()), v != d) // != acts as XOR
 	case schema.Type_Which_int8:
 		v := int8(val.Int())
 		d := dv.Int8()
-		s.SetUint8(capnp.DataOffset(f.Slot().Offset()), uint8(v^d))
+		s.SetUint8(shark.DataOffset(f.Slot().Offset()), uint8(v^d))
 	case schema.Type_Which_int16:
 		v := int16(val.Int())
 		d := dv.Int16()
-		s.SetUint16(capnp.DataOffset(f.Slot().Offset()*2), uint16(v^d))
+		s.SetUint16(shark.DataOffset(f.Slot().Offset()*2), uint16(v^d))
 	case schema.Type_Which_int32:
 		v := int32(val.Int())
 		d := dv.Int32()
-		s.SetUint32(capnp.DataOffset(f.Slot().Offset()*4), uint32(v^d))
+		s.SetUint32(shark.DataOffset(f.Slot().Offset()*4), uint32(v^d))
 	case schema.Type_Which_int64:
 		v := val.Int()
 		d := dv.Int64()
-		s.SetUint64(capnp.DataOffset(f.Slot().Offset()*8), uint64(v^d))
+		s.SetUint64(shark.DataOffset(f.Slot().Offset()*8), uint64(v^d))
 	case schema.Type_Which_uint8:
 		v := uint8(val.Uint())
 		d := dv.Uint8()
-		s.SetUint8(capnp.DataOffset(f.Slot().Offset()), v^d)
+		s.SetUint8(shark.DataOffset(f.Slot().Offset()), v^d)
 	case schema.Type_Which_uint16:
 		v := uint16(val.Uint())
 		d := dv.Uint16()
-		s.SetUint16(capnp.DataOffset(f.Slot().Offset()*2), v^d)
+		s.SetUint16(shark.DataOffset(f.Slot().Offset()*2), v^d)
 	case schema.Type_Which_enum:
 		v := uint16(val.Uint())
 		d := dv.Enum()
-		s.SetUint16(capnp.DataOffset(f.Slot().Offset()*2), v^d)
+		s.SetUint16(shark.DataOffset(f.Slot().Offset()*2), v^d)
 	case schema.Type_Which_uint32:
 		v := uint32(val.Uint())
 		d := dv.Uint32()
-		s.SetUint32(capnp.DataOffset(f.Slot().Offset()*4), v^d)
+		s.SetUint32(shark.DataOffset(f.Slot().Offset()*4), v^d)
 	case schema.Type_Which_uint64:
 		v := val.Uint()
 		d := dv.Uint64()
-		s.SetUint64(capnp.DataOffset(f.Slot().Offset()*8), v^d)
+		s.SetUint64(shark.DataOffset(f.Slot().Offset()*8), v^d)
 	case schema.Type_Which_float32:
 		v := math.Float32bits(float32(val.Float()))
 		d := math.Float32bits(dv.Float32())
-		s.SetUint32(capnp.DataOffset(f.Slot().Offset()*4), v^d)
+		s.SetUint32(shark.DataOffset(f.Slot().Offset()*4), v^d)
 	case schema.Type_Which_float64:
 		v := math.Float64bits(val.Float())
 		d := uint64(math.Float64bits(dv.Float64()))
-		s.SetUint64(capnp.DataOffset(f.Slot().Offset()*8), v^d)
+		s.SetUint64(shark.DataOffset(f.Slot().Offset()*8), v^d)
 	case schema.Type_Which_text:
 		off := uint16(f.Slot().Offset())
 		if val.Len() == 0 {
@@ -185,7 +185,7 @@ func (ins *inserter) insertField(s capnp.Struct, f schema.Field, val reflect.Val
 		sval := val
 		if val.Kind() == reflect.Ptr {
 			if val.IsNil() {
-				return s.SetPtr(off, capnp.Ptr{})
+				return s.SetPtr(off, shark.Ptr{})
 			}
 			sval = val.Elem()
 		}
@@ -194,7 +194,7 @@ func (ins *inserter) insertField(s capnp.Struct, f schema.Field, val reflect.Val
 		if err != nil {
 			return err
 		}
-		ss, err := capnp.NewStruct(s.Segment(), sz)
+		ss, err := shark.NewStruct(s.Segment(), sz)
 		if err != nil {
 			return err
 		}
@@ -205,7 +205,7 @@ func (ins *inserter) insertField(s capnp.Struct, f schema.Field, val reflect.Val
 	case schema.Type_Which_list:
 		off := uint16(f.Slot().Offset())
 		if val.IsNil() && isEmptyValue(dv) {
-			return s.SetPtr(off, capnp.Ptr{})
+			return s.SetPtr(off, shark.Ptr{})
 		}
 		elem, err := typ.List().ElementType()
 		if err != nil {
@@ -229,18 +229,18 @@ func (ins *inserter) insertField(s capnp.Struct, f schema.Field, val reflect.Val
 		off := uint16(f.Slot().Offset())
 		switch val.Type() {
 		case ptrType:
-			return s.SetPtr(off, val.Interface().(capnp.Ptr))
+			return s.SetPtr(off, val.Interface().(shark.Ptr))
 		case structType:
-			return s.SetPtr(off, val.Interface().(capnp.Struct).ToPtr())
+			return s.SetPtr(off, val.Interface().(shark.Struct).ToPtr())
 		case listType:
-			return s.SetPtr(off, val.Interface().(capnp.List).ToPtr())
+			return s.SetPtr(off, val.Interface().(shark.List).ToPtr())
 		case clientType:
-			c := val.Convert(clientType).Interface().(capnp.Client)
+			c := val.Convert(clientType).Interface().(shark.Client)
 			if !c.IsValid() {
-				return s.SetPtr(off, capnp.Ptr{})
+				return s.SetPtr(off, shark.Ptr{})
 			}
 			id := s.Message().CapTable().Add(c)
-			return s.SetPtr(off, capnp.NewInterface(s.Segment(), id).ToPtr())
+			return s.SetPtr(off, shark.NewInterface(s.Segment(), id).ToPtr())
 		default:
 			panic("unreachable")
 		}
@@ -250,17 +250,17 @@ func (ins *inserter) insertField(s capnp.Struct, f schema.Field, val reflect.Val
 	return nil
 }
 
-func capPtr(seg *capnp.Segment, val reflect.Value) capnp.Ptr {
-	client := val.Convert(clientType).Interface().(capnp.Client)
+func capPtr(seg *shark.Segment, val reflect.Value) shark.Ptr {
+	client := val.Convert(clientType).Interface().(shark.Client)
 	if !client.IsValid() {
-		return capnp.Ptr{}
+		return shark.Ptr{}
 	}
 	cap := seg.Message().CapTable().Add(client)
-	iface := capnp.NewInterface(seg, cap)
+	iface := shark.NewInterface(seg, cap)
 	return iface.ToPtr()
 }
 
-func (ins *inserter) insertList(l capnp.List, typ schema.Type, val reflect.Value) error {
+func (ins *inserter) insertList(l shark.List, typ schema.Type, val reflect.Value) error {
 	elem, err := typ.List().ElementType()
 	if err != nil {
 		return err
@@ -274,52 +274,52 @@ func (ins *inserter) insertList(l capnp.List, typ schema.Type, val reflect.Value
 	case schema.Type_Which_void:
 	case schema.Type_Which_bool:
 		for i := 0; i < n; i++ {
-			capnp.BitList(l).Set(i, val.Index(i).Bool())
+			shark.BitList(l).Set(i, val.Index(i).Bool())
 		}
 	case schema.Type_Which_int8:
 		for i := 0; i < n; i++ {
-			capnp.Int8List(l).Set(i, int8(val.Index(i).Int()))
+			shark.Int8List(l).Set(i, int8(val.Index(i).Int()))
 		}
 	case schema.Type_Which_int16:
 		for i := 0; i < n; i++ {
-			capnp.Int16List(l).Set(i, int16(val.Index(i).Int()))
+			shark.Int16List(l).Set(i, int16(val.Index(i).Int()))
 		}
 	case schema.Type_Which_int32:
 		for i := 0; i < n; i++ {
-			capnp.Int32List(l).Set(i, int32(val.Index(i).Int()))
+			shark.Int32List(l).Set(i, int32(val.Index(i).Int()))
 		}
 	case schema.Type_Which_int64:
 		for i := 0; i < n; i++ {
-			capnp.Int64List(l).Set(i, val.Index(i).Int())
+			shark.Int64List(l).Set(i, val.Index(i).Int())
 		}
 	case schema.Type_Which_uint8:
 		for i := 0; i < n; i++ {
-			capnp.UInt8List(l).Set(i, uint8(val.Index(i).Uint()))
+			shark.UInt8List(l).Set(i, uint8(val.Index(i).Uint()))
 		}
 	case schema.Type_Which_uint16, schema.Type_Which_enum:
 		for i := 0; i < n; i++ {
-			capnp.UInt16List(l).Set(i, uint16(val.Index(i).Uint()))
+			shark.UInt16List(l).Set(i, uint16(val.Index(i).Uint()))
 		}
 	case schema.Type_Which_uint32:
 		for i := 0; i < n; i++ {
-			capnp.UInt32List(l).Set(i, uint32(val.Index(i).Uint()))
+			shark.UInt32List(l).Set(i, uint32(val.Index(i).Uint()))
 		}
 	case schema.Type_Which_uint64:
 		for i := 0; i < n; i++ {
-			capnp.UInt64List(l).Set(i, val.Index(i).Uint())
+			shark.UInt64List(l).Set(i, val.Index(i).Uint())
 		}
 	case schema.Type_Which_float32:
 		for i := 0; i < n; i++ {
-			capnp.Float32List(l).Set(i, float32(val.Index(i).Float()))
+			shark.Float32List(l).Set(i, float32(val.Index(i).Float()))
 		}
 	case schema.Type_Which_float64:
 		for i := 0; i < n; i++ {
-			capnp.Float64List(l).Set(i, val.Index(i).Float())
+			shark.Float64List(l).Set(i, val.Index(i).Float())
 		}
 	case schema.Type_Which_text:
 		if val.Type().Elem().Kind() == reflect.String {
 			for i := 0; i < n; i++ {
-				err := capnp.TextList(l).Set(i, val.Index(i).String())
+				err := shark.TextList(l).Set(i, val.Index(i).String())
 				if err != nil {
 					// TODO(light): collect errors and finish
 					return err
@@ -329,18 +329,18 @@ func (ins *inserter) insertList(l capnp.List, typ schema.Type, val reflect.Value
 			for i := 0; i < n; i++ {
 				b := val.Index(i).Bytes()
 				if len(b) == 0 {
-					err := capnp.PointerList(l).Set(i, capnp.Ptr{})
+					err := shark.PointerList(l).Set(i, shark.Ptr{})
 					if err != nil {
 						// TODO(light): collect errors and finish
 						return err
 					}
 				}
-				t, err := capnp.NewTextFromBytes(l.Segment(), b)
+				t, err := shark.NewTextFromBytes(l.Segment(), b)
 				if err != nil {
 					// TODO(light): collect errors and finish
 					return err
 				}
-				err = capnp.PointerList(l).Set(i, t.ToPtr())
+				err = shark.PointerList(l).Set(i, t.ToPtr())
 				if err != nil {
 					// TODO(light): collect errors and finish
 					return err
@@ -351,24 +351,24 @@ func (ins *inserter) insertList(l capnp.List, typ schema.Type, val reflect.Value
 		for i := 0; i < n; i++ {
 			b := val.Index(i).Bytes()
 			if len(b) == 0 {
-				err := capnp.PointerList(l).Set(i, capnp.Ptr{})
+				err := shark.PointerList(l).Set(i, shark.Ptr{})
 				if err != nil {
 					// TODO(light): collect errors and finish
 					return err
 				}
 			}
-			err := capnp.DataList(l).Set(i, b)
+			err := shark.DataList(l).Set(i, b)
 			if err != nil {
 				// TODO(light): collect errors and finish
 				return err
 			}
 		}
 	case schema.Type_Which_list:
-		pl := capnp.PointerList(l)
+		pl := shark.PointerList(l)
 		for i := 0; i < n; i++ {
 			vi := val.Index(i)
 			if vi.IsNil() {
-				if err := pl.Set(i, capnp.Ptr{}); err != nil {
+				if err := pl.Set(i, shark.Ptr{}); err != nil {
 					return err
 				}
 				continue
@@ -398,7 +398,7 @@ func (ins *inserter) insertList(l capnp.List, typ schema.Type, val reflect.Value
 			}
 		}
 	case schema.Type_Which_interface:
-		pl := capnp.PointerList(l)
+		pl := shark.PointerList(l)
 		for i := 0; i < n; i++ {
 			ptr := capPtr(l.Segment(), val.Index(i))
 			if err := pl.Set(i, ptr); err != nil {
@@ -416,68 +416,68 @@ func (ins *inserter) insertList(l capnp.List, typ schema.Type, val reflect.Value
 	return nil
 }
 
-func (ins *inserter) newList(s *capnp.Segment, t schema.Type, len int32) (capnp.List, error) {
+func (ins *inserter) newList(s *shark.Segment, t schema.Type, len int32) (shark.List, error) {
 	switch t.Which() {
 	case schema.Type_Which_void:
-		l := capnp.NewVoidList(s, len)
-		return capnp.List(l), nil
+		l := shark.NewVoidList(s, len)
+		return shark.List(l), nil
 	case schema.Type_Which_bool:
-		l, err := capnp.NewBitList(s, len)
-		return capnp.List(l), err
+		l, err := shark.NewBitList(s, len)
+		return shark.List(l), err
 	case schema.Type_Which_int8, schema.Type_Which_uint8:
-		l, err := capnp.NewUInt8List(s, len)
-		return capnp.List(l), err
+		l, err := shark.NewUInt8List(s, len)
+		return shark.List(l), err
 	case schema.Type_Which_int16, schema.Type_Which_uint16, schema.Type_Which_enum:
-		l, err := capnp.NewUInt16List(s, len)
-		return capnp.List(l), err
+		l, err := shark.NewUInt16List(s, len)
+		return shark.List(l), err
 	case schema.Type_Which_int32, schema.Type_Which_uint32, schema.Type_Which_float32:
-		l, err := capnp.NewUInt32List(s, len)
-		return capnp.List(l), err
+		l, err := shark.NewUInt32List(s, len)
+		return shark.List(l), err
 	case schema.Type_Which_int64, schema.Type_Which_uint64, schema.Type_Which_float64:
-		l, err := capnp.NewUInt64List(s, len)
-		return capnp.List(l), err
+		l, err := shark.NewUInt64List(s, len)
+		return shark.List(l), err
 	case schema.Type_Which_text, schema.Type_Which_data, schema.Type_Which_list, schema.Type_Which_interface, schema.Type_Which_anyPointer:
-		l, err := capnp.NewPointerList(s, len)
-		return capnp.List(l), err
+		l, err := shark.NewPointerList(s, len)
+		return shark.List(l), err
 	case schema.Type_Which_structType:
 		sz, err := ins.structSize(t.StructType().TypeId())
 		if err != nil {
-			return capnp.List{}, err
+			return shark.List{}, err
 		}
-		return capnp.NewCompositeList(s, sz, len)
+		return shark.NewCompositeList(s, sz, len)
 	default:
-		return capnp.List{}, fmt.Errorf("new list: unknown element type: %v", t.Which())
+		return shark.List{}, fmt.Errorf("new list: unknown element type: %v", t.Which())
 	}
 }
 
-func (ins *inserter) structSize(id uint64) (capnp.ObjectSize, error) {
+func (ins *inserter) structSize(id uint64) (shark.ObjectSize, error) {
 	n, err := ins.nodes.Find(id)
 	if err != nil {
-		return capnp.ObjectSize{}, err
+		return shark.ObjectSize{}, err
 	}
 	if n.Which() != schema.Node_Which_structNode {
-		return capnp.ObjectSize{}, fmt.Errorf("insert struct: sizing: node @%#x is not a struct", id)
+		return shark.ObjectSize{}, fmt.Errorf("insert struct: sizing: node @%#x is not a struct", id)
 	}
-	return capnp.ObjectSize{
-		DataSize:     capnp.Size(n.StructNode().DataWordCount()) * 8,
+	return shark.ObjectSize{
+		DataSize:     shark.Size(n.StructNode().DataWordCount()) * 8,
 		PointerCount: n.StructNode().PointerCount(),
 	}, nil
 }
 
-func isFieldInBounds(sz capnp.ObjectSize, off uint32, t schema.Type) bool {
+func isFieldInBounds(sz shark.ObjectSize, off uint32, t schema.Type) bool {
 	switch t.Which() {
 	case schema.Type_Which_void:
 		return true
 	case schema.Type_Which_bool:
-		return sz.DataSize >= capnp.Size(off/8+1)
+		return sz.DataSize >= shark.Size(off/8+1)
 	case schema.Type_Which_int8, schema.Type_Which_uint8:
-		return sz.DataSize >= capnp.Size(off+1)
+		return sz.DataSize >= shark.Size(off+1)
 	case schema.Type_Which_int16, schema.Type_Which_uint16, schema.Type_Which_enum:
-		return sz.DataSize >= capnp.Size(off+1)*2
+		return sz.DataSize >= shark.Size(off+1)*2
 	case schema.Type_Which_int32, schema.Type_Which_uint32, schema.Type_Which_float32:
-		return sz.DataSize >= capnp.Size(off+1)*4
+		return sz.DataSize >= shark.Size(off+1)*4
 	case schema.Type_Which_int64, schema.Type_Which_uint64, schema.Type_Which_float64:
-		return sz.DataSize >= capnp.Size(off+1)*8
+		return sz.DataSize >= shark.Size(off+1)*8
 	case schema.Type_Which_text, schema.Type_Which_data, schema.Type_Which_list, schema.Type_Which_structType, schema.Type_Which_interface, schema.Type_Which_anyPointer:
 		return sz.PointerCount >= uint16(off+1)
 	default:

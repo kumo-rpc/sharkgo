@@ -4,15 +4,15 @@ import (
 	"io"
 	"testing"
 
-	"capnproto.org/go/capnp/v3"
-	"capnproto.org/go/capnp/v3/rpc/transport"
+	"github.com/kumo-rpc/sharkgo"
+	"github.com/kumo-rpc/sharkgo/rpc/transport"
 	"github.com/stretchr/testify/require"
 )
 
 func TestPipe(t *testing.T) {
 	t.Parallel()
 
-	m, _ := capnp.NewSingleSegmentMessage(nil)
+	m, _ := shark.NewSingleSegmentMessage(nil)
 
 	p1, p2 := transport.NewPipe(1)
 

@@ -1,14 +1,14 @@
-package capnp
+package shark
 
 import (
 	"context"
 	"errors"
 	"strconv"
 
-	"capnproto.org/go/capnp/v3/exc"
-	"capnproto.org/go/capnp/v3/internal/str"
-	"capnproto.org/go/capnp/v3/util/deferred"
-	"capnproto.org/go/capnp/v3/util/sync/mutex"
+	"github.com/kumo-rpc/sharkgo/exc"
+	"github.com/kumo-rpc/sharkgo/internal/str"
+	"github.com/kumo-rpc/sharkgo/util/deferred"
+	"github.com/kumo-rpc/sharkgo/util/sync/mutex"
 )
 
 // A Promise holds the result of an RPC call.  Only one of Fulfill
@@ -525,7 +525,7 @@ func (pc PipelineClient) String() string {
 }
 
 // A PipelineOp describes a step in transforming a pipeline.
-// It maps closely with the PromisedAnswer.Op struct in rpc.capnp.
+// It maps closely with the PromisedAnswer.Op struct in rpc.shark.
 type PipelineOp struct {
 	Field        uint16
 	DefaultValue []byte

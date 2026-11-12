@@ -3,7 +3,7 @@ package rpc
 import (
 	"errors"
 
-	"capnproto.org/go/capnp/v3/exc"
+	"github.com/kumo-rpc/sharkgo/exc"
 )
 
 var (

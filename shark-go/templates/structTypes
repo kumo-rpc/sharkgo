@@ -1,0 +1,8 @@
+{{with .Annotations.Doc -}}
+// {{.}}
+{{end -}}
+type {{.Node.Name}} {{if .IsBase -}}
+shark.Struct
+{{- else -}}
+{{.BaseNode.Name}}
+{{- end}}
