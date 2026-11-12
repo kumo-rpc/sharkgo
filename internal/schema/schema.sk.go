@@ -3019,79 +3019,79 @@ func NewElementSize_List(s *shark.Segment, sz int32) (ElementSize_List, error) {
 	return shark.NewEnumList[ElementSize](s, sz)
 }
 
-type CapnpVersion shark.Struct
+type SharkVersion shark.Struct
 
-// CapnpVersion_TypeID is the unique identifier for the type CapnpVersion.
-const CapnpVersion_TypeID = 0xd85d305b7d839963
+// SharkVersion_TypeID is the unique identifier for the type SharkVersion.
+const SharkVersion_TypeID = 0x950d343b21334fe1
 
-func NewCapnpVersion(s *shark.Segment) (CapnpVersion, error) {
+func NewSharkVersion(s *shark.Segment) (SharkVersion, error) {
 	st, err := shark.NewStruct(s, shark.ObjectSize{DataSize: 8, PointerCount: 0})
-	return CapnpVersion(st), err
+	return SharkVersion(st), err
 }
 
-func NewRootCapnpVersion(s *shark.Segment) (CapnpVersion, error) {
+func NewRootSharkVersion(s *shark.Segment) (SharkVersion, error) {
 	st, err := shark.NewRootStruct(s, shark.ObjectSize{DataSize: 8, PointerCount: 0})
-	return CapnpVersion(st), err
+	return SharkVersion(st), err
 }
 
-func ReadRootCapnpVersion(msg *shark.Message) (CapnpVersion, error) {
+func ReadRootSharkVersion(msg *shark.Message) (SharkVersion, error) {
 	root, err := msg.Root()
-	return CapnpVersion(root.Struct()), err
+	return SharkVersion(root.Struct()), err
 }
 
-func (s CapnpVersion) EncodeAsPtr(seg *shark.Segment) shark.Ptr {
+func (s SharkVersion) EncodeAsPtr(seg *shark.Segment) shark.Ptr {
 	return shark.Struct(s).EncodeAsPtr(seg)
 }
 
-func (CapnpVersion) DecodeFromPtr(p shark.Ptr) CapnpVersion {
-	return CapnpVersion(shark.Struct{}.DecodeFromPtr(p))
+func (SharkVersion) DecodeFromPtr(p shark.Ptr) SharkVersion {
+	return SharkVersion(shark.Struct{}.DecodeFromPtr(p))
 }
 
-func (s CapnpVersion) ToPtr() shark.Ptr {
+func (s SharkVersion) ToPtr() shark.Ptr {
 	return shark.Struct(s).ToPtr()
 }
-func (s CapnpVersion) IsValid() bool {
+func (s SharkVersion) IsValid() bool {
 	return shark.Struct(s).IsValid()
 }
 
-func (s CapnpVersion) Message() *shark.Message {
+func (s SharkVersion) Message() *shark.Message {
 	return shark.Struct(s).Message()
 }
 
-func (s CapnpVersion) Segment() *shark.Segment {
+func (s SharkVersion) Segment() *shark.Segment {
 	return shark.Struct(s).Segment()
 }
-func (s CapnpVersion) Major() uint16 {
+func (s SharkVersion) Major() uint16 {
 	return shark.Struct(s).Uint16(0)
 }
 
-func (s CapnpVersion) SetMajor(v uint16) {
+func (s SharkVersion) SetMajor(v uint16) {
 	shark.Struct(s).SetUint16(0, v)
 }
 
-func (s CapnpVersion) Minor() uint8 {
+func (s SharkVersion) Minor() uint8 {
 	return shark.Struct(s).Uint8(2)
 }
 
-func (s CapnpVersion) SetMinor(v uint8) {
+func (s SharkVersion) SetMinor(v uint8) {
 	shark.Struct(s).SetUint8(2, v)
 }
 
-func (s CapnpVersion) Micro() uint8 {
+func (s SharkVersion) Micro() uint8 {
 	return shark.Struct(s).Uint8(3)
 }
 
-func (s CapnpVersion) SetMicro(v uint8) {
+func (s SharkVersion) SetMicro(v uint8) {
 	shark.Struct(s).SetUint8(3, v)
 }
 
-// CapnpVersion_List is a list of CapnpVersion.
-type CapnpVersion_List = shark.StructList[CapnpVersion]
+// SharkVersion_List is a list of SharkVersion.
+type SharkVersion_List = shark.StructList[SharkVersion]
 
-// NewCapnpVersion creates a new list of CapnpVersion.
-func NewCapnpVersion_List(s *shark.Segment, sz int32) (CapnpVersion_List, error) {
+// NewSharkVersion creates a new list of SharkVersion.
+func NewSharkVersion_List(s *shark.Segment, sz int32) (SharkVersion_List, error) {
 	l, err := shark.NewCompositeList(s, shark.ObjectSize{DataSize: 8, PointerCount: 0}, sz)
-	return shark.StructList[CapnpVersion](l), err
+	return shark.StructList[SharkVersion](l), err
 }
 
 type CodeGeneratorRequest shark.Struct
@@ -3136,25 +3136,25 @@ func (s CodeGeneratorRequest) Message() *shark.Message {
 func (s CodeGeneratorRequest) Segment() *shark.Segment {
 	return shark.Struct(s).Segment()
 }
-func (s CodeGeneratorRequest) SharkVersion() (CapnpVersion, error) {
+func (s CodeGeneratorRequest) SharkVersion() (SharkVersion, error) {
 	p, err := shark.Struct(s).Ptr(2)
-	return CapnpVersion(p.Struct()), err
+	return SharkVersion(p.Struct()), err
 }
 
 func (s CodeGeneratorRequest) HasSharkVersion() bool {
 	return shark.Struct(s).HasPtr(2)
 }
 
-func (s CodeGeneratorRequest) SetSharkVersion(v CapnpVersion) error {
+func (s CodeGeneratorRequest) SetSharkVersion(v SharkVersion) error {
 	return shark.Struct(s).SetPtr(2, shark.Struct(v).ToPtr())
 }
 
 // NewSharkVersion sets the sharkVersion field to a newly
-// allocated CapnpVersion struct, preferring placement in s's segment.
-func (s CodeGeneratorRequest) NewSharkVersion() (CapnpVersion, error) {
-	ss, err := NewCapnpVersion(shark.Struct(s).Segment())
+// allocated SharkVersion struct, preferring placement in s's segment.
+func (s CodeGeneratorRequest) NewSharkVersion() (SharkVersion, error) {
+	ss, err := NewSharkVersion(shark.Struct(s).Segment())
 	if err != nil {
-		return CapnpVersion{}, err
+		return SharkVersion{}, err
 	}
 	err = shark.Struct(s).SetPtr(2, shark.Struct(ss).ToPtr())
 	return ss, err
