@@ -303,7 +303,7 @@ func (g *generator) Value(rel *node, t schema.Type, v schema.Value) (string, err
 
 	case schema.Type_Which_interface:
 		// The only statically representable interface value is null.
-		return g.imports.Capnp() + ".Client(nil)", nil
+		return g.imports.Shark() + ".Client(nil)", nil
 
 	case schema.Type_Which_bool:
 		if v.Bool() {
@@ -972,7 +972,7 @@ func (g *generator) ObjectSize(n *node) (string, error) {
 		return "", fmt.Errorf("object size called for %v node", n.Which())
 	}
 	return fmt.Sprintf("%s.ObjectSize{DataSize: %d, PointerCount: %d}",
-		g.imports.Capnp(),
+		g.imports.Shark(),
 		int(n.StructNode().DataWordCount())*8,
 		n.StructNode().PointerCount()), nil
 }

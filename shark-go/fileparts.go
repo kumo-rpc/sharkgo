@@ -82,7 +82,7 @@ func newImports() imports {
 	return i
 }
 
-func (i *imports) Capnp() string {
+func (i *imports) Shark() string {
 	return i.add(importSpec{path: sharkImport, name: "shark"})
 }
 
