@@ -1,8 +1,6 @@
 // Package flowcontrol provides support code for per-object flow control.
 //
-// This is most important for dealing with streaming interfaces; see
-// https://capnproto.org/news/2020-04-23-capnproto-0.8.html#multi-stream-flow-control
-// for a description of the general problem.
+// This is most important for dealing with streaming interfaces;
 //
 // The Go implementation's approach differs from that of the C++ implementation in that
 // we don't treat the `stream` annotation specially; we instead do flow control on all

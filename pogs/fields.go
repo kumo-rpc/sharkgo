@@ -24,7 +24,7 @@ const (
 
 func parseField(f reflect.StructField, hasDiscrim bool) fieldProps {
 	var p fieldProps
-	tag := f.Tag.Get("capnp")
+	tag := f.Tag.Get("shark")
 	p.tagged = tag != ""
 	tname, _ := nextOpt(tag)
 	switch tname {

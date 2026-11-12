@@ -492,7 +492,7 @@ func setupTempDir() (string, error) {
 
 	// Add go.mod to the new dir, minimal contents
 	err = os.WriteFile(filepath.Join(dir, "go.mod"),
-		[]byte("module capnpc_go_test"), 0660)
+		[]byte("module shark_go_test"), 0660)
 	if err != nil {
 		return "", fmt.Errorf("setupTempDir: write go.mod: %v", err)
 	}
@@ -512,7 +512,7 @@ func setupTempDir() (string, error) {
 	return dir, nil
 }
 
-// This test arises because capnproto-c++ has a file named:
+// This test arises because shark-cpp has a file named:
 // * shark/rpc/persistent.shk
 // * Also found in this repo: std/shark/persistent.shk
 //

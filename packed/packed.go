@@ -1,5 +1,4 @@
 // Package packed provides functions to read and write the "packed"
-// compression scheme described at https://capnproto.org/encoding.html#packing.
 package packed
 
 import (

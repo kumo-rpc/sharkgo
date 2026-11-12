@@ -395,7 +395,6 @@ func (e *extracter) extractList(val reflect.Value, typ schema.Type, l shark.List
 		}
 	case schema.Type_Which_anyPointer:
 		// Schemas aren't allowed to have List(AnyPointer).
-		// See https://groups.google.com/d/topic/capnproto/BVk3m7Nc-4s/discussion
 		return errors.New("List(AnyPointer) not allowed in schema")
 	default:
 		return fmt.Errorf("unknown list type %v", elem.Which())
@@ -437,7 +436,6 @@ func isTypeMatch(r reflect.Type, s schema.Type) bool {
 		}
 		if s.AnyPointer().Which() != schema.Type_anyPointer_Which_unconstrained {
 			// TODO(someday): handle generic parameters, see
-			// https://github.com/capnproto/go-capnproto2/issues/94
 			return false
 		}
 		switch s.AnyPointer().Unconstrained().Which() {

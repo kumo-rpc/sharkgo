@@ -27,7 +27,7 @@ type VerTwoData struct {
 }
 
 type F16 struct {
-	PlaneBase `capnp:"base"`
+	PlaneBase `shark:"base"`
 }
 
 func TestExtract_Embed(t *testing.T) {
@@ -198,19 +198,19 @@ type VerValNoTag struct {
 }
 
 type VerValTag1 struct {
-	Val int16 `capnp:"val"`
+	Val int16 `shark:"val"`
 }
 
 type VerValTag2 struct {
-	Val int16 `capnp:"val"`
+	Val int16 `shark:"val"`
 }
 
 type VerValTag3 struct {
-	Val int16 `capnp:"val"`
+	Val int16 `shark:"val"`
 }
 
 type VerTwoDataOmit struct {
-	VerVal `capnp:"-"`
+	VerVal `shark:"-"`
 	Duo    int64
 }
 

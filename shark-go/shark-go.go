@@ -5,9 +5,6 @@ Licensed under the MIT License:
 shark-go is the Cap'n proto code generator for Go.  It reads a
 CodeGeneratorRequest from stdin and for a file foo.shark it writes
 foo.sk.go.  This is usually invoked from `shark compile -ogo`.
-
-See https://capnproto.org/otherlang.html#how-to-write-compiler-plugins
-for more details.
 */
 package main
 
@@ -33,11 +30,11 @@ import (
 
 // Non-stdlib import paths.
 const (
-	capnpImport       = "github.com/kumo-rpc/sharkgo"
-	textImport        = capnpImport + "/encoding/text"
-	schemasImport     = capnpImport + "/schemas"
-	serverImport      = capnpImport + "/server"
-	flowcontrolImport = capnpImport + "/flowcontrol"
+	sharkImport       = "github.com/kumo-rpc/sharkgo"
+	textImport        = sharkImport + "/encoding/text"
+	schemasImport     = sharkImport + "/schemas"
+	serverImport      = sharkImport + "/server"
+	flowcontrolImport = sharkImport + "/flowcontrol"
 )
 
 // genoptions are parameters that control code generation.
@@ -699,21 +696,21 @@ var (
 	}
 	staticListTypeRefs = map[schema.Type_Which]typeRef{
 		// TODO(light): omitting newfunc since it doesn't have a similar type signature (no errors).
-		schema.Type_Which_void: {name: "VoidList", imp: capnpImportSpec},
+		schema.Type_Which_void: {name: "VoidList", imp: sharkImportSpec},
 
-		schema.Type_Which_bool:    {name: "BitList", newfunc: "NewBitList", imp: capnpImportSpec},
-		schema.Type_Which_int8:    {name: "Int8List", newfunc: "NewInt8List", imp: capnpImportSpec},
-		schema.Type_Which_uint8:   {name: "UInt8List", newfunc: "NewUInt8List", imp: capnpImportSpec},
-		schema.Type_Which_int16:   {name: "Int16List", newfunc: "NewInt16List", imp: capnpImportSpec},
-		schema.Type_Which_uint16:  {name: "UInt16List", newfunc: "NewUInt16List", imp: capnpImportSpec},
-		schema.Type_Which_int32:   {name: "Int32List", newfunc: "NewInt32List", imp: capnpImportSpec},
-		schema.Type_Which_uint32:  {name: "UInt32List", newfunc: "NewUInt32List", imp: capnpImportSpec},
-		schema.Type_Which_int64:   {name: "Int64List", newfunc: "NewInt64List", imp: capnpImportSpec},
-		schema.Type_Which_uint64:  {name: "UInt64List", newfunc: "NewUInt64List", imp: capnpImportSpec},
-		schema.Type_Which_float32: {name: "Float32List", newfunc: "NewFloat32List", imp: capnpImportSpec},
-		schema.Type_Which_float64: {name: "Float64List", newfunc: "NewFloat64List", imp: capnpImportSpec},
-		schema.Type_Which_text:    {name: "TextList", newfunc: "NewTextList", imp: capnpImportSpec},
-		schema.Type_Which_data:    {name: "DataList", newfunc: "NewDataList", imp: capnpImportSpec},
+		schema.Type_Which_bool:    {name: "BitList", newfunc: "NewBitList", imp: sharkImportSpec},
+		schema.Type_Which_int8:    {name: "Int8List", newfunc: "NewInt8List", imp: sharkImportSpec},
+		schema.Type_Which_uint8:   {name: "UInt8List", newfunc: "NewUInt8List", imp: sharkImportSpec},
+		schema.Type_Which_int16:   {name: "Int16List", newfunc: "NewInt16List", imp: sharkImportSpec},
+		schema.Type_Which_uint16:  {name: "UInt16List", newfunc: "NewUInt16List", imp: sharkImportSpec},
+		schema.Type_Which_int32:   {name: "Int32List", newfunc: "NewInt32List", imp: sharkImportSpec},
+		schema.Type_Which_uint32:  {name: "UInt32List", newfunc: "NewUInt32List", imp: sharkImportSpec},
+		schema.Type_Which_int64:   {name: "Int64List", newfunc: "NewInt64List", imp: sharkImportSpec},
+		schema.Type_Which_uint64:  {name: "UInt64List", newfunc: "NewUInt64List", imp: sharkImportSpec},
+		schema.Type_Which_float32: {name: "Float32List", newfunc: "NewFloat32List", imp: sharkImportSpec},
+		schema.Type_Which_float64: {name: "Float64List", newfunc: "NewFloat64List", imp: sharkImportSpec},
+		schema.Type_Which_text:    {name: "TextList", newfunc: "NewTextList", imp: sharkImportSpec},
+		schema.Type_Which_data:    {name: "DataList", newfunc: "NewDataList", imp: sharkImportSpec},
 	}
 )
 
@@ -766,18 +763,18 @@ func makeTypeRef(t schema.Type, rel *node, nodes nodeMap) (typeRef, error) {
 			ref.newfunc = "New" + ref.name
 			return ref, nil
 		case schema.Type_Which_anyPointer, schema.Type_Which_list:
-			return typeRef{name: "PointerList", newfunc: "NewPointerList", imp: capnpImportSpec}, nil
+			return typeRef{name: "PointerList", newfunc: "NewPointerList", imp: sharkImportSpec}, nil
 		}
 	case schema.Type_Which_anyPointer:
 		// capability pointer?
 		if isAnyCap(t.AnyPointer()) {
-			return typeRef{name: "Client", imp: capnpImportSpec}, nil
+			return typeRef{name: "Client", imp: sharkImportSpec}, nil
 		}
 
 		// TODO:  handle other pointer types
 
 		// Fall back to default => generic pointer type
-		return typeRef{name: "Ptr", imp: capnpImportSpec}, nil
+		return typeRef{name: "Ptr", imp: sharkImportSpec}, nil
 
 	}
 	return typeRef{}, fmt.Errorf("unable to reference type %v", t.Which())

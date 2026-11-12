@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	capnpImportSpec = importSpec{path: capnpImport, name: "shark"}
+	sharkImportSpec = importSpec{path: sharkImport, name: "shark"}
 	importList      = []importSpec{
-		capnpImportSpec,
+		sharkImportSpec,
 
 		// shark subpackage imports
 		{path: schemasImport, name: "schemas"},
@@ -83,7 +83,7 @@ func newImports() imports {
 }
 
 func (i *imports) Capnp() string {
-	return i.add(importSpec{path: capnpImport, name: "shark"})
+	return i.add(importSpec{path: sharkImport, name: "shark"})
 }
 
 func (i *imports) Schemas() string {

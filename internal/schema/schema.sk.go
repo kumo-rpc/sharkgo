@@ -3136,22 +3136,22 @@ func (s CodeGeneratorRequest) Message() *shark.Message {
 func (s CodeGeneratorRequest) Segment() *shark.Segment {
 	return shark.Struct(s).Segment()
 }
-func (s CodeGeneratorRequest) CapnpVersion() (CapnpVersion, error) {
+func (s CodeGeneratorRequest) SharkVersion() (CapnpVersion, error) {
 	p, err := shark.Struct(s).Ptr(2)
 	return CapnpVersion(p.Struct()), err
 }
 
-func (s CodeGeneratorRequest) HasCapnpVersion() bool {
+func (s CodeGeneratorRequest) HasSharkVersion() bool {
 	return shark.Struct(s).HasPtr(2)
 }
 
-func (s CodeGeneratorRequest) SetCapnpVersion(v CapnpVersion) error {
+func (s CodeGeneratorRequest) SetSharkVersion(v CapnpVersion) error {
 	return shark.Struct(s).SetPtr(2, shark.Struct(v).ToPtr())
 }
 
-// NewCapnpVersion sets the capnpVersion field to a newly
+// NewSharkVersion sets the sharkVersion field to a newly
 // allocated CapnpVersion struct, preferring placement in s's segment.
-func (s CodeGeneratorRequest) NewCapnpVersion() (CapnpVersion, error) {
+func (s CodeGeneratorRequest) NewSharkVersion() (CapnpVersion, error) {
 	ss, err := NewCapnpVersion(shark.Struct(s).Segment())
 	if err != nil {
 		return CapnpVersion{}, err

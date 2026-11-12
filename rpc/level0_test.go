@@ -2130,14 +2130,14 @@ type rpcException struct {
 }
 
 type rpcBootstrap struct {
-	QuestionID uint32 `capnp:"questionId"`
+	QuestionID uint32 `shark:"questionId"`
 }
 
 type rpcCall struct {
-	QuestionID              uint32 `capnp:"questionId"`
+	QuestionID              uint32 `shark:"questionId"`
 	Target                  rpcMessageTarget
-	InterfaceID             uint64 `capnp:"interfaceId"`
-	MethodID                uint16 `capnp:"methodId"`
+	InterfaceID             uint64 `shark:"interfaceId"`
+	MethodID                uint16 `shark:"methodId"`
 	AllowThirdPartyTailCall bool
 	Params                  rpcPayload
 	SendResultsTo           rpcCallSendResultsTo
@@ -2148,7 +2148,7 @@ type rpcCallSendResultsTo struct {
 }
 
 type rpcReturn struct {
-	AnswerID         uint32 `capnp:"answerId"`
+	AnswerID         uint32 `shark:"answerId"`
 	ReleaseParamCaps bool
 
 	Which                 rpccp.Return_Which
@@ -2158,7 +2158,7 @@ type rpcReturn struct {
 }
 
 type rpcFinish struct {
-	QuestionID        uint32 `capnp:"questionId"`
+	QuestionID        uint32 `shark:"questionId"`
 	ReleaseResultCaps bool
 }
 
@@ -2182,7 +2182,7 @@ type rpcCapDescriptor struct {
 }
 
 type rpcPromisedAnswer struct {
-	QuestionID uint32 `capnp:"questionId"`
+	QuestionID uint32 `shark:"questionId"`
 	Transform  []rpcPromisedAnswerOp
 }
 

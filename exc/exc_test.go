@@ -35,7 +35,7 @@ func TestErrorString(t *testing.T) {
 	}{
 		{Failed, "", "", ""},
 		{Failed, "", "goofed", "goofed"},
-		{Failed, "capnp", "goofed", "capnp: goofed"},
+		{Failed, "shark", "goofed", "shark: goofed"},
 	}
 	for _, test := range tests {
 		err := New(test.typ, test.prefix, test.msg)
@@ -68,8 +68,8 @@ func TestAnnotate(t *testing.T) {
 		},
 		{
 			msg:      "context",
-			err:      New(Failed, "capnp", "goofed"),
-			want:     "context: capnp: goofed",
+			err:      New(Failed, "shark", "goofed"),
+			want:     "context: shark: goofed",
 			wantType: Failed,
 		},
 		{
@@ -80,36 +80,36 @@ func TestAnnotate(t *testing.T) {
 		},
 		{
 			msg:      "context",
-			err:      New(Unimplemented, "capnp", "unimplemented"),
-			want:     "context: capnp: unimplemented",
+			err:      New(Unimplemented, "shark", "unimplemented"),
+			want:     "context: shark: unimplemented",
 			wantType: Unimplemented,
 		},
 		{
-			prefix:   "capnp",
+			prefix:   "shark",
 			msg:      "context",
 			err:      errors.New("goofed"),
-			want:     "capnp: context: goofed",
+			want:     "shark: context: goofed",
 			wantType: Failed,
 		},
 		{
-			prefix:   "capnp",
+			prefix:   "shark",
 			msg:      "context",
 			err:      New(Failed, "", "goofed"),
-			want:     "capnp: context: goofed",
+			want:     "shark: context: goofed",
 			wantType: Failed,
 		},
 		{
-			prefix:   "capnp",
+			prefix:   "shark",
 			msg:      "context",
-			err:      New(Failed, "capnp", "goofed"),
-			want:     "capnp: context: goofed",
+			err:      New(Failed, "shark", "goofed"),
+			want:     "shark: context: goofed",
 			wantType: Failed,
 		},
 		{
 			prefix:   "rpc",
 			msg:      "context",
-			err:      New(Failed, "capnp", "goofed"),
-			want:     "rpc: context: capnp: goofed",
+			err:      New(Failed, "shark", "goofed"),
+			want:     "rpc: context: shark: goofed",
 			wantType: Failed,
 		},
 	}

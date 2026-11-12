@@ -243,7 +243,6 @@ func (s *Segment) readListPtr(base address, val rawPointer) (List, error) {
 }
 
 func (s *Segment) resolveFarPointer(paddr address) (dst *Segment, base address, resolved rawPointer, err error) {
-	// Encoding details at https://capnproto.org/encoding.html#inter-segment-pointers
 
 	val := s.readRawPointer(paddr)
 	switch val.pointerType() {

@@ -778,8 +778,7 @@ func TestRecvDisembargo(t *testing.T) {
 
 // TestIssue3 exposes a capability that makes a call to its received
 // capability argument, acks the call, then waits on its return.  In
-// earlier versions of go-capnproto, this would cause a deadlock.
-// See https://github.com/capnproto/go-capnproto2/issues/3 for history.
+// earlier versions of shark, this would cause a deadlock.
 // Level 1 requirement.
 func TestIssue3(t *testing.T) {
 	const callbackInterfaceID = interfaceID + 100
@@ -1033,14 +1032,14 @@ func TestIssue3(t *testing.T) {
 }
 
 type rpcResolve struct {
-	PromiseID uint32 `capnp:"promiseId"`
+	PromiseID uint32 `shark:"promiseId"`
 	Which     rpccp.Resolve_Which
 	Cap       *rpcCapDescriptor
 	Exception *rpcException
 }
 
 type rpcRelease struct {
-	ID             uint32 `capnp:"id"`
+	ID             uint32 `shark:"id"`
 	ReferenceCount uint32
 }
 

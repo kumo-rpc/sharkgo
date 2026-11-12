@@ -153,7 +153,6 @@ struct Z {
     anyCapability     @49 :Capability;
 
     # Schemas aren't allowed to have List(AnyPointer).
-    # See https://groups.google.com/d/topic/capnproto/BVk3m7Nc-4s/discussion
   }
 }
 

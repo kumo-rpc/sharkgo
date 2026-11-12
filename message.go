@@ -45,8 +45,7 @@ type Message struct {
 	// List is obtained.  This means that calling a getter for the same
 	// sub-struct multiple times will cause it to be double-counted.  Once
 	// the traversal limit is reached, pointer accessors will report
-	// errors. See https://capnproto.org/encoding.html#amplification-attack
-	// for more details on this security measure.
+	// errors.
 	//
 	// If not set, this defaults to 64 MiB.
 	TraverseLimit uint64
@@ -243,8 +242,6 @@ func (m *Message) SetRoot(p Ptr) error {
 // message. Capability pointers inside the message will use this
 // table to map pointers to Clients.   The table is populated by
 // the RPC system.
-//
-// https://capnproto.org/encoding.html#capabilities-interfaces
 func (m *Message) CapTable() *CapTable {
 	return &m.capTable
 }

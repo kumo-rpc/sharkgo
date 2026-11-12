@@ -1,5 +1,5 @@
-This directory contains go packages for all of the capnproto
-schemas that ship with capnproto itself. They are generated with
+This directory contains go packages for all of the shark
+schemas that ship with shark itself. They are generated with
 the help of `./gen.sh`. Though some manual modifications have been made
 to the schema to correct name collisions (See below).
 
@@ -62,7 +62,7 @@ stored in  a subdirectory, to make them their own package:
 `/std/shark/${mangled_schema_name}/${mangled_schema_name}.shark.go`.
 
 In addition to the upstream base schemas, we also ship a schema
-`/std/go.shk`, which contains annotations used by `go-capnpc`. Its
+`/std/go.shk`, which contains annotations used by `sharkgo`. Its
 usage is described in the top-level README. The generated source is
 placed in the root of the repository, making it part of the go package
 `github.com/kumo-rpc/sharkgo`.

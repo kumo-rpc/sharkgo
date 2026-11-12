@@ -1,7 +1,7 @@
 package shark
 
-// The TypeParam interface must be satisified by a type to be used as a capnproto
-// type parameter. This is satisified by all capnproto pointer types. T should
+// The TypeParam interface must be satisified by a type to be used as a shark
+// type parameter. This is satisified by all shark pointer types. T should
 // be instantiated by the type itself; in type parameter lists you will typically
 // see parameter/constraints like T TypeParam[T].
 type TypeParam[T any] interface {

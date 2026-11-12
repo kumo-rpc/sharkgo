@@ -71,7 +71,7 @@ func Example() {
 	_ = buf
 
 	// ... or write to an io.Writer.
-	file, err := os.CreateTemp("", "go-capnproto")
+	file, err := os.CreateTemp("", "sharkgo-proto")
 	if err != nil {
 		panic(err)
 	}

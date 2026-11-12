@@ -713,9 +713,9 @@ func TestInsert_GroupNoPtr(t *testing.T) {
 // TagZ is a variant of Z that has tags.
 type TagZ struct {
 	Which   air.Z_Which
-	Float64 float64 `capnp:"f64"`
-	I64     int64   `capnp:"-"`
-	U8      bool    `capnp:"bool"`
+	Float64 float64 `shark:"f64"`
+	I64     int64   `shark:"-"`
+	U8      bool    `shark:"bool"`
 }
 
 func TestExtract_Tags(t *testing.T) {

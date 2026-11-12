@@ -252,7 +252,7 @@ struct Field {
     # The original ordinal number given to the field.  You probably should NOT use this; if you need
     # a numeric identifier for a field, use its position within the field array for its scope.
     # The ordinal is given here mainly just so that the original schema text can be reproduced given
-    # the compiled version -- i.e. so that `shark compile -ocapnp` can do its job.
+    # the compiled version -- i.e. so that `shark compile -oshark` can do its job.
   }
 }
 
@@ -496,7 +496,7 @@ struct CapnpVersion {
 }
 
 struct CodeGeneratorRequest {
-  capnpVersion @2 :CapnpVersion;
+  sharkVersion @2 :CapnpVersion;
   # Version of the `shark` executable. Generally, code generators should ignore this, but the code
   # generators that ship with `shark` itself will print a warning if this mismatches since that
   # probably indicates something is misconfigured.

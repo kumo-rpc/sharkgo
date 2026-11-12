@@ -36,7 +36,7 @@ find_shk_files() {
 	find "$1" -type f -name '*.shk'
 }
 
-# shark compile treats a bare language name as capnpc-<lang>. Pass the
+# shark compile treats a bare language name as shark-<lang>. Pass the
 # shark-go executable path so the plugin is this repo's generator.
 shark_go_plugin() {
 	if [ -n "${SHARK_GO:-}" ]; then

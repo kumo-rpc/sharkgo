@@ -4,8 +4,6 @@ package shark
 // message. Capability pointers inside the message will use this
 // table to map pointers to Clients.   The table is populated by
 // the RPC system.
-//
-// https://capnproto.org/encoding.html#capabilities-interfaces
 type CapTable struct {
 	cs []Client
 }
