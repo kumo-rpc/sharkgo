@@ -39,7 +39,7 @@ func (e *extracter) extractStruct(val reflect.Value, typeID uint64, s shark.Stru
 		}
 		switch {
 		case !val.CanSet() && val.IsNil():
-			// Even if the Cap'n Proto pointer isn't valid, this is probably
+			// Even if the Shark Proto pointer isn't valid, this is probably
 			// the caller's fault and will be a bug at some point.
 			return errors.New("can't extract struct into nil")
 		case !s.IsValid() && val.CanSet():

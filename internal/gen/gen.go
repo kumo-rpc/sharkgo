@@ -1,5 +1,5 @@
 // This program generates some repetative method implementations
-// for the many types of list capnp provides.
+// for the many types of list shark provides.
 package main
 
 import (

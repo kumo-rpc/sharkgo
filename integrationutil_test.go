@@ -10,10 +10,10 @@ import (
 
 	"github.com/kumo-rpc/sharkgo"
 	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
-	"github.com/kumo-rpc/sharkgo/internal/capnptool"
+	"github.com/kumo-rpc/sharkgo/internal/sharktool"
 )
 
-const schemaPath = "internal/aircraftlib/aircraft.capnp"
+const schemaPath = "internal/aircraftlib/aircraft.shk"
 
 func initNester(t *testing.T, n air.Nester1Capn, strs ...string) {
 	tl, err := n.NewStrs(int32(len(strs)))
@@ -71,15 +71,15 @@ func zdataFilledMessage(t testing.TB, n int) *shark.Message {
 	return msg
 }
 
-// encodeTestMessage encodes the textual Cap'n Proto message to unpacked
-// binary using the capnp tool, or returns the fallback if the tool fails.
+// encodeTestMessage encodes the textual Shark Proto message to unpacked
+// binary using the shark tool, or returns the fallback if the tool fails.
 func encodeTestMessage(t testing.TB, typ string, text string, fallback []byte) ([]byte, error) {
-	tool, err := capnptool.Find()
+	tool, err := sharktool.Find()
 	if err != nil {
-		t.Log("capnp tool not found; using fallback")
+		t.Log("shark tool not found; using fallback")
 		return fallback, nil
 	}
-	b, err := tool.Encode(capnptool.Type{SchemaPath: schemaPath, Name: typ}, text)
+	b, err := tool.Encode(sharktool.Type{SchemaPath: schemaPath, Name: typ}, text)
 	if err != nil {
 		return nil, fmt.Errorf("%s value %q encode failed: %v", typ, text, err)
 	}
@@ -89,8 +89,8 @@ func encodeTestMessage(t testing.TB, typ string, text string, fallback []byte) (
 	return b, nil
 }
 
-// mustEncodeTestMessage encodes the textual Cap'n Proto message to unpacked
-// binary using the capnp tool, or returns the fallback if the tool fails.
+// mustEncodeTestMessage encodes the textual Shark Proto message to unpacked
+// binary using the shark tool, or returns the fallback if the tool fails.
 func mustEncodeTestMessage(t testing.TB, typ string, text string, fallback []byte) []byte {
 	b, err := encodeTestMessage(t, typ, text, fallback)
 	if err != nil {

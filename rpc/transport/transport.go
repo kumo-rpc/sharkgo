@@ -2,8 +2,6 @@
 //
 // In addition to the implementations defined here, one of the developers maintains
 // a websocket-backed implementation as a separate module:
-//
-// https://pkg.go.dev/zenhack.net/go/websocket-capnp
 package transport
 
 import (
@@ -15,7 +13,7 @@ import (
 	rpccp "github.com/kumo-rpc/sharkgo/std/shark/rpc"
 )
 
-// A Transport sends and receives Cap'n Proto RPC messages to and from
+// A Transport sends and receives Shark Proto RPC messages to and from
 // another vat.
 //
 // It is safe to call NewMessage and its returned functions concurrently
@@ -91,7 +89,7 @@ type Codec interface {
 	Close() error
 }
 
-// A transport serializes and deserializes Cap'n Proto using a Codec.
+// A transport serializes and deserializes Shark Proto using a Codec.
 // It adds no buffering beyond what is provided by the underlying
 // byte transfer mechanism.
 type transport struct {

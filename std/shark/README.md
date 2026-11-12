@@ -9,7 +9,7 @@ Executing:
 
     ./gen.sh import /path/to/schemas
 
-Will copy all the `*.capnp` files from the given directory into this
+Will copy all the `*.shk` files from the given directory into this
 directory, and add annotations to them specifying package names and
 import paths for `shark-go`.
 
@@ -52,14 +52,14 @@ annotation foo(struct, field) :Void $Go.name("fooAnnotation");
 The directory structure of this repository is designed such that when
 compiling other schema, it should be sufficient to execute:
 
-    shark compile -I ${path_to_this_repository}/std -ogo ${schama_name}.capnp
+    shark compile -I ${path_to_this_repository}/std -ogo ${schama_name}.shk
 
 And have the `$import` statements in existing schema "just work."
 
 To achieve this, the base schemas themselves are stored as
-`/std/capnp/${schema_name}.capnp`. The generated go source files are
+`/std/shark/${schema_name}.shk`. The generated go source files are
 stored in  a subdirectory, to make them their own package:
-`/std/capnp/${mangled_schema_name}/${mangled_schema_name}.shark.go`.
+`/std/shark/${mangled_schema_name}/${mangled_schema_name}.shark.go`.
 
 In addition to the upstream base schemas, we also ship a schema
 `/std/go.shk`, which contains annotations used by `go-capnpc`. Its

@@ -11,7 +11,7 @@ import (
 // A SegmentID is a numeric identifier for a Segment.
 type SegmentID uint32
 
-// A Segment is an allocation arena for Cap'n Proto objects.
+// A Segment is an allocation arena for Shark Proto objects.
 // It is part of a Message, which can contain other segments that
 // reference each other.
 type Segment struct {

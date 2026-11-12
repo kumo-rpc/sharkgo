@@ -1,4 +1,4 @@
-// Package text supports marshaling Cap'n Proto messages as text based on a schema.
+// Package text supports marshaling Shark Proto messages as text based on a schema.
 package text
 
 import (
@@ -42,7 +42,7 @@ func MarshalList(typeID uint64, l shark.List) (string, error) {
 	return buf.String(), nil
 }
 
-// An Encoder writes the text format of Cap'n Proto messages to an output stream.
+// An Encoder writes the text format of Shark Proto messages to an output stream.
 type Encoder struct {
 	w     errWriter
 	tmp   []byte

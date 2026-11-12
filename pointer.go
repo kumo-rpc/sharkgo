@@ -7,7 +7,7 @@ import (
 	"github.com/kumo-rpc/sharkgo/internal/str"
 )
 
-// A Ptr is a reference to a Cap'n Proto struct, list, or interface.
+// A Ptr is a reference to a Shark Proto struct, list, or interface.
 // The zero value is a null pointer.
 type Ptr struct {
 	seg        *Segment

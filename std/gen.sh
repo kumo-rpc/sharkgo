@@ -5,9 +5,9 @@ repo_root="$(cd "$std_dir/.." && pwd)"
 
 infer_package_name() {
 	# Convert the filename $1 to a package name:
-	# strip the .shk extension and dirname, remove dashes, convert '+' to 'x'.
-	# cpp.shk is the renamed c++.capnp schema; its Go package stays cxx.
-	name="$(printf '%s' "$(basename "$1")" | sed 's/\.shk$// ; s/-//g ; s/+/x/g')"
+	# strip the .shk extension and dirname, turn dashes into underscores, convert '+' to 'x'.
+	# cpp.shk keeps the Go package name cxx.
+	name="$(printf '%s' "$(basename "$1")" | sed 's/\.shk$// ; s/-/_/g ; s/+/x/g')"
 	if [ "$name" = "cpp" ]; then
 		name="cxx"
 	fi

@@ -3,7 +3,7 @@ Copyright (c) 2013-2023 Sandstorm Development Group, Inc. and contributors
 Licensed under the MIT License:
 
 shark-go is the Cap'n proto code generator for Go.  It reads a
-CodeGeneratorRequest from stdin and for a file foo.capnp it writes
+CodeGeneratorRequest from stdin and for a file foo.shark it writes
 foo.sk.go.  This is usually invoked from `shark compile -ogo`.
 
 See https://capnproto.org/otherlang.html#how-to-write-compiler-plugins
@@ -652,7 +652,7 @@ func (g *generator) defineField(n *node, f field) (err error) {
 	}
 }
 
-// typeRef is a Go reference to a Cap'n Proto type.
+// typeRef is a Go reference to a Shark Proto type.
 type typeRef struct {
 	name    string
 	newfunc string     // if absent, there is no New function for this type.

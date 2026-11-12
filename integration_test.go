@@ -13,11 +13,11 @@ import (
 
 	"github.com/kumo-rpc/sharkgo"
 	air "github.com/kumo-rpc/sharkgo/internal/aircraftlib"
-	"github.com/kumo-rpc/sharkgo/internal/capnptool"
+	"github.com/kumo-rpc/sharkgo/internal/sharktool"
 )
 
 // A marshalTest tests whether a message can be encoded then read by the
-// reference capnp implementation.
+// reference shark implementation.
 type marshalTest struct {
 	name string
 
@@ -660,9 +660,9 @@ func TestMarshalShouldMatchData(t *testing.T) {
 
 func TestMarshalShouldMatchTextWhenDecoded(t *testing.T) {
 	t.Parallel()
-	tool, err := capnptool.Find()
+	tool, err := sharktool.Find()
 	if err != nil {
-		t.Skip("capnp tool not found:", err)
+		t.Skip("shark tool not found:", err)
 	}
 	for _, test := range makeMarshalTests(t) {
 		data, err := test.msg.Marshal()
@@ -670,9 +670,9 @@ func TestMarshalShouldMatchTextWhenDecoded(t *testing.T) {
 			t.Errorf("%s: marshal error: %v", test.name, err)
 			continue
 		}
-		text, err := tool.Decode(capnptool.Type{SchemaPath: schemaPath, Name: test.typ}, bytes.NewReader(data))
+		text, err := tool.Decode(sharktool.Type{SchemaPath: schemaPath, Name: test.typ}, bytes.NewReader(data))
 		if err != nil {
-			t.Errorf("%s: capnp decode: %v", test.name, err)
+			t.Errorf("%s: shark decode: %v", test.name, err)
 			continue
 		}
 		if text != test.text {
@@ -683,9 +683,9 @@ func TestMarshalShouldMatchTextWhenDecoded(t *testing.T) {
 
 func TestMarshalPackedShouldMatchTextWhenDecoded(t *testing.T) {
 	t.Parallel()
-	tool, err := capnptool.Find()
+	tool, err := sharktool.Find()
 	if err != nil {
-		t.Skip("capnp tool not found:", err)
+		t.Skip("shark tool not found:", err)
 	}
 	for _, test := range makeMarshalTests(t) {
 		data, err := test.msg.MarshalPacked()
@@ -693,9 +693,9 @@ func TestMarshalPackedShouldMatchTextWhenDecoded(t *testing.T) {
 			t.Errorf("%s: marshal error: %v", test.name, err)
 			continue
 		}
-		text, err := tool.DecodePacked(capnptool.Type{SchemaPath: schemaPath, Name: test.typ}, bytes.NewReader(data))
+		text, err := tool.DecodePacked(sharktool.Type{SchemaPath: schemaPath, Name: test.typ}, bytes.NewReader(data))
 		if err != nil {
-			t.Errorf("%s: capnp decode: %v", test.name, err)
+			t.Errorf("%s: shark decode: %v", test.name, err)
 			continue
 		}
 		if text != test.text {
@@ -810,9 +810,9 @@ func TestBitList(t *testing.T) {
 
 func TestBitList_Decode(t *testing.T) {
 	t.Parallel()
-	tool, err := capnptool.Find()
+	tool, err := sharktool.Find()
 	if err != nil {
-		t.Skip("capnp tool not found:", err)
+		t.Skip("shark tool not found:", err)
 	}
 	for _, test := range bitListTests {
 		msg, err := test.makeMessage()
@@ -825,13 +825,13 @@ func TestBitList_Decode(t *testing.T) {
 			t.Errorf("%v: marshal: %v", test.list, err)
 			continue
 		}
-		text, err := tool.Decode(capnptool.Type{SchemaPath: schemaPath, Name: "Z"}, bytes.NewReader(out))
+		text, err := tool.Decode(sharktool.Type{SchemaPath: schemaPath, Name: "Z"}, bytes.NewReader(out))
 		if err != nil {
-			t.Errorf("%v: capnp decode: %v", test.list, err)
+			t.Errorf("%v: shark decode: %v", test.list, err)
 			continue
 		}
 		if text != test.text {
-			t.Errorf("%v: capnp decode = %q; want %q", test.list, text, test.text)
+			t.Errorf("%v: shark decode = %q; want %q", test.list, text, test.text)
 		}
 	}
 }
@@ -1649,7 +1649,7 @@ func unsafeBytesToString(b []byte) string {
 }
 
 // BenchmarkMarshal benchmarks marshalling a message using the simplest API
-// available to go-capnp users.
+// available to shark users.
 func BenchmarkMarshal(b *testing.B) {
 	r := rand.New(rand.NewSource(12345))
 	data := make([]*A, 1000)
@@ -1703,7 +1703,7 @@ func BenchmarkMarshal_ReuseMsg(b *testing.B) {
 }
 
 // BenchmarkUnmarshal benchmarks unmarshalling using the simplest API possible
-// available to go-capnp users.
+// available to shark users.
 func BenchmarkUnmarshal(b *testing.B) {
 	r := rand.New(rand.NewSource(12345))
 	type testCase struct {
@@ -1746,7 +1746,7 @@ func BenchmarkUnmarshal(b *testing.B) {
 // BenchmarkUnmarshal_Reuse benchmarks unmarshalling by reusing the msg object
 // and directly using the test data buffer as an arena.
 //
-// NOTE: this bypasses framing done by capnp marshalling, thus expects the
+// NOTE: this bypasses framing done by shark marshalling, thus expects the
 // caller to frame the message appropriately.
 func BenchmarkUnmarshal_Reuse(b *testing.B) {
 	type testCase struct {

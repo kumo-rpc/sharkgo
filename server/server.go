@@ -1,4 +1,4 @@
-// Package server provides runtime support for implementing Cap'n Proto
+// Package server provides runtime support for implementing Shark Proto
 // interfaces locally.
 package server // import "github.com/kumo-rpc/sharkgo/server"
 
@@ -301,5 +301,5 @@ func (sm sortedMethods) Swap(i, j int) {
 }
 
 func newError(msg string) error {
-	return exc.New(exc.Failed, "capnp server", msg)
+	return exc.New(exc.Failed, "shark server", msg)
 }

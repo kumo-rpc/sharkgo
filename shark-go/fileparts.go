@@ -14,7 +14,7 @@ var (
 	importList      = []importSpec{
 		capnpImportSpec,
 
-		// capnp subpackage imports
+		// shark subpackage imports
 		{path: schemasImport, name: "schemas"},
 		{path: serverImport, name: "server"},
 		{path: textImport, name: "text"},

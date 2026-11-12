@@ -1,9 +1,9 @@
 # Generate scopes.shk.out with:
-# shark compile -o- scopes.capnp > scopes.shk.out
+# shark compile -o- scopes.shk > scopes.shk.out
 # Must run inside this directory to preserve paths.
 
 using Go = import "go.shk";
-using Other = import "otherscopes.capnp";
+using Other = import "otherscopes.shk";
 
 @0xd68755941d99d05e;
 

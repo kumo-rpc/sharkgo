@@ -44,5 +44,5 @@ interface ByteStream {
   }
 }
 using Go = import "/go.shk";
-$Go.package("bytestream");
-$Go.import("github.com/kumo-rpc/sharkgo/std/shark/compat/bytestream");
+$Go.package("byte_stream");
+$Go.import("github.com/kumo-rpc/sharkgo/std/shark/compat/byte_stream");

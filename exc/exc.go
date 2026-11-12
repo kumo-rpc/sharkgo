@@ -1,4 +1,4 @@
-// Package exc provides an error type for capnp exceptions.
+// Package exc provides an error type for shark exceptions.
 package exc
 
 import (
@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// Exception is an error that designates a Cap'n Proto exception.
+// Exception is an error that designates a Shark Proto exception.
 type Exception struct {
 	Type   Type
 	Prefix string

@@ -15,7 +15,7 @@ struct RpcMessage {
   #
   # May be omitted when caller doesn't care about the response. The implementation will omit `id`
   # and return immediately when calling methods with the annotation `@notification` (defined in
-  # `json.capnp`). The `@notification` annotation only matters for outgoing calls; for incoming
+  # `json.shk`). The `@notification` annotation only matters for outgoing calls; for incoming
   # calls, it's the client's decision whether it wants to receive the response.
 
   method @2 :Text;
@@ -42,5 +42,5 @@ struct RpcMessage {
   }
 }
 using Go = import "/go.shk";
-$Go.package("jsonrpc");
-$Go.import("github.com/kumo-rpc/sharkgo/std/shark/compat/jsonrpc");
+$Go.package("json_rpc");
+$Go.import("github.com/kumo-rpc/sharkgo/std/shark/compat/json_rpc");

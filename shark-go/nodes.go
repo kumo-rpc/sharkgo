@@ -317,7 +317,7 @@ func resolveName(nodes nodeMap, n *node, base, name string, file *node) error {
 			// idea is to use a consistent naming rule that works even if there
 			// is no name collision yet. If a node is added later, names will
 			// not get mixed up or require a big refactor downstream.
-			// See also: persistent.capnp
+			// See also: persistent.shk
 			n.Name = strings.Title(name) + "_"
 		}
 	} else {

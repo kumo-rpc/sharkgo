@@ -1,12 +1,12 @@
 /*
-Package pogs provides functions to convert Cap'n Proto messages to and
+Package pogs provides functions to convert Shark Proto messages to and
 from Go structs.  pogs operates similarly to encoding/json: define a
 struct that is optionally marked up with tags, then Insert and Extract
-will copy the fields to and from the corresponding Cap'n Proto struct.
+will copy the fields to and from the corresponding Shark Proto struct.
 
 # Inserting
 
-To copy data into a Cap'n Proto struct, we use the Insert function.
+To copy data into a Shark Proto struct, we use the Insert function.
 Consider the following schema:
 
 	struct Message {
@@ -23,7 +23,7 @@ and the Go struct:
 		Time int64
 	}
 
-We can copy the Go struct into a Cap'n Proto struct like this:
+We can copy the Go struct into a Shark Proto struct like this:
 
 	_, arena := shark.NewSingleSegmentMessage(nil)
 	root, _ := myschema.NewRootMessage(arena)
@@ -31,12 +31,12 @@ We can copy the Go struct into a Cap'n Proto struct like this:
 	err := pogs.Insert(myschema.Message_TypeID, root.Struct, m)
 
 Note that if any field names in our Go struct don't match to a field in
-the Cap'n Proto struct, Insert returns an error.  We'll see how to fix
+the Shark Proto struct, Insert returns an error.  We'll see how to fix
 that in a moment.
 
 # Extracting
 
-Copying data back out from a Cap'n Proto struct is quite similar: we
+Copying data back out from a Shark Proto struct is quite similar: we
 pass a pointer to our Go struct to Extract.
 
 	m := new(Message)
@@ -44,7 +44,7 @@ pass a pointer to our Go struct to Extract.
 
 # Types
 
-The mapping between Cap'n Proto types and underlying Go types is as
+The mapping between Shark Proto types and underlying Go types is as
 follows:
 
 	Bool                          -> bool
@@ -66,21 +66,21 @@ filled-in byte slice will point to original segment.
 
 # Renaming and Omitting Fields
 
-By default, the Go field name is the same as the Cap'n Proto schema
+By default, the Go field name is the same as the Shark Proto schema
 field name with the first letter capitalized.  If we want to change this
-mapping, we use the capnp field tag.
+mapping, we use the shark field tag.
 
 	type MessageRenamed struct {
-		Subject    string `capnp:"name"`
+		Subject    string `shark:"name"`
 		Body       string
-		SentMillis int64  `capnp:"time"`
+		SentMillis int64  `shark:"time"`
 	}
 
 Using a "-" will cause the field to be ignored by the Insert and
 Extract functions.
 
 	type ExtraFieldsMessage struct {
-		ID   uint64 `capnp:"-"`
+		ID   uint64 `shark:"-"`
 		Name string
 		Body string
 		Time int64
@@ -89,7 +89,7 @@ Extract functions.
 # Unions
 
 Since Go does not have support for variant types, Go structs that want
-to use fields inside a Cap'n Proto union must have an explicit
+to use fields inside a Shark Proto union must have an explicit
 discriminant field called Which.  The Extract function will populate the
 Which field and the Insert function will read the Which field to
 determine which field to set.  Given this schema:
@@ -120,7 +120,7 @@ particular field.
 
 	type Square struct {
 		Area  float64
-		Width float64  `capnp:"square"`
+		Width float64  `shark:"square"`
 	}
 
 This can be useful if we want to use a different Go type depending on
@@ -144,8 +144,8 @@ which field in the union is set.
 Anonymous struct fields are usually extracted or inserted as if their
 inner exported fields were fields in the outer struct, subject to the
 rules in the next paragraph.  An anonymous struct field with a name
-given in its capnp tag is treated as having that name, rather than being
-anonymous.  An anonymous struct field with a capnp tag of "-" will be
+given in its shark tag is treated as having that name, rather than being
+anonymous.  An anonymous struct field with a shark tag of "-" will be
 ignored.
 
 The visibility rules for struct fields are amended for pogs in the same
@@ -153,7 +153,7 @@ way they are amended in encoding/json: if there are multiple fields at
 the same level, and that level is the least nested, the following extra
 rules apply:
 
-1) Of those fields, if any are capnp-tagged, only tagged fields are
+1) Of those fields, if any are shark-tagged, only tagged fields are
 considered, even if there are multiple untagged fields that would
 otherwise conflict.
 2) If there is exactly one field (tagged or not according to the first

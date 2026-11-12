@@ -1,8 +1,8 @@
 // Package strquote provides a function for formatting a string as a
-// Cap'n Proto string literal.
+// Shark Proto string literal.
 package strquote
 
-// Append appends a Cap'n Proto string literal of s to buf.
+// Append appends a Shark Proto string literal of s to buf.
 func Append(buf []byte, s []byte) []byte {
 	buf = append(buf, '"')
 	last := 0

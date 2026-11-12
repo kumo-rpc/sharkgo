@@ -26,14 +26,14 @@ type Decoder struct {
 	MaxMessageSize uint64
 }
 
-// NewDecoder creates a new Cap'n Proto framer that reads from r.
+// NewDecoder creates a new Shark Proto framer that reads from r.
 // The returned decoder will only read as much data as necessary to
 // decode the message.
 func NewDecoder(r io.Reader) *Decoder {
 	return &Decoder{r: r}
 }
 
-// NewPackedDecoder creates a new Cap'n Proto framer that reads from a
+// NewPackedDecoder creates a new Shark Proto framer that reads from a
 // packed stream r.  The returned decoder may read more data than
 // necessary from r.
 func NewPackedDecoder(r io.Reader) *Decoder {
@@ -219,12 +219,12 @@ type Encoder struct {
 	bufs   [][]byte
 }
 
-// NewEncoder creates a new Cap'n Proto framer that writes to w.
+// NewEncoder creates a new Shark Proto framer that writes to w.
 func NewEncoder(w io.Writer) *Encoder {
 	return &Encoder{w: w}
 }
 
-// NewPackedEncoder creates a new Cap'n Proto framer that writes to a
+// NewPackedEncoder creates a new Shark Proto framer that writes to a
 // packed stream w.
 func NewPackedEncoder(w io.Writer) *Encoder {
 	return NewEncoder(&packed.Writer{Writer: w})
@@ -292,7 +292,7 @@ func appendUint32(b []byte, v uint32) []byte {
 }
 
 // streamHeader holds the framing words at the beginning of a serialized
-// Cap'n Proto message.
+// Shark Proto message.
 type streamHeader []byte
 
 // maxSegment returns the number of segments in the message minus one.

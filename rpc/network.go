@@ -6,7 +6,7 @@ import (
 	"github.com/kumo-rpc/sharkgo"
 )
 
-// A PeerID identifies a peer on a Cap'n Proto network. The exact
+// A PeerID identifies a peer on a Shark Proto network. The exact
 // format of this is network specific.
 type PeerID struct {
 	// Network specific value identifying the peer.
@@ -77,7 +77,7 @@ type IntroductionInfo struct {
 }
 
 // A Network is a reference to a multi-party (generally >= 3) network
-// of Cap'n Proto peers. Use this instead of NewConn when establishing
+// of Shark Proto peers. Use this instead of NewConn when establishing
 // connections outside a point-to-point setting.
 //
 // In addition to satisfying the method set, a correct implementation

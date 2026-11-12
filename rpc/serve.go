@@ -8,7 +8,7 @@ import (
 	"github.com/kumo-rpc/sharkgo"
 )
 
-// serveOpts are options for the Cap'n Proto server.
+// serveOpts are options for the Shark Proto server.
 type serveOpts struct {
 	newTransport NewTransportFunc
 }
@@ -36,7 +36,7 @@ func WithPackedStreamingTransport() ServeOption {
 	}
 }
 
-// Serve serves a Cap'n Proto RPC to incoming connections.
+// Serve serves a Shark Proto RPC to incoming connections.
 //
 // Serve will take ownership of bootstrapClient and release it after the listener closes.
 //
@@ -71,7 +71,7 @@ func Serve(lis net.Listener, boot shark.Client, opts ...ServeOption) error {
 	}
 }
 
-// ListenAndServe opens a listener on the given address and serves a Cap'n Proto RPC to incoming connections
+// ListenAndServe opens a listener on the given address and serves a Shark Proto RPC to incoming connections
 //
 // network and address are passed to net.Listen. Use network "unix" for Unix Domain Sockets
 // and "tcp" for regular TCP IP4 or IP6 connections.

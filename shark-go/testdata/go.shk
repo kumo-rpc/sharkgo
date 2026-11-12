@@ -12,4 +12,4 @@ annotation notag(enumerant) :Void;
 annotation customtype(field) :Text;
 annotation name(struct, field, union, enum, enumerant, interface, method, param, annotation, const, group) :Text;
 
-$package("capnp");
+$package("shark");

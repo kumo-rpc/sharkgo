@@ -56,7 +56,7 @@ func (a address) addOffset(o DataOffset) address {
 // A Size is a size (in bytes).
 type Size uint32
 
-// wordSize is the number of bytes in a Cap'n Proto word.
+// wordSize is the number of bytes in a Shark Proto word.
 const wordSize Size = 8
 
 // String returns the size in the format "X bytes".
@@ -94,7 +94,7 @@ func (sz Size) padToWord() Size {
 	return (sz + n) &^ n
 }
 
-// maxSegmentSize is the largest size representable in the Cap'n Proto
+// maxSegmentSize is the largest size representable in the Shark Proto
 // encoding.
 const maxSegmentSize Size = 1<<32 - 8
 

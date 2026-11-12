@@ -18,7 +18,7 @@ func Example() {
 	// The cost of the extra word of storage is usually worth it, as
 	// then human readable output is easily obtained via a shell command such as
 	//
-	// $ cat binary.cpz | capnp decode aircraft.capnp Z
+	// $ cat binary.cpz | shark decode aircraft.shk Z
 	//
 	// If you need to conserve space, and know your content in advance, it
 	// isn't necessary to use an anonymous union. Just supply the type name

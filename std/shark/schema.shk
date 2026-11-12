@@ -497,11 +497,11 @@ struct CapnpVersion {
 
 struct CodeGeneratorRequest {
   capnpVersion @2 :CapnpVersion;
-  # Version of the `capnp` executable. Generally, code generators should ignore this, but the code
-  # generators that ship with `capnp` itself will print a warning if this mismatches since that
+  # Version of the `shark` executable. Generally, code generators should ignore this, but the code
+  # generators that ship with `shark` itself will print a warning if this mismatches since that
   # probably indicates something is misconfigured.
   #
-  # The first version of 'capnp' to set this was 0.6.0. So, if it's missing, the compiler version
+  # The first version of 'shark' to set this was 0.6.0. So, if it's missing, the compiler version
   # is older than that.
 
   nodes @0 :List(Node);

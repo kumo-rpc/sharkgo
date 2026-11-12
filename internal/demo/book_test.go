@@ -17,7 +17,7 @@ func Example_book() {
 }
 
 func writer(out io.Writer) {
-	// Make a brand new empty message.  A Message allocates Cap'n Proto structs.
+	// Make a brand new empty message.  A Message allocates Shark Proto structs.
 	msg, seg := shark.NewSingleSegmentMessage(nil)
 
 	// Create a new Book struct.  Every message must have a root struct.

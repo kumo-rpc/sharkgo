@@ -634,7 +634,7 @@ func (test_zero_stream) Read(b []byte) (int, error) {
 
 // TestZeroStream checks that an all-zero stream will fail to decode with an
 // error, and not panic.
-// See github.com/capnproto/go-capnp/issues/592
+// See github.com/capnproto/shark/issues/592
 func TestZeroStream(t *testing.T) {
 	m, err := NewDecoder(test_zero_stream{}).Decode()
 	require.NoError(t, err)

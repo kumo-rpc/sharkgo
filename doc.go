@@ -1,9 +1,8 @@
 /*
-Package capnp is a Cap'n Proto library for Go.
-https://capnproto.org/
+Package shark is a Kumo Proto library for Go.
 
 Read the Getting Started guide for a tutorial on how to use this
-package. https://github.com/capnproto/go-capnproto2/wiki/Getting-Started
+package.
 
 # Generating code
 
@@ -11,10 +10,10 @@ shark-go provides the compiler backend for shark.
 
 	# First, install shark-go to $PATH.
 	go install github.com/kumo-rpc/sharkgo/shark-go
-	# Then, check out the go-capnp source code:
-	git clone https://github.com/capnproto/go-capnp /desired/path/to/go-capnp
+	# Then, check out the shark source code:
+	git clone https://github.com/kumo-rpc/sharkgo /desired/path/to/shark
 	# Then, generate Go files.
-	shark compile -I /desired/path/to/go-capnp/std -ogo *.capnp
+	shark compile -I /desired/path/to/shark-go/std -ogo *.shk
 
 shark-go requires two annotations for all files: package and import.
 package is needed to know what package to place at the head of the
@@ -39,7 +38,7 @@ that godoc will pick it up. For example:
 
 # Messages and Segments
 
-In Cap'n Proto, the unit of communication is a message. A message
+In Shark Proto, the unit of communication is a message. A message
 consists of one or more segments -- contiguous blocks of memory.  This
 allows large messages to be split up and loaded independently or lazily.
 Typically you will use one segment per message.  Logically, a message is
@@ -55,7 +54,7 @@ Decoder types.
 
 # Pointers
 
-The type for a generic reference to a Cap'n Proto object is Ptr.  A Ptr
+The type for a generic reference to a Shark Proto object is Ptr.  A Ptr
 can refer to a struct, a list, or an interface.  Ptr, Struct, List, and
 Interface (the pointer types) have value semantics and refer to data in
 a single segment.  All of the pointer types have a notion of "valid".
@@ -64,8 +63,7 @@ panic when any setter is called.
 
 In previous versions of this package, the Pointer interface was used
 instead of the Ptr struct.  This interface and functions that use it are
-now deprecated.  See https://github.com/capnproto/go-capnproto2/wiki/New-Ptr-Type
-for details about this API change.
+now deprecated.
 
 Data accessors and setters (i.e. struct primitive fields and list
 elements) do not return errors, but pointer accessors and setters do.
@@ -136,7 +134,7 @@ shark-go will generate:
 	func (s Foo) NewBar() (Foo, error)
 
 	// Foo_List is a value with pointer semantics. It is created for all
-	// structs, and is used for List(Foo) in the capnp file.
+	// structs, and is used for List(Foo) in the shark file.
 	type Foo_List struct{ shark.List }
 
 	// NewFoo_List creates a new orphaned List(Foo), preferring placement
@@ -259,7 +257,7 @@ and in usage:
 
 # Enums
 
-shark-go generates enum values as constants. For example in the capnp file:
+shark-go generates enum values as constants. For example in the shark file:
 
 	enum ElementSize {
 	  empty @0;

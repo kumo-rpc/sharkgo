@@ -309,7 +309,7 @@ func (p BitList) Set(i int, v bool) {
 	}
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[true, false]").
+// String returns the list in Shark Proto schema format (e.g. "[true, false]").
 func (p BitList) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -427,7 +427,7 @@ func (l TextList) Set(i int, v string) error {
 	return l.seg.writePtr(addr, p.ToPtr(), false)
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. `["foo", "bar"]`).
+// String returns the list in Shark Proto schema format (e.g. `["foo", "bar"]`).
 func (l TextList) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -489,7 +489,7 @@ func (l DataList) Set(i int, v []byte) error {
 	return l.seg.writePtr(addr, p.ToPtr(), false)
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. `["foo", "bar"]`).
+// String returns the list in Shark Proto schema format (e.g. `["foo", "bar"]`).
 func (l DataList) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -526,7 +526,7 @@ func NewVoidList(s *Segment, n int32) VoidList {
 	}
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[void, void, void]").
+// String returns the list in Shark Proto schema format (e.g. "[void, void, void]").
 func (l VoidList) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -609,7 +609,7 @@ func (l UInt8List) Set(i int, v uint8) {
 	l.seg.writeUint8(addr, v)
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l UInt8List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -655,7 +655,7 @@ func (l Int8List) Set(i int, v int8) {
 	l.seg.writeUint8(addr, uint8(v))
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l Int8List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -701,7 +701,7 @@ func (l UInt16List) Set(i int, v uint16) {
 	l.seg.writeUint16(addr, v)
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l UInt16List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -747,7 +747,7 @@ func (l Int16List) Set(i int, v int16) {
 	l.seg.writeUint16(addr, uint16(v))
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l Int16List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -793,7 +793,7 @@ func (l UInt32List) Set(i int, v uint32) {
 	l.seg.writeUint32(addr, v)
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l UInt32List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -839,7 +839,7 @@ func (l Int32List) Set(i int, v int32) {
 	l.seg.writeUint32(addr, uint32(v))
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l Int32List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -885,7 +885,7 @@ func (l UInt64List) Set(i int, v uint64) {
 	l.seg.writeUint64(addr, v)
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l UInt64List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -931,7 +931,7 @@ func (l Int64List) Set(i int, v int64) {
 	l.seg.writeUint64(addr, uint64(v))
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l Int64List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -977,7 +977,7 @@ func (l Float32List) Set(i int, v float32) {
 	l.seg.writeUint32(addr, math.Float32bits(v))
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l Float32List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -1023,7 +1023,7 @@ func (l Float64List) Set(i int, v float64) {
 	l.seg.writeUint64(addr, math.Float64bits(v))
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l Float64List) String() string {
 	var buf []byte
 	buf = append(buf, '[')
@@ -1037,7 +1037,7 @@ func (l Float64List) String() string {
 	return string(buf)
 }
 
-// A list of some Cap'n Proto enum type T.
+// A list of some Shark Proto enum type T.
 type EnumList[T ~uint16] UInt16List
 
 var _ TypeParam[EnumList[uint16]] = EnumList[uint16]{}
@@ -1058,12 +1058,12 @@ func (l EnumList[T]) Set(i int, v T) {
 	UInt16List(l).Set(i, uint16(v))
 }
 
-// String returns the list in Cap'n Proto schema format (e.g. "[1, 2, 3]").
+// String returns the list in Shark Proto schema format (e.g. "[1, 2, 3]").
 func (l EnumList[T]) String() string {
 	return UInt16List(l).String()
 }
 
-// A list of some Cap'n Proto struct type T.
+// A list of some Shark Proto struct type T.
 type StructList[T ~StructKind] List
 
 var _ TypeParam[StructList[Struct]] = StructList[Struct]{}
@@ -1078,7 +1078,7 @@ func (s StructList[T]) Set(i int, v T) error {
 	return List(s).SetStruct(i, Struct(v))
 }
 
-// A list of some Cap'n Proto capability type T.
+// A list of some Shark Proto capability type T.
 type CapList[T ~ClientKind] PointerList
 
 func (c CapList[T]) At(i int) (res T, err error) {

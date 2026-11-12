@@ -103,7 +103,7 @@ func (id CapabilityID) GoString() string {
 	return "shark.CapabilityID(" + str.Utod(id) + ")"
 }
 
-// A Client is a reference to a Cap'n Proto capability.
+// A Client is a reference to a Shark Proto capability.
 // The zero value is a null capability reference.
 // It is safe to use from multiple goroutines.
 type Client ClientKind
@@ -950,7 +950,7 @@ func (wc WeakClient) AddRef() (c Client, ok bool) {
 	return c, true
 }
 
-// A ClientHook represents a Cap'n Proto capability.  Application code
+// A ClientHook represents a Shark Proto capability.  Application code
 // should not pass around ClientHooks; applications should pass around
 // Clients.  A ClientHook must be safe to use from multiple goroutines.
 //

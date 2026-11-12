@@ -36,7 +36,7 @@ struct StreamResult @0x995f9a3377c0b16e {
   #
   # Is equivalent to:
   #
-  #     write @0 (bytes :Data) -> import "/capnp/stream.capnp".StreamResult;
+  #     write @0 (bytes :Data) -> import "/shark/stream.shk".StreamResult;
   #
   # However, implementations that recognize streaming will elide the reference to StreamResult
   # and instead give write() a different signature appropriate for streaming.

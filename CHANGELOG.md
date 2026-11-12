@@ -1,4 +1,4 @@
-# Go Cap'n Proto Release Notes
+# Go Shark Proto Release Notes
 
 ## 2.17.0
 
@@ -142,7 +142,7 @@ release.
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.6.0">2.6.0</a></th>
-      <td>Add packages for predefined Cap'n Proto schemas</td>
+      <td>Add packages for predefined Shark Proto schemas</td>
     </tr>
     <tr>
       <th scope="row"><a href="https://github.com/capnproto/go-capnproto2/releases/tag/v2.5.1">2.5.1</a></th>

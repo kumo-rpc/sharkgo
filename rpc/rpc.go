@@ -1,4 +1,4 @@
-// Package rpc implements the Cap'n Proto RPC protocol.
+// Package rpc implements the Shark Proto RPC protocol.
 package rpc // import "github.com/kumo-rpc/sharkgo/rpc"
 
 import (
@@ -79,7 +79,7 @@ This makes it easy to see and avoid extraneous lock transitions, which
 is a common source of errors and/or inefficiencies.
 */
 
-// A Conn is a connection to another Cap'n Proto vat.
+// A Conn is a connection to another Shark Proto vat.
 // It is safe to use from multiple goroutines.
 type Conn struct {
 	remotePeerID PeerID

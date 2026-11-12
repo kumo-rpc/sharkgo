@@ -1,5 +1,5 @@
-// Package capnptool provides an API for calling the capnp tool in tests.
-package capnptool
+// Package sharktool provides an API for calling the shark tool in tests.
+package sharktool
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-// Tool is the path to the capnp command-line tool.
+// Tool is the path to the shark command-line tool.
 // It can be used from multiple goroutines.
 type Tool string
 
@@ -20,10 +20,10 @@ var cache struct {
 	err  error
 }
 
-// Find searches PATH for the capnp tool.
+// Find searches PATH for the shark tool.
 func Find() (Tool, error) {
 	cache.init.Do(func() {
-		path, err := exec.LookPath("capnp")
+		path, err := exec.LookPath("shark")
 		if err != nil {
 			cache.err = err
 			return
@@ -46,12 +46,12 @@ func (tool Tool) Run(stdin io.Reader, args ...string) ([]byte, error) {
 	return out, nil
 }
 
-// Encode encodes Cap'n Proto text into the binary representation.
+// Encode encodes Shark Proto text into the binary representation.
 func (tool Tool) Encode(typ Type, text string) ([]byte, error) {
 	return tool.Run(strings.NewReader(text), "encode", typ.SchemaPath, typ.Name)
 }
 
-// Decode decodes a Cap'n Proto message into text.
+// Decode decodes a Shark Proto message into text.
 func (tool Tool) Decode(typ Type, r io.Reader) (string, error) {
 	out, err := tool.Run(r, "decode", "--short", typ.SchemaPath, typ.Name)
 	if err != nil {
@@ -60,7 +60,7 @@ func (tool Tool) Decode(typ Type, r io.Reader) (string, error) {
 	return string(out), nil
 }
 
-// DecodePacked decodes a packed Cap'n Proto message into text.
+// DecodePacked decodes a packed Shark Proto message into text.
 func (tool Tool) DecodePacked(typ Type, r io.Reader) (string, error) {
 	out, err := tool.Run(r, "decode", "--short", "--packed", typ.SchemaPath, typ.Name)
 	if err != nil {
@@ -69,7 +69,7 @@ func (tool Tool) DecodePacked(typ Type, r io.Reader) (string, error) {
 	return string(out), nil
 }
 
-// Type is a reference to a Cap'n Proto type in a schema.
+// Type is a reference to a Shark Proto type in a schema.
 type Type struct {
 	SchemaPath string
 	Name       string

@@ -93,7 +93,7 @@ interface ByteStream {
   write @0 (data :Data);
   # Add bytes.
   #
-  # It's safe to make overlapping calls to `write()`, since Cap'n Proto enforces E-Order and so
+  # It's safe to make overlapping calls to `write()`, since Shark Proto enforces E-Order and so
   # the calls will be delivered in order. However, it is a good idea to limit how much data is
   # in-flight at a time, so that it doesn't fill up buffers and block other traffic. On the other
   # hand, having only one `write()` in flight at a time will not fully utilize the available

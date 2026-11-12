@@ -23,7 +23,7 @@ var bookData = []byte{
 }
 
 func ExampleExtract() {
-	// books.capnp:
+	// books.shk:
 	// struct Book {
 	//   title @0 :Text;
 	//   pageCount @1 :Int32;
@@ -56,7 +56,7 @@ func ExampleExtract() {
 }
 
 func ExampleInsert() {
-	// books.capnp:
+	// books.shk:
 	// struct Book {
 	//   title @0 :Text;
 	//   pageCount @1 :Int32;
@@ -67,14 +67,14 @@ func ExampleInsert() {
 		PageCount int32
 	}
 
-	// Allocate a new Cap'n Proto Book struct.
+	// Allocate a new Shark Proto Book struct.
 	_, seg := shark.NewSingleSegmentMessage(nil)
 	root, err := books.NewRootBook(seg)
 	if err != nil {
 		panic(err)
 	}
 
-	// Insert the book struct into the Cap'n Proto struct.
+	// Insert the book struct into the Shark Proto struct.
 	b := &Book{
 		Title:     "War and Peace",
 		PageCount: 1440,

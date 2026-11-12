@@ -24,7 +24,7 @@ const (
 
 const maxDepth = ^uint(0)
 
-// A Message is a tree of Cap'n Proto objects, split into one or more
+// A Message is a tree of Shark Proto objects, split into one or more
 // segments of contiguous memory.  The only required field is Arena.
 // A Message is safe to read from multiple goroutines.
 //

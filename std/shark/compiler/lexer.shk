@@ -67,4 +67,4 @@ struct LexedStatements {
 }
 using Go = import "/go.shk";
 $Go.package("lexer");
-$Go.import("github.com/kumo-rpc/sharkgo/std/shark/lexer");
+$Go.import("github.com/kumo-rpc/sharkgo/std/shark/compiler/lexer");

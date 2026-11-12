@@ -513,7 +513,7 @@ func setupTempDir() (string, error) {
 }
 
 // This test arises because capnproto-c++ has a file named:
-// * src/capnp/persistent.capnp
+// * shark/rpc/persistent.shk
 // * Also found in this repo: std/shark/persistent.shk
 //
 // It contains two definitions:
@@ -521,17 +521,17 @@ func setupTempDir() (string, error) {
 //	interface Persistent {}
 //	annotation persistent(interface, field) :Void;
 //
-// testdata/persistent-simple.capnp is a minimal reproducible test case for the
+// testdata/persistent-simple.shk is a minimal reproducible test case for the
 // collision.
 func TestPersistent(t *testing.T) {
 	// This test is equivalent to:
-	// `shark compile -ogo persistent-simple.capnp`
+	// `shark compile -ogo persistent-simple.shk`
 	//
 	// Or the equivalent in-repo commands before a go install:
 	// ```
 	//    go build;
 	//    shark compile --no-standard-import -I../std -o- \
-	//        testdata/persistent-simple.capnp | \
+	//        testdata/persistent-simple.shk | \
 	//        shark-go -promises=0 -schemas=0 -structstrings=0
 	// ```
 	t.Parallel()
@@ -551,8 +551,8 @@ func TestPersistent(t *testing.T) {
 		opts  genoptions
 	}{
 		// The shk.out is generated with:
-		// shark compile --no-standard-import -I../../std -o- persistent-simple.capnp \
-		//         persistent-samepkg.capnp > persistent-simple-and-samepkg.shk.out
+		// shark compile --no-standard-import -I../../std -o- persistent-simple.shk \
+		//         persistent-samepkg.shk > persistent-simple-and-samepkg.shk.out
 		{"persistent-simple-and-samepkg.shk.out", defaultOptions},
 	}
 	var tobuild []string
@@ -620,7 +620,7 @@ func TestPersistent(t *testing.T) {
 		if testIndex+1 < len(tests) {
 			continue
 		}
-		// Relies on persistent-simple.capnp with $Go.package("persistent_simple")
+		// Relies on persistent-simple.shk with $Go.package("persistent_simple")
 		// not being ("main"). Thus `go build` skips writing an executable.
 		tobuild = append([]string{"build"}, tobuild...)
 		cmd := exec.Command("go", tobuild...)

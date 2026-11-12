@@ -5,12 +5,12 @@
 Navigate to the example directory:
 
 ```bash
-cd /path/to/go-capnp/example/hashes`
+cd /path/to/sharkgo/example/hashes`
 ````
 
-Compile the capnp file:
+Compile the shark file:
 
-`shark compile -I ../../std/ -ogo hashes.capnp`
+`shark compile -I ../../std/ -ogo hashes.shk`
 
 Build your code, and run it:
 

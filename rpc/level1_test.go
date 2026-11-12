@@ -651,7 +651,7 @@ func TestRecvDisembargo(t *testing.T) {
 
 	// 7. Read calls and returns and disembargoes.
 	//
-	// Here's where things get tricky: Cap'n Proto does not guarantee
+	// Here's where things get tricky: Shark Proto does not guarantee
 	// return order, just delivery order.
 	//
 	// At least at time of writing, the Go implementation delays sending
